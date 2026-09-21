@@ -9370,7 +9370,7 @@ showUserProfile=async function(userId){
     <div class="panel" style="margin-top:16px"><h3>Players · Most Awards First</h3>
     <div class="data-list" style="margin-top:10px">${rows.filter(x=>x.player_id).map(x=>`
       <div class="data-row profile-link" onclick="openPlayerProfile('${x.player_id}')">
-       <span><strong>${escapeHTML(x.player_name)}</strong><br><span class="muted">${escapeHTML(x.position||"")} · ${x.overall||0} OVR</span></span>
+       <span><strong>${escapeHTML(x.player_name)}</strong><br><span class="muted">${escapeHTML(x.player_position||x.position||"")} · ${x.overall||0} OVR</span></span>
        <span>🏆 ${x.award_count} award${x.award_count===1?"":"s"}</span>
       </div>`).join("")||'<div class="empty-state">No players yet.</div>'}</div></div>`;
 };
