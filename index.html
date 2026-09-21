@@ -543,45 +543,32 @@
 
 function showLogin() {
 
-  document.querySelector(".hero").style.display =
-    "none";
+  document.getElementById("authSection").style.display = "block";
 
-  document.getElementById("authSection").style.display =
-    "block";
+  document.querySelector(".hero").style.display = "none";
 
-  document.querySelector(".hero").nextElementSibling.style.display =
-    "none";
+  document.getElementById("playersSection").style.display = "none";
 
-  document.getElementById("playersSection").style.display =
-    "none";
+  document.getElementById("playerProfileSection").style.display = "none";
 
-  document.getElementById("playerProfileSection").style.display =
-    "none";
+  document.querySelector(".hero").nextElementSibling.style.display = "none";
 
 
-  document.getElementById("authTitle").textContent =
-    "Log In";
+  document.getElementById("authTitle").textContent = "Log In";
 
-  document.getElementById("authButton").textContent =
-    "Log In";
+  document.getElementById("authButton").textContent = "Log In";
 
-  document.getElementById("authButton").onclick =
-    loginUser;
+  document.getElementById("authButton").onclick = loginUser;
 
 
-  document.getElementById("authUsername").style.display =
-    "none";
+  document.getElementById("authUsername").style.display = "none";
 
 
-  document.getElementById("authMessage").textContent =
-    "";
+  document.getElementById("authMessage").textContent = "";
 
+  document.getElementById("authEmail").value = "";
 
-  document.getElementById("authEmail").value =
-    "";
-
-  document.getElementById("authPassword").value =
-    "";
+  document.getElementById("authPassword").value = "";
 
 
   document.getElementById("authSection").scrollIntoView({
@@ -589,43 +576,6 @@ function showLogin() {
   });
 }
 
-
-  function showLogin() {
-
-    document.querySelector(".hero").style.display = "none";
-
-    document.getElementById("authSection").style.display = "block";
-
-    document.querySelector(".section").style.display = "none";
-
-    document.getElementById("playersSection").style.display = "none";
-
-    document.getElementById("playerProfileSection").style.display = "none";
-
-
-    document.getElementById("authTitle").textContent =
-      "Log In";
-
-    document.getElementById("authButton").textContent =
-      "Log In";
-
-    document.getElementById("authButton").onclick =
-      loginUser;
-
-    document.getElementById("authUsername").style.display =
-      "none";
-
-    document.getElementById("authMessage").textContent = "";
-
-
-    document.getElementById("authEmail").value = "";
-    document.getElementById("authPassword").value = "";
-
-
-    document.getElementById("authSection").scrollIntoView({
-      behavior: "smooth"
-    });
-  }
 
 
   /*
