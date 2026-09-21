@@ -654,7 +654,9 @@ function openPlayerProfile(playerId) {
         </div>
 
         ${
-          !roster
+       !roster &&
+currentUser &&
+player.created_by === currentUser.id
             ? `
               <button
                 onclick="startPlayerSigning('${player.id}')"
