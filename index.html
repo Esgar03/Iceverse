@@ -542,7 +542,10 @@ function openPlayerProfile(playerId) {
   }
 
   document.querySelector(".hero").style.display = "none";
-  document.querySelector(".section").style.display = "none";
+
+document.getElementById("playersSection").style.display = "none";
+
+document.getElementById("playerProfileSection").style.display = "block";
 
   const profileSection =
     document.getElementById("playerProfileSection");
