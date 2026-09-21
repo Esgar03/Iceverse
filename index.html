@@ -24,7 +24,6 @@
       background: #0b1c31;
       border-bottom: 1px solid #203854;
       padding: 18px 30px;
-
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -40,6 +39,7 @@
     nav {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     nav button {
@@ -133,6 +133,214 @@
       color: #ffb7bd;
     }
 
+    .primary-button {
+      padding: 13px 20px;
+      border: none;
+      border-radius: 9px;
+      background: #2f80ed;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .primary-button:hover {
+      background: #256bc7;
+    }
+
+    .secondary-button {
+      padding: 10px 16px;
+      border: 1px solid #294766;
+      border-radius: 8px;
+      background: #142b45;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .form-card {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #0d2035;
+      border: 1px solid #203c59;
+      border-radius: 16px;
+      padding: 30px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      color: #b8c8d9;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #294766;
+      background: #071525;
+      color: white;
+      font-size: 16px;
+    }
+
+    .form-group select option {
+      background: #071525;
+      color: white;
+    }
+
+    .build-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 20px;
+      margin-top: 25px;
+    }
+
+    .build-panel {
+      background: #071525;
+      border: 1px solid #294766;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .build-panel h3 {
+      margin-bottom: 15px;
+    }
+
+    .build-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .build-stat {
+      background: #102a43;
+      border-radius: 10px;
+      padding: 12px 15px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .build-stat-label {
+      color: #9fb3c8;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .build-stat-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .attribute-group {
+      margin-bottom: 25px;
+    }
+
+    .attribute-group h4 {
+      margin-bottom: 10px;
+      color: #dce8f5;
+      border-bottom: 1px solid #294766;
+      padding-bottom: 7px;
+    }
+
+    .attribute-row {
+      display: grid;
+      grid-template-columns: 1fr 70px 80px;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .attribute-name {
+      color: #d3deea;
+    }
+
+    .attribute-value {
+      text-align: center;
+      font-weight: bold;
+      background: #102a43;
+      border-radius: 6px;
+      padding: 6px;
+    }
+
+    .attribute-button {
+      padding: 7px;
+      border: none;
+      border-radius: 6px;
+      background: #2f80ed;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .attribute-button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .star-rating {
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+
+    .star-filled {
+      color: #ffd166;
+    }
+
+    .star-empty {
+      color: #43566b;
+    }
+
+    .flag {
+      font-size: 25px;
+      vertical-align: middle;
+      margin-right: 7px;
+    }
+
+    .country-line {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #b7c7d8;
+    }
+
+    .privacy-note {
+      color: #91a5ba;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .success-message {
+      color: #86efac;
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    .warning-message {
+      color: #facc15;
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
     footer {
       text-align: center;
       color: #71849a;
@@ -140,14 +348,14 @@
       margin-top: 50px;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 800px) {
+
       header {
         flex-direction: column;
         gap: 15px;
       }
 
       nav {
-        flex-wrap: wrap;
         justify-content: center;
       }
 
@@ -158,43 +366,96 @@
       .teams {
         grid-template-columns: 1fr;
       }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+      .build-layout {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">ICEVERSE</div>
 
- <nav>
-  <button onclick="showHome()">Home</button>
-  <button onclick="showLeague()">League</button>
-  <button onclick="showTeams()">Teams</button>
-  <button onclick="showPlayers()">Players</button>
+  <div class="logo">
+    ICEVERSE
+  </div>
 
-  <button id="loginButton" onclick="showLogin()">
-    Log In
-  </button>
+  <nav>
 
-  <button id="signupButton" onclick="showSignup()">
-    Create Account
-  </button>
+    <button onclick="showHome()">
+      Home
+    </button>
 
-  <button
-    id="logoutButton"
-    onclick="logoutUser()"
-    style="display: none;"
-  >
-    Log Out
-  </button>
-</nav>
+    <button onclick="showLeague()">
+      League
+    </button>
+
+    <button onclick="showTeams()">
+      Teams
+    </button>
+
+    <button onclick="showPlayers()">
+      Players
+    </button>
+
+    <button
+      id="createPlayerNavButton"
+      onclick="showCreatePlayer()"
+      style="display: none;"
+    >
+      Create Player
+    </button>
+
+    <button
+      id="loginButton"
+      onclick="showLogin()"
+    >
+      Log In
+    </button>
+
+    <button
+      id="signupButton"
+      onclick="showSignup()"
+    >
+      Create Account
+    </button>
+
+    <button
+      id="logoutButton"
+      onclick="logoutUser()"
+      style="display: none;"
+    >
+      Log Out
+    </button>
+
+  </nav>
+
 </header>
+
 
 <main>
 
-<section id="authSection" class="section" style="display: none;">
+<!-- ========================================= -->
+<!-- AUTH -->
+<!-- ========================================= -->
+
+<section
+  id="authSection"
+  class="section"
+  style="display: none;"
+>
 
   <div style="
     max-width: 500px;
@@ -205,28 +466,35 @@
     padding: 30px;
   ">
 
-    <h2 id="authTitle" style="margin-bottom: 20px;">
+    <h2
+      id="authTitle"
+      style="margin-bottom: 20px;"
+    >
       Create Account
     </h2>
-    
-<div style="margin-bottom: 15px;">
-  <input
-    id="authUsername"
-    type="text"
-    placeholder="Username"
-    maxlength="20"
-    style="
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #294766;
-      background: #071525;
-      color: white;
-      font-size: 16px;
-    "
-  >
-</div>
+
     <div style="margin-bottom: 15px;">
+
+      <input
+        id="authUsername"
+        type="text"
+        placeholder="Username"
+        maxlength="20"
+        style="
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #294766;
+          background: #071525;
+          color: white;
+          font-size: 16px;
+        "
+      >
+
+    </div>
+
+    <div style="margin-bottom: 15px;">
+
       <input
         id="authEmail"
         type="email"
@@ -241,9 +509,11 @@
           font-size: 16px;
         "
       >
+
     </div>
 
     <div style="margin-bottom: 15px;">
+
       <input
         id="authPassword"
         type="password"
@@ -258,22 +528,14 @@
           font-size: 16px;
         "
       >
+
     </div>
 
     <button
       id="authButton"
       type="button"
-      style="
-        width: 100%;
-        padding: 13px;
-        border: none;
-        border-radius: 8px;
-        background: #2f80ed;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-      "
+      class="primary-button"
+      style="width: 100%;"
     >
       Create Account
     </button>
@@ -289,28 +551,83 @@
   </div>
 
 </section>
-  
-  <section class="hero">
-    <h1>ICEVERSE</h1>
 
-    <p>
-      A persistent multiplayer hockey universe where you create players,
-      manage teams, build lines, develop talent, and compete against other
-      hockey managers.
-    </p>
-  </section>
 
-  <section class="section">
-    <h2>Iceverse Hockey League</h2>
+<!-- ========================================= -->
+<!-- HOME -->
+<!-- ========================================= -->
 
-    <div id="teams" class="teams">
-      <div class="loading">Loading Iceverse teams...</div>
+<section class="hero">
+
+  <h1>
+    ICEVERSE
+  </h1>
+
+  <p>
+    A persistent multiplayer hockey universe where you create players,
+    manage teams, build lines, develop talent, and compete against other
+    hockey managers.
+  </p>
+
+</section>
+
+
+<section class="section">
+
+  <h2>
+    Iceverse Hockey League
+  </h2>
+
+  <div
+    id="teams"
+    class="teams"
+  >
+
+    <div class="loading">
+      Loading Iceverse teams...
     </div>
-  </section><section id="playersSection" class="section" style="display: none;">
 
-  <h2>Iceverse Players</h2>
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- PLAYERS -->
+<!-- ========================================= -->
+
+<section
+  id="playersSection"
+  class="section"
+  style="display: none;"
+>
+
+  <div style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  ">
+
+    <h2>
+      Iceverse Players
+    </h2>
+
+    <button
+      id="createPlayerButton"
+      class="primary-button"
+      onclick="showCreatePlayer()"
+      style="display: none;"
+    >
+      + Create Player
+    </button>
+
+  </div>
 
   <div style="margin-bottom: 20px;">
+
     <input
       id="playerSearch"
       type="text"
@@ -327,185 +644,976 @@
         font-size: 16px;
       "
     >
+
   </div>
 
-  <div id="players" class="teams">
-    <div class="loading">Loading players...</div>
+  <div
+    id="players"
+    class="teams"
+  >
+
+    <div class="loading">
+      Loading players...
+    </div>
+
   </div>
 
 </section>
-<section id="playerProfileSection" style="
-  display: none;
-  min-height: 100vh;
-  padding: 40px 20px;
-  background: #071525;
-  box-sizing: border-box;
-">
 
-  <button onclick="showPlayers()" style="
-    margin-bottom: 20px;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: none;
-    background: #294766;
-    color: white;
-    cursor: pointer;
-  ">
+
+<!-- ========================================= -->
+<!-- CREATE PLAYER -->
+<!-- ========================================= -->
+
+<section
+  id="createPlayerSection"
+  class="section"
+  style="display: none;"
+>
+
+  <div class="form-card">
+
+    <div style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    ">
+
+      <div>
+
+        <h2 style="margin-bottom: 7px;">
+          Create Your Player
+        </h2>
+
+        <div class="team-info">
+          Every new player begins at age 18.
+          Your starting build determines where their career begins.
+        </div>
+
+      </div>
+
+      <button
+        class="secondary-button"
+        onclick="showPlayers()"
+      >
+        ← Back
+      </button>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label for="createFirstName">
+          First Name
+        </label>
+
+        <input
+          id="createFirstName"
+          type="text"
+          maxlength="30"
+          placeholder="First name"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createLastName">
+          Last Name
+        </label>
+
+        <input
+          id="createLastName"
+          type="text"
+          maxlength="30"
+          placeholder="Last name"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createHeight">
+          Height
+        </label>
+
+        <select id="createHeight"></select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createWeight">
+          Weight
+        </label>
+
+        <select id="createWeight"></select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createPrimaryPosition">
+          Primary Position
+        </label>
+
+        <select
+          id="createPrimaryPosition"
+          onchange="updateSecondaryPositionOptions()"
+        >
+
+          <option value="">
+            Select position
+          </option>
+
+          <option value="C">
+            Center
+          </option>
+
+          <option value="LW">
+            Left Wing
+          </option>
+
+          <option value="RW">
+            Right Wing
+          </option>
+
+          <option value="LD">
+            Left Defense
+          </option>
+
+          <option value="RD">
+            Right Defense
+          </option>
+
+          <option value="G">
+            Goalie
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createSecondaryPosition">
+          Secondary Position
+        </label>
+
+        <select id="createSecondaryPosition">
+
+          <option value="">
+            None
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createHandedness">
+          Handedness
+        </label>
+
+        <select id="createHandedness">
+
+          <option value="">
+            Select handedness
+          </option>
+
+          <option value="Left">
+            Left
+          </option>
+
+          <option value="Right">
+            Right
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createNationality">
+          Nationality
+        </label>
+
+        <select id="createNationality">
+
+          <option value="">
+            Select nationality
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group full">
+
+        <label for="createArchetype">
+          Archetype
+        </label>
+
+        <select
+          id="createArchetype"
+          onchange="updateCreationBuild()"
+        >
+
+          <option value="">
+            Select archetype
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="creationBuildArea"
+      style="display: none;"
+    >
+
+      <div class="build-layout">
+
+        <div class="build-panel">
+
+          <h3>
+            Starting Build
+          </h3>
+
+          <div class="build-summary">
+
+            <div class="build-stat">
+
+              <div class="build-stat-label">
+                Base Overall
+              </div>
+
+              <div
+                id="buildBaseOverall"
+                class="build-stat-value"
+              >
+                62
+              </div>
+
+            </div>
+
+
+            <div class="build-stat">
+
+              <div class="build-stat-label">
+                Skill Points
+              </div>
+
+              <div
+                id="buildPoints"
+                class="build-stat-value"
+              >
+                0
+              </div>
+
+            </div>
+
+
+            <div class="build-stat">
+
+              <div class="build-stat-label">
+                Projected Overall
+              </div>
+
+              <div
+                id="buildOverall"
+                class="build-stat-value"
+              >
+                62
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="buildDescription"
+            class="privacy-note"
+          ></div>
+
+
+          <div
+            id="buildMessage"
+            class="warning-message"
+          ></div>
+
+        </div>
+
+
+        <div class="build-panel">
+
+          <h3>
+            Build Guide
+          </h3>
+
+          <p class="privacy-note">
+            Your archetype gives you a natural starting shape, but it
+            will not create identical players. Height, weight, position,
+            handedness, archetype and build choices all influence the
+            result.
+          </p>
+
+          <p
+            class="privacy-note"
+            style="margin-top: 12px;"
+          >
+            Skill upgrades become increasingly expensive as an attribute
+            gets higher. Initial caps prevent players from creating
+            unrealistic elite attributes at age 18.
+          </p>
+
+          <p
+            class="privacy-note"
+            style="margin-top: 12px;"
+          >
+            A realistic build is more likely to receive additional
+            starting skill points. After creation, attributes develop
+            automatically through the player's career.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="attributeEditor"
+        class="build-panel"
+        style="margin-top: 20px;"
+      ></div>
+
+
+      <div style="
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+      ">
+
+        <button
+          id="finalCreatePlayerButton"
+          class="primary-button"
+          onclick="createPlayer()"
+        >
+          Create Player
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="createPlayerMessage"
+      style="margin-top: 15px;"
+    ></div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- PLAYER PROFILE -->
+<!-- ========================================= -->
+
+<section
+  id="playerProfileSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <button
+    onclick="showPlayers()"
+    class="secondary-button"
+    style="margin-bottom: 20px;"
+  >
     ← Back to Players
   </button>
 
   <div id="playerProfile">
-    <div class="loading">Loading player...</div>
+
+    <div class="loading">
+      Loading player...
+    </div>
+
   </div>
 
 </section>
+
 </main>
+
 
 <footer>
   Iceverse Hockey League · Building the future of online hockey
 </footer>
 
+
 <script>
 
-  /*
-   * ============================================
-   * SUPABASE CONNECTION
-   * ============================================
-   */
+/* =========================================================
+   SUPABASE
+   ========================================================= */
 
-  const SUPABASE_URL =
-    "https://lmafzfqsnzvwckpjjuwe.supabase.co";
+const SUPABASE_URL =
+  "https://lmafzfqsnzvwckpjjuwe.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_2raUKflPiqDcX_Pn-EfN_Q_u2MvT4AO";
+const SUPABASE_KEY =
+  "sb_publishable_2raUKflPiqDcX_Pn-EfN_Q_u2MvT4AO";
 
-  const { createClient } = supabase;
+const { createClient } = supabase;
 
-  const supabaseClient = createClient(
+const supabaseClient =
+  createClient(
     SUPABASE_URL,
     SUPABASE_KEY
   );
 
-  let currentUser = null;
+let currentUser = null;
 
 
-  /*
-   * ============================================
-   * CURRENT USER
-   * ============================================
-   */
+/* =========================================================
+   NATIONALITIES
+   ========================================================= */
 
-  async function loadCurrentUser() {
+const NATIONALITIES = {
+  "USA": "🇺🇸",
+  "Canada": "🇨🇦",
+  "Sweden": "🇸🇪",
+  "Finland": "🇫🇮",
+  "Russia": "🇷🇺",
+  "Germany": "🇩🇪",
+  "Switzerland": "🇨🇭",
+  "Czech Republic": "🇨🇿",
+  "Slovakia": "🇸🇰",
+  "Latvia": "🇱🇻",
+  "Denmark": "🇩🇰",
+  "Austria": "🇦🇹",
+  "Slovenia": "🇸🇮",
+  "Norway": "🇳🇴",
+  "France": "🇫🇷"
+};
 
-    const {
-      data: { user },
+
+/* =========================================================
+   ATTRIBUTE DEFINITIONS
+   ========================================================= */
+
+const ATTRIBUTE_GROUPS = {
+
+  "Skating": [
+    "speed",
+    "acceleration",
+    "agility"
+  ],
+
+  "Shooting": [
+    "wrist_shot",
+    "slap_shot",
+    "shot_accuracy",
+    "shot_power"
+  ],
+
+  "Puck Skills": [
+    "puck_control",
+    "deking",
+    "passing",
+    "receiving",
+    "puck_protection",
+    "tipping"
+  ],
+
+  "Offensive": [
+    "offensive_iq",
+    "vision",
+    "offensive_positioning",
+    "rebound_awareness"
+  ],
+
+  "Defense": [
+    "defensive_iq",
+    "defensive_positioning",
+    "stick_checking",
+    "poke_checking",
+    "hitting",
+    "shot_blocking",
+    "defensive_awareness"
+  ],
+
+  "Physical": [
+    "strength",
+    "endurance",
+    "durability",
+    "balance"
+  ],
+
+  "Mental": [
+    "hockey_iq",
+    "clutch",
+    "discipline",
+    "composure"
+  ]
+
+};
+
+
+const ATTRIBUTE_LABELS = {
+
+  speed: "Speed",
+  acceleration: "Acceleration",
+  agility: "Agility",
+
+  wrist_shot: "Wrist Shot",
+  slap_shot: "Slap Shot",
+  shot_accuracy: "Shot Accuracy",
+  shot_power: "Shot Power",
+
+  puck_control: "Puck Control",
+  deking: "Deking",
+  passing: "Passing",
+  receiving: "Receiving",
+  puck_protection: "Puck Protection",
+  tipping: "Tipping",
+
+  offensive_iq: "Offensive IQ",
+  vision: "Vision",
+  offensive_positioning: "Offensive Positioning",
+  rebound_awareness: "Rebound Awareness",
+
+  defensive_iq: "Defensive IQ",
+  defensive_positioning: "Defensive Positioning",
+  stick_checking: "Stick Checking",
+  poke_checking: "Poke Checking",
+  hitting: "Hitting",
+  shot_blocking: "Shot Blocking",
+  defensive_awareness: "Defensive Awareness",
+
+  strength: "Strength",
+  endurance: "Endurance",
+  durability: "Durability",
+  balance: "Balance",
+
+  hockey_iq: "Hockey IQ",
+  clutch: "Clutch",
+  discipline: "Discipline",
+  composure: "Composure",
+
+  reflexes: "Reflexes",
+  goalie_positioning: "Positioning",
+  glove: "Glove",
+  blocker: "Blocker",
+  rebound_control: "Rebound Control",
+  athleticism: "Athleticism",
+  puck_handling: "Puck Handling",
+  goalie_iq: "Goalie IQ",
+  goalie_endurance: "Endurance"
+};
+
+
+/* =========================================================
+   ARCHETYPES
+   ========================================================= */
+
+const ARCHETYPES = {
+
+  "Sniper": {
+    positions: ["C", "LW", "RW"],
+    preferred: [
+      "wrist_shot",
+      "shot_accuracy",
+      "shot_power",
+      "offensive_positioning",
+      "puck_control",
+      "tipping"
+    ],
+    weaker: [
+      "defensive_iq",
+      "defensive_positioning",
+      "shot_blocking"
+    ],
+    description:
+      "A scoring-focused forward built around shooting, finishing and attacking space."
+  },
+
+  "Playmaker": {
+    positions: ["C", "LW", "RW"],
+    preferred: [
+      "passing",
+      "vision",
+      "puck_control",
+      "deking",
+      "receiving",
+      "offensive_iq"
+    ],
+    weaker: [
+      "shot_power",
+      "hitting"
+    ],
+    description:
+      "A creative forward who generates offense through passing, vision and puck control."
+  },
+
+  "Power Forward": {
+    positions: ["C", "LW", "RW"],
+    preferred: [
+      "strength",
+      "shot_power",
+      "puck_protection",
+      "tipping",
+      "hitting",
+      "wrist_shot"
+    ],
+    weaker: [
+      "agility",
+      "acceleration"
+    ],
+    description:
+      "A strong net-front forward who uses size, strength, physical play and tipping to create offense."
+  },
+
+  "Two-Way Forward": {
+    positions: ["C", "LW", "RW"],
+    preferred: [
+      "defensive_iq",
+      "defensive_positioning",
+      "passing",
+      "endurance",
+      "hockey_iq",
+      "offensive_iq"
+    ],
+    weaker: [],
+    description:
+      "A balanced forward who contributes at both ends of the ice."
+  },
+
+  "Dangler": {
+    positions: ["C", "LW", "RW"],
+    preferred: [
+      "deking",
+      "puck_control",
+      "agility",
+      "acceleration",
+      "speed",
+      "puck_protection"
+    ],
+    weaker: [
+      "shot_blocking",
+      "hitting"
+    ],
+    description:
+      "A highly skilled puck carrier who beats defenders with speed, agility and creativity."
+  },
+
+  "Enforcer": {
+    positions: ["C", "LW", "RW"],
+    preferred: [
+      "strength",
+      "hitting",
+      "durability",
+      "balance",
+      "discipline"
+    ],
+    weaker: [
+      "deking",
+      "passing",
+      "vision",
+      "shot_accuracy"
+    ],
+    description:
+      "A physical forward built around strength, durability and intimidation."
+  },
+
+  "Offensive Defenseman": {
+    positions: ["LD", "RD"],
+    preferred: [
+      "wrist_shot",
+      "slap_shot",
+      "passing",
+      "puck_control",
+      "offensive_iq",
+      "speed"
+    ],
+    weaker: [
+      "hitting",
+      "defensive_positioning"
+    ],
+    description:
+      "A defenseman who drives offense through puck movement, shooting and transition."
+  },
+
+  "Stay-at-Home Defenseman": {
+    positions: ["LD", "RD"],
+    preferred: [
+      "defensive_iq",
+      "defensive_positioning",
+      "stick_checking",
+      "poke_checking",
+      "shot_blocking",
+      "defensive_awareness"
+    ],
+    weaker: [
+      "deking",
+      "shot_power"
+    ],
+    description:
+      "A defensive specialist focused on preventing chances and protecting the net."
+  },
+
+  "Two-Way Defenseman": {
+    positions: ["LD", "RD"],
+    preferred: [
+      "defensive_iq",
+      "passing",
+      "puck_control",
+      "speed",
+      "hockey_iq",
+      "defensive_positioning"
+    ],
+    weaker: [],
+    description:
+      "A balanced defenseman capable of contributing offensively and defensively."
+  },
+
+  "Physical Defenseman": {
+    positions: ["LD", "RD"],
+    preferred: [
+      "strength",
+      "hitting",
+      "durability",
+      "balance",
+      "defensive_positioning",
+      "shot_blocking"
+    ],
+    weaker: [
+      "agility",
+      "deking",
+      "vision"
+    ],
+    description:
+      "A physical defender who uses size, strength and contact to shut down opponents."
+  },
+
+  "Puck-Moving Defenseman": {
+    positions: ["LD", "RD"],
+    preferred: [
+      "passing",
+      "puck_control",
+      "speed",
+      "acceleration",
+      "agility",
+      "vision"
+    ],
+    weaker: [
+      "hitting",
+      "shot_blocking"
+    ],
+    description:
+      "A mobile defenseman who starts the transition game and moves the puck efficiently."
+  },
+
+  "Butterfly": {
+    positions: ["G"],
+    preferred: [
+      "goalie_positioning",
+      "rebound_control",
+      "glove",
+      "blocker"
+    ],
+    weaker: [
+      "puck_handling"
+    ],
+    description:
+      "A structured goalie who relies on positioning and controlled saves."
+  },
+
+  "Athletic": {
+    positions: ["G"],
+    preferred: [
+      "reflexes",
+      "athleticism",
+      "rebound_control",
+      "goalie_iq"
+    ],
+    weaker: [],
+    description:
+      "A reactive goalie who relies on athleticism and recovery ability."
+  },
+
+  "Positioning": {
+    positions: ["G"],
+    preferred: [
+      "goalie_positioning",
+      "goalie_iq",
+      "rebound_control",
+      "discipline"
+    ],
+    weaker: [],
+    description:
+      "A technically sound goalie who minimizes mistakes through positioning and awareness."
+  },
+
+  "Aggressive": {
+    positions: ["G"],
+    preferred: [
+      "puck_handling",
+      "athleticism",
+      "reflexes",
+      "goalie_iq"
+    ],
+    weaker: [
+      "discipline"
+    ],
+    description:
+      "An aggressive goalie who challenges shooters and actively handles the puck."
+  }
+
+};
+
+
+/* =========================================================
+   CURRENT USER
+   ========================================================= */
+
+async function loadCurrentUser() {
+
+  const {
+    data: { user },
+    error
+  } = await supabaseClient.auth.getUser();
+
+  if (error) {
+
+    console.error(
+      "Unable to get current user:",
       error
-    } = await supabaseClient.auth.getUser();
-
-    if (error) {
-
-      console.error(
-        "Unable to get current user:",
-        error
-      );
-
-      currentUser = null;
-      return;
-    }
-
-    currentUser = user;
-  }
-
-
-  /*
-   * ============================================
-   * AUTH NAVIGATION
-   * ============================================
-   */
-
-  function updateAuthNavigation() {
-
-    const loginButton =
-      document.getElementById("loginButton");
-
-    const signupButton =
-      document.getElementById("signupButton");
-
-    const logoutButton =
-      document.getElementById("logoutButton");
-
-    if (!loginButton || !signupButton || !logoutButton) {
-      return;
-    }
-
-    if (currentUser) {
-
-      loginButton.style.display = "none";
-      signupButton.style.display = "none";
-      logoutButton.style.display = "inline-block";
-
-    } else {
-
-      loginButton.style.display = "inline-block";
-      signupButton.style.display = "inline-block";
-      logoutButton.style.display = "none";
-
-    }
-  }
-
-
-  /*
-   * ============================================
-   * LOG OUT
-   * ============================================
-   */
-
-  async function logoutUser() {
-
-    const { error } =
-      await supabaseClient.auth.signOut();
-
-    if (error) {
-
-      console.error(
-        "Unable to log out:",
-        error
-      );
-
-      return;
-    }
+    );
 
     currentUser = null;
-
-    updateAuthNavigation();
-
-    showHome();
+    return;
   }
 
+  currentUser = user;
+}
 
-  /*
-   * ============================================
-   * AUTH PAGE
-   * ============================================
-   */
 
-  function showSignup() {
+/* =========================================================
+   AUTH NAVIGATION
+   ========================================================= */
 
-  document.querySelector(".hero").style.display =
-    "none";
+function updateAuthNavigation() {
+
+  const loginButton =
+    document.getElementById("loginButton");
+
+  const signupButton =
+    document.getElementById("signupButton");
+
+  const logoutButton =
+    document.getElementById("logoutButton");
+
+  const createPlayerNavButton =
+    document.getElementById("createPlayerNavButton");
+
+  const createPlayerButton =
+    document.getElementById("createPlayerButton");
+
+  if (currentUser) {
+
+    loginButton.style.display = "none";
+    signupButton.style.display = "none";
+    logoutButton.style.display = "inline-block";
+
+    createPlayerNavButton.style.display =
+      "inline-block";
+
+    createPlayerButton.style.display =
+      "inline-block";
+
+  } else {
+
+    loginButton.style.display =
+      "inline-block";
+
+    signupButton.style.display =
+      "inline-block";
+
+    logoutButton.style.display =
+      "none";
+
+    createPlayerNavButton.style.display =
+      "none";
+
+    createPlayerButton.style.display =
+      "none";
+  }
+}
+
+
+/* =========================================================
+   LOG OUT
+   ========================================================= */
+
+async function logoutUser() {
+
+  const { error } =
+    await supabaseClient.auth.signOut();
+
+  if (error) {
+
+    console.error(
+      "Unable to log out:",
+      error
+    );
+
+    return;
+  }
+
+  currentUser = null;
+
+  updateAuthNavigation();
+
+  showHome();
+}
+
+
+/* =========================================================
+   AUTH PAGE
+   ========================================================= */
+
+function showSignup() {
+
+  hideAllMainSections();
 
   document.getElementById("authSection").style.display =
     "block";
-
-  document.querySelector(".hero").nextElementSibling.style.display =
-    "none";
-
-  document.getElementById("playersSection").style.display =
-    "none";
-
-  document.getElementById("playerProfileSection").style.display =
-    "none";
-
 
   document.getElementById("authTitle").textContent =
     "Create Account";
@@ -516,14 +1624,11 @@
   document.getElementById("authButton").onclick =
     createAccount;
 
-
   document.getElementById("authUsername").style.display =
     "block";
 
-
   document.getElementById("authMessage").textContent =
     "";
-
 
   document.getElementById("authUsername").value =
     "";
@@ -534,7 +1639,6 @@
   document.getElementById("authPassword").value =
     "";
 
-
   document.getElementById("authSection").scrollIntoView({
     behavior: "smooth"
   });
@@ -543,33 +1647,31 @@
 
 function showLogin() {
 
-  document.getElementById("authSection").style.display = "block";
+  hideAllMainSections();
 
-  document.querySelector(".hero").style.display = "none";
+  document.getElementById("authSection").style.display =
+    "block";
 
-  document.getElementById("playersSection").style.display = "none";
+  document.getElementById("authTitle").textContent =
+    "Log In";
 
-  document.getElementById("playerProfileSection").style.display = "none";
+  document.getElementById("authButton").textContent =
+    "Log In";
 
-  document.querySelector(".hero").nextElementSibling.style.display = "none";
+  document.getElementById("authButton").onclick =
+    loginUser;
 
+  document.getElementById("authUsername").style.display =
+    "none";
 
-  document.getElementById("authTitle").textContent = "Log In";
+  document.getElementById("authMessage").textContent =
+    "";
 
-  document.getElementById("authButton").textContent = "Log In";
+  document.getElementById("authEmail").value =
+    "";
 
-  document.getElementById("authButton").onclick = loginUser;
-
-
-  document.getElementById("authUsername").style.display = "none";
-
-
-  document.getElementById("authMessage").textContent = "";
-
-  document.getElementById("authEmail").value = "";
-
-  document.getElementById("authPassword").value = "";
-
+  document.getElementById("authPassword").value =
+    "";
 
   document.getElementById("authSection").scrollIntoView({
     behavior: "smooth"
@@ -577,571 +1679,1889 @@ function showLogin() {
 }
 
 
+/* =========================================================
+   CREATE ACCOUNT
+   ========================================================= */
 
-  /*
-   * ============================================
-   * CREATE ACCOUNT
-   * ============================================
-   */
+async function createAccount() {
 
-  async function createAccount() {
+  const username =
+    document.getElementById("authUsername").value.trim();
 
-    const username =
-      document.getElementById("authUsername").value.trim();
+  const email =
+    document.getElementById("authEmail").value.trim();
 
-    const email =
-      document.getElementById("authEmail").value.trim();
+  const password =
+    document.getElementById("authPassword").value;
 
-    const password =
-      document.getElementById("authPassword").value;
+  const message =
+    document.getElementById("authMessage");
 
-    const message =
-      document.getElementById("authMessage");
-
-
-    if (!username || !email || !password) {
-
-      message.textContent =
-        "Please enter a username, email, and password.";
-
-      return;
-    }
-
+  if (!username || !email || !password) {
 
     message.textContent =
-      "Creating account...";
+      "Please enter a username, email, and password.";
 
+    return;
+  }
 
-    const {
-      data,
-      error
-    } = await supabaseClient.auth.signUp({
-      email: email,
-      password: password
+  message.textContent =
+    "Creating account...";
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signUp({
+      email,
+      password
     });
 
+  if (error) {
 
-    if (error) {
+    console.error(error);
 
-      console.error(error);
+    message.textContent =
+      error.message;
 
-      message.textContent =
-        error.message;
+    return;
+  }
 
-      return;
-    }
+  if (!data.user) {
 
+    message.textContent =
+      "Account could not be created.";
 
-    if (!data.user) {
+    return;
+  }
 
-      message.textContent =
-        "Account could not be created.";
+  currentUser =
+    data.user;
 
-      return;
-    }
-
-
-    currentUser = data.user;
-
-
-    /*
-     * Save username to profiles
-     */
-
-    const {
-      error: profileError
-    } = await supabaseClient
+  const {
+    error: profileError
+  } =
+    await supabaseClient
       .from("profiles")
       .upsert({
         id: data.user.id,
-        username: username
+        username
       });
 
+  if (profileError) {
 
-    if (profileError) {
-
-      console.error(
-        "Profile error:",
-        profileError
-      );
-
-      message.textContent =
-        "Account created, but username could not be saved.";
-
-      return;
-    }
-
-
-    updateAuthNavigation();
-
+    console.error(
+      "Profile error:",
+      profileError
+    );
 
     message.textContent =
-      "Account created successfully!";
+      "Account created, but username could not be saved.";
 
-
-    showHome();
+    return;
   }
 
+  updateAuthNavigation();
 
-  /*
-   * ============================================
-   * LOG IN
-   * ============================================
-   */
+  message.textContent =
+    "Account created successfully!";
 
-  async function loginUser() {
-
-    const email =
-      document.getElementById("authEmail").value.trim();
-
-    const password =
-      document.getElementById("authPassword").value;
-
-    const message =
-      document.getElementById("authMessage");
+  showHome();
+}
 
 
-    if (!email || !password) {
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
-      message.textContent =
-        "Please enter an email and password.";
+async function loginUser() {
 
-      return;
-    }
+  const email =
+    document.getElementById("authEmail").value.trim();
 
+  const password =
+    document.getElementById("authPassword").value;
+
+  const message =
+    document.getElementById("authMessage");
+
+  if (!email || !password) {
 
     message.textContent =
-      "Logging in...";
+      "Please enter an email and password.";
 
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-
-    if (error) {
-
-      console.error(error);
-
-      message.textContent =
-        error.message;
-
-      return;
-    }
-
-
-    currentUser = data.user;
-
-
-    updateAuthNavigation();
-
-
-    message.textContent =
-      "Logged in successfully!";
-
-
-    showHome();
+    return;
   }
 
+  message.textContent =
+    "Logging in...";
 
-  /*
-   * ============================================
-   * LOAD TEAMS
-   * ============================================
-   */
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
 
-  async function loadTeams() {
+  if (error) {
 
-  const teamsContainer = document.getElementById("teams");
+    console.error(error);
 
-  teamsContainer.innerHTML = "Loading teams...";
+    message.textContent =
+      error.message;
+
+    return;
+  }
+
+  currentUser =
+    data.user;
+
+  updateAuthNavigation();
+
+  message.textContent =
+    "Logged in successfully!";
+
+  showHome();
+}
+
+
+/* =========================================================
+   HIDE MAIN SECTIONS
+   ========================================================= */
+
+function hideAllMainSections() {
+
+  document.querySelector(".hero").style.display =
+    "none";
+
+  document.getElementById("authSection").style.display =
+    "none";
+
+  document.querySelector(".hero").nextElementSibling.style.display =
+    "none";
+
+  document.getElementById("playersSection").style.display =
+    "none";
+
+  document.getElementById("createPlayerSection").style.display =
+    "none";
+
+  document.getElementById("playerProfileSection").style.display =
+    "none";
+}
+
+
+/* =========================================================
+   HOME
+   ========================================================= */
+
+function showHome() {
+
+  hideAllMainSections();
+
+  document.querySelector(".hero").style.display =
+    "block";
+
+  document.querySelector(".hero").nextElementSibling.style.display =
+    "block";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+function showLeague() {
+
+  document.querySelector(".hero").nextElementSibling.scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+
+function showTeams() {
+
+  document.querySelector(".hero").nextElementSibling.scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+
+/* =========================================================
+   LOAD TEAMS
+   ========================================================= */
+
+async function loadTeams() {
+
+  const teamsContainer =
+    document.getElementById("teams");
+
+  teamsContainer.innerHTML =
+    "Loading teams...";
 
   try {
 
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
-      {
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization":
+              `Bearer ${SUPABASE_KEY}`
+          }
         }
-      }
-    );
+      );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Team loading error:", errorText);
+
+      const errorText =
+        await response.text();
+
+      console.error(
+        "Team loading error:",
+        errorText
+      );
+
       teamsContainer.innerHTML =
         "Unable to load Iceverse teams.";
+
       return;
     }
 
-    const teams = await response.json();
+    const teams =
+      await response.json();
 
     if (!teams || teams.length === 0) {
-      teamsContainer.innerHTML = "No teams found.";
+
+      teamsContainer.innerHTML =
+        "No teams found.";
+
       return;
     }
 
-    teamsContainer.innerHTML = teams.map(team => `
-      <div class="team-card">
+    teamsContainer.innerHTML =
+      teams.map(team => `
 
-        <h3>${escapeHTML(team.name || "Unknown Team")}</h3>
+        <div class="team-card">
 
-        <p>
-          <strong>Abbreviation:</strong>
-          ${escapeHTML(team.abbreviation || "---")}
-        </p>
+          <h3>
+            ${escapeHTML(team.name || "Unknown Team")}
+          </h3>
 
-        <p>
-          <strong>City:</strong>
-          ${escapeHTML(team.city || "---")}
-        </p>
+          <p>
+            <strong>Abbreviation:</strong>
+            ${escapeHTML(team.abbreviation || "---")}
+          </p>
 
-        <p>
-          <strong>Record:</strong>
-          ${team.wins ?? 0}-${team.losses ?? 0}-${team.overtime_losses ?? 0}
-        </p>
+          <p>
+            <strong>City:</strong>
+            ${escapeHTML(team.city || "---")}
+          </p>
 
-      </div>
-    `).join("");
+          <p>
+            <strong>Record:</strong>
+            ${team.wins ?? 0}-
+            ${team.losses ?? 0}-
+            ${team.overtime_losses ?? 0}
+          </p>
+
+        </div>
+
+      `).join("");
 
   } catch (error) {
 
-    console.error("Team loading error:", error);
+    console.error(
+      "Team loading error:",
+      error
+    );
 
     teamsContainer.innerHTML =
       "Unable to load Iceverse teams.";
-
   }
 }
 
 
-  /*
-   * ============================================
-   * BASIC NAVIGATION
-   * ============================================
-   */
+/* =========================================================
+   PLAYERS PAGE
+   ========================================================= */
 
-  function showHome() {
+async function showPlayers() {
 
-    document.querySelector(".hero").style.display =
-      "block";
+  hideAllMainSections();
 
-    document.getElementById("authSection").style.display =
-      "none";
+  document.getElementById("playersSection").style.display =
+    "block";
 
-    document.getElementById("playersSection").style.display =
-      "none";
+  document.getElementById("playerSearch").value =
+    "";
 
-    document.getElementById("playerProfileSection").style.display =
-      "none";
+  document.getElementById("playersSection").scrollIntoView({
+    behavior: "smooth"
+  });
 
-    document.querySelector(".hero").nextElementSibling.style.display =
-      "block";
+  await loadPlayers();
+}
 
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+async function loadPlayers() {
+
+  const container =
+    document.getElementById("players");
+
+  container.innerHTML =
+    '<div class="loading">Loading Iceverse players...</div>';
+
+  try {
+
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,nationality,primary_position,secondary_position,overall,archetype,personality,created_by,height_inches,weight_lbs,handedness&order=overall.desc`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization":
+              `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+    if (!response.ok) {
+
+      const errorText =
+        await response.text();
+
+      console.error(
+        "Supabase players error:",
+        response.status,
+        errorText
+      );
+
+      throw new Error(
+        `Supabase error ${response.status}`
+      );
+    }
+
+    const players =
+      await response.json();
+
+    window.iceversePlayers =
+      players;
+
+    displayPlayers(players);
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="error">
+        Unable to load Iceverse players.<br>
+        ${escapeHTML(error.message)}
+      </div>
+    `;
   }
+}
 
 
-  function showLeague() {
+/* =========================================================
+   DISPLAY PLAYERS
+   ========================================================= */
 
-    document.querySelector(".hero").nextElementSibling.scrollIntoView({
-      behavior: "smooth"
-    });
-  }
+function displayPlayers(players) {
 
+  const container =
+    document.getElementById("players");
 
-  function showTeams() {
-
-    document.querySelector(".hero").nextElementSibling.scrollIntoView({
-      behavior: "smooth"
-    });
-  }
-
-
-  /*
-   * ============================================
-   * PLAYERS PAGE
-   * ============================================
-   */
-
-  async function showPlayers() {
-
-    document.querySelector(".hero").style.display =
-      "none";
-
-    document.getElementById("authSection").style.display =
-      "none";
-
-    document.querySelector(".hero").nextElementSibling.style.display =
-      "none";
-
-    document.getElementById("playerProfileSection").style.display =
-      "none";
-
-
-    const playersSection =
-      document.getElementById("playersSection");
-
-
-    playersSection.style.display =
-      "block";
-
-
-    playersSection.scrollIntoView({
-      behavior: "smooth"
-    });
-
-
-    await loadPlayers();
-  }
-
-
-  async function loadPlayers() {
-
-    const container =
-      document.getElementById("players");
-
+  if (players.length === 0) {
 
     container.innerHTML =
-      '<div class="loading">Loading Iceverse players...</div>';
+      '<div class="loading">No players found.</div>';
 
-
-    try {
-
-const response = await fetch(
-  `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by&order=overall.desc`,
-  {
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": `Bearer ${SUPABASE_KEY}`
-    }
-  }
-);
-
-
-      if (!response.ok) {
-
-        const errorText =
-          await response.text();
-
-        console.error(
-          "Supabase players error:",
-          response.status,
-          errorText
-        );
-
-        throw new Error(
-          `Supabase error ${response.status}`
-        );
-      }
-
-
-      const players =
-        await response.json();
-
-
-      window.iceversePlayers =
-        players;
-
-
-      displayPlayers(players);
-
-
-    } catch (error) {
-
-      console.error(error);
-
-
-      container.innerHTML = `
-        <div class="error">
-          Unable to load Iceverse players.<br>
-          ${escapeHTML(error.message)}
-        </div>
-      `;
-    }
+    return;
   }
 
+  container.innerHTML = "";
 
-  function displayPlayers(players) {
+  players.forEach(player => {
 
-    const container =
-      document.getElementById("players");
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "team-card";
+
+    const flag =
+      getFlag(player.nationality);
+
+    card.innerHTML = `
+
+      <div
+        class="team-name"
+        style="cursor: pointer;"
+        onclick="openPlayerProfile('${player.id}')"
+      >
+
+        <span class="flag">
+          ${flag}
+        </span>
+
+        ${escapeHTML(player.first_name)}
+        ${escapeHTML(player.last_name)}
+
+      </div>
+
+      <div class="team-info">
+
+        ${escapeHTML(player.primary_position)}
+
+        ${player.secondary_position
+          ? " / " + escapeHTML(player.secondary_position)
+          : ""}
+
+        · Age ${player.age}
+
+        · Overall ${player.overall}
+
+      </div>
+
+      <div
+        class="team-info"
+        style="margin-top: 5px;"
+      >
+
+        ${escapeHTML(player.archetype)}
+
+      </div>
+
+      <div
+        class="country-line"
+        style="margin-top: 10px;"
+      >
+
+        <span>
+          ${flag}
+        </span>
+
+        <span>
+          ${escapeHTML(player.nationality || "Unknown")}
+        </span>
+
+      </div>
+
+    `;
+
+    container.appendChild(card);
+  });
+}
 
 
-    if (players.length === 0) {
+function filterPlayers() {
 
-      container.innerHTML =
-        '<div class="loading">No players found.</div>';
+  const search =
+    document.getElementById("playerSearch")
+      .value
+      .toLowerCase();
+
+  const players =
+    window.iceversePlayers || [];
+
+  const filtered =
+    players.filter(player => {
+
+      const fullName =
+        `${player.first_name} ${player.last_name}`
+          .toLowerCase();
+
+      return fullName.includes(search);
+    });
+
+  displayPlayers(filtered);
+}
+
+
+/* =========================================================
+   FLAGS
+   ========================================================= */
+
+function getFlag(nationality) {
+
+  return NATIONALITIES[nationality] || "🏒";
+}
+
+
+/* =========================================================
+   PLAYER CREATION
+   ========================================================= */
+
+function initializeCreationForm() {
+
+  const heightSelect =
+    document.getElementById("createHeight");
+
+  const weightSelect =
+    document.getElementById("createWeight");
+
+  const nationalitySelect =
+    document.getElementById("createNationality");
+
+  heightSelect.innerHTML =
+    '<option value="">Select height</option>';
+
+  for (
+    let inches = 65;
+    inches <= 81;
+    inches++
+  ) {
+
+    const feet =
+      Math.floor(inches / 12);
+
+    const remaining =
+      inches % 12;
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      inches;
+
+    option.textContent =
+      `${feet}'${remaining}"`;
+
+    heightSelect.appendChild(option);
+  }
+
+  weightSelect.innerHTML =
+    '<option value="">Select weight</option>';
+
+  for (
+    let weight = 155;
+    weight <= 275;
+    weight += 5
+  ) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      weight;
+
+    option.textContent =
+      `${weight} lbs`;
+
+    weightSelect.appendChild(option);
+  }
+
+  nationalitySelect.innerHTML =
+    '<option value="">Select nationality</option>';
+
+  Object.keys(NATIONALITIES)
+    .forEach(country => {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        country;
+
+      option.textContent =
+        `${NATIONALITIES[country]} ${country}`;
+
+      nationalitySelect.appendChild(option);
+    });
+
+  const archetypeSelect =
+    document.getElementById("createArchetype");
+
+  archetypeSelect.innerHTML =
+    '<option value="">Select archetype</option>';
+
+  Object.keys(ARCHETYPES)
+    .forEach(archetype => {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        archetype;
+
+      option.textContent =
+        archetype;
+
+      archetypeSelect.appendChild(option);
+    });
+
+  updateSecondaryPositionOptions();
+}
+
+
+function updateSecondaryPositionOptions() {
+
+  const primary =
+    document.getElementById("createPrimaryPosition").value;
+
+  const secondary =
+    document.getElementById("createSecondaryPosition");
+
+  secondary.innerHTML =
+    '<option value="">None</option>';
+
+  if (
+    primary === "C" ||
+    primary === "LW" ||
+    primary === "RW"
+  ) {
+
+    ["C", "LW", "RW"]
+      .filter(position => position !== primary)
+      .forEach(position => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          position;
+
+        option.textContent =
+          position === "C"
+            ? "Center"
+            : position === "LW"
+              ? "Left Wing"
+              : "Right Wing";
+
+        secondary.appendChild(option);
+      });
+  }
+
+  if (
+    primary === "LD" ||
+    primary === "RD"
+  ) {
+
+    ["LD", "RD"]
+      .filter(position => position !== primary)
+      .forEach(position => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          position;
+
+        option.textContent =
+          position === "LD"
+            ? "Left Defense"
+            : "Right Defense";
+
+        secondary.appendChild(option);
+      });
+  }
+
+  if (primary === "G") {
+
+    secondary.innerHTML =
+      '<option value="">None</option>';
+  }
+
+  updateCreationBuild();
+}
+
+
+/* =========================================================
+   STARTING BUILD ENGINE
+   ========================================================= */
+
+let creationBuild = null;
+
+
+function seededRandom(seed) {
+
+  let x =
+    Math.sin(seed) * 10000;
+
+  return x - Math.floor(x);
+}
+
+
+function getBuildSeed() {
+
+  const first =
+    document.getElementById("createFirstName")
+      .value
+      .trim();
+
+  const last =
+    document.getElementById("createLastName")
+      .value
+      .trim();
+
+  let seed =
+    first.length * 37 +
+    last.length * 91 +
+    Date.now() % 10000;
+
+  return seed;
+}
+
+
+function calculatePhysicalModifier(height, weight) {
+
+  if (!height || !weight) {
+    return 0;
+  }
+
+  let modifier = 0;
+
+  if (height >= 72) {
+    modifier += 1;
+  }
+
+  if (height >= 76) {
+    modifier += 1;
+  }
+
+  if (height <= 67) {
+    modifier -= 1;
+  }
+
+  if (weight >= 210) {
+    modifier += 1;
+  }
+
+  if (weight >= 240) {
+    modifier += 1;
+  }
+
+  if (weight <= 175) {
+    modifier -= 1;
+  }
+
+  return modifier;
+}
+
+
+function getStartingSkillPoints(
+  archetype,
+  position,
+  height,
+  weight
+) {
+
+  const seed =
+    getBuildSeed();
+
+  const physicalModifier =
+    calculatePhysicalModifier(
+      height,
+      weight
+    );
+
+  const archetypeData =
+    ARCHETYPES[archetype];
+
+  if (!archetypeData) {
+    return 0;
+  }
+
+  const preferredCount =
+    archetypeData.preferred.length;
+
+  const weakerCount =
+    archetypeData.weaker.length;
+
+  const realismScore =
+    preferredCount * 2 -
+    weakerCount;
+
+  const randomPart =
+    Math.floor(
+      seededRandom(seed) * 11
+    );
+
+  let points =
+    115 +
+    realismScore +
+    physicalModifier +
+    randomPart;
+
+  if (
+    position &&
+    archetypeData.positions.includes(position)
+  ) {
+    points += 8;
+  }
+
+  return Math.max(
+    105,
+    Math.min(145, points)
+  );
+}
+
+
+function getInitialCap(
+  attribute,
+  archetype
+) {
+
+  let cap =
+    72;
+
+  const preferred =
+    ARCHETYPES[archetype]?.preferred || [];
+
+  const weaker =
+    ARCHETYPES[archetype]?.weaker || [];
+
+  if (
+    preferred.includes(attribute)
+  ) {
+    cap += 8;
+  }
+
+  if (
+    weaker.includes(attribute)
+  ) {
+    cap -= 5;
+  }
+
+  return Math.max(
+    65,
+    Math.min(82, cap)
+  );
+}
+
+
+function getBaseAttribute(
+  attribute,
+  archetype,
+  height,
+  weight,
+  position
+) {
+
+  let value =
+    62;
+
+  const archetypeData =
+    ARCHETYPES[archetype];
+
+  if (!archetypeData) {
+    return value;
+  }
+
+  if (
+    archetypeData.preferred.includes(attribute)
+  ) {
+    value += 4;
+  }
+
+  if (
+    archetypeData.weaker.includes(attribute)
+  ) {
+    value -= 2;
+  }
+
+  const physical =
+    calculatePhysicalModifier(
+      height,
+      weight
+    );
+
+  if (
+    attribute === "strength" ||
+    attribute === "hitting" ||
+    attribute === "puck_protection" ||
+    attribute === "balance"
+  ) {
+
+    value +=
+      Math.max(
+        -2,
+        physical
+      );
+  }
+
+  if (
+    attribute === "speed" ||
+    attribute === "acceleration" ||
+    attribute === "agility"
+  ) {
+
+    if (weight >= 230) {
+      value -= 2;
+    }
+
+    if (height <= 68) {
+      value += 1;
+    }
+  }
+
+  if (
+    attribute === "tipping" &&
+    archetype === "Power Forward"
+  ) {
+    value += 5;
+  }
+
+  if (
+    position === "G"
+  ) {
+    return 60;
+  }
+
+  return Math.max(
+    55,
+    Math.min(70, value)
+  );
+}
+
+
+/* =========================================================
+   ATTRIBUTE COST
+   ========================================================= */
+
+function getUpgradeCost(
+  currentValue
+) {
+
+  if (currentValue < 65) {
+    return 1;
+  }
+
+  if (currentValue < 68) {
+    return 2;
+  }
+
+  if (currentValue < 71) {
+    return 3;
+  }
+
+  if (currentValue < 74) {
+    return 4;
+  }
+
+  if (currentValue < 77) {
+    return 5;
+  }
+
+  if (currentValue < 80) {
+    return 7;
+  }
+
+  if (currentValue < 82) {
+    return 9;
+  }
+
+  return 999;
+}
+
+
+/* =========================================================
+   BUILD OVERALL
+   ========================================================= */
+
+function calculateOverall(attributes) {
+
+  const values =
+    Object.values(attributes);
+
+  if (!values.length) {
+    return 62;
+  }
+
+  const average =
+    values.reduce(
+      (sum, value) => sum + value,
+      0
+    ) / values.length;
+
+  return Math.round(
+    Math.max(
+      62,
+      Math.min(79, average)
+    )
+  );
+}
+
+
+function getBuildRealism(
+  attributes,
+  archetype
+) {
+
+  const preferred =
+    ARCHETYPES[archetype]?.preferred || [];
+
+  const weaker =
+    ARCHETYPES[archetype]?.weaker || [];
+
+  let score = 50;
+
+  preferred.forEach(attribute => {
+
+    if (
+      attributes[attribute] >= 70
+    ) {
+      score += 4;
+    }
+  });
+
+  weaker.forEach(attribute => {
+
+    if (
+      attributes[attribute] >= 70
+    ) {
+      score -= 3;
+    }
+  });
+
+  return Math.max(
+    0,
+    Math.min(100, score)
+  );
+}
+
+
+/* =========================================================
+   UPDATE BUILD
+   ========================================================= */
+
+function updateCreationBuild() {
+
+  const archetype =
+    document.getElementById("createArchetype").value;
+
+  const position =
+    document.getElementById("createPrimaryPosition").value;
+
+  const height =
+    Number(
+      document.getElementById("createHeight").value
+    );
+
+  const weight =
+    Number(
+      document.getElementById("createWeight").value
+    );
+
+  const buildArea =
+    document.getElementById("creationBuildArea");
+
+  if (
+    !archetype ||
+    !position ||
+    !height ||
+    !weight
+  ) {
+
+    buildArea.style.display =
+      "none";
+
+    creationBuild =
+      null;
+
+    return;
+  }
+
+  buildArea.style.display =
+    "block";
+
+  const skillPoints =
+    getStartingSkillPoints(
+      archetype,
+      position,
+      height,
+      weight
+    );
+
+  const attributes = {};
+
+  Object.values(ATTRIBUTE_GROUPS)
+    .flat()
+    .forEach(attribute => {
+
+      attributes[attribute] =
+        getBaseAttribute(
+          attribute,
+          archetype,
+          height,
+          weight,
+          position
+        );
+    });
+
+  creationBuild = {
+    archetype,
+    position,
+    height,
+    weight,
+    startingPoints: skillPoints,
+    remainingPoints: skillPoints,
+    attributes
+  };
+
+  renderAttributeEditor();
+
+  document.getElementById("buildPoints").textContent =
+    skillPoints;
+
+  document.getElementById("buildOverall").textContent =
+    calculateOverall(attributes);
+
+  document.getElementById("buildDescription").textContent =
+    ARCHETYPES[archetype].description;
+}
+
+
+/* =========================================================
+   ATTRIBUTE EDITOR
+   ========================================================= */
+
+function renderAttributeEditor() {
+
+  if (!creationBuild) {
+    return;
+  }
+
+  const container =
+    document.getElementById("attributeEditor");
+
+  container.innerHTML = "";
+
+  Object.entries(ATTRIBUTE_GROUPS)
+    .forEach(([group, attributes]) => {
+
+      const groupDiv =
+        document.createElement("div");
+
+      groupDiv.className =
+        "attribute-group";
+
+      const heading =
+        document.createElement("h4");
+
+      heading.textContent =
+        group;
+
+      groupDiv.appendChild(heading);
+
+      attributes.forEach(attribute => {
+
+        const row =
+          document.createElement("div");
+
+        row.className =
+          "attribute-row";
+
+        const label =
+          document.createElement("div");
+
+        label.className =
+          "attribute-name";
+
+        label.textContent =
+          ATTRIBUTE_LABELS[attribute];
+
+        const value =
+          document.createElement("div");
+
+        value.className =
+          "attribute-value";
+
+        value.textContent =
+          creationBuild.attributes[attribute];
+
+        const button =
+          document.createElement("button");
+
+        button.className =
+          "attribute-button";
+
+        const cost =
+          getUpgradeCost(
+            creationBuild.attributes[attribute]
+          );
+
+        button.textContent =
+          cost >= 999
+            ? "MAX"
+            : `+1 (${cost})`;
+
+        button.disabled =
+          cost >= 999 ||
+          creationBuild.remainingPoints < cost ||
+          creationBuild.attributes[attribute] >=
+            getInitialCap(
+              attribute,
+              creationBuild.archetype
+            );
+
+        button.onclick =
+          () => upgradeCreationAttribute(attribute);
+
+        row.appendChild(label);
+        row.appendChild(value);
+        row.appendChild(button);
+
+        groupDiv.appendChild(row);
+      });
+
+      container.appendChild(groupDiv);
+    });
+}
+
+
+function upgradeCreationAttribute(attribute) {
+
+  if (!creationBuild) {
+    return;
+  }
+
+  const current =
+    creationBuild.attributes[attribute];
+
+  const cap =
+    getInitialCap(
+      attribute,
+      creationBuild.archetype
+    );
+
+  const cost =
+    getUpgradeCost(current);
+
+  if (
+    current >= cap ||
+    cost >= 999 ||
+    creationBuild.remainingPoints < cost
+  ) {
+    return;
+  }
+
+  creationBuild.attributes[attribute] += 1;
+
+  creationBuild.remainingPoints -=
+    cost;
+
+  const realism =
+    getBuildRealism(
+      creationBuild.attributes,
+      creationBuild.archetype
+    );
+
+  document.getElementById("buildPoints").textContent =
+    creationBuild.remainingPoints;
+
+  document.getElementById("buildOverall").textContent =
+    calculateOverall(
+      creationBuild.attributes
+    );
+
+  document.getElementById("buildMessage").textContent =
+    `Build realism: ${realism}/100`;
+
+  renderAttributeEditor();
+}
+
+
+/* =========================================================
+   FINAL OVERALL / POTENTIAL
+   ========================================================= */
+
+function calculatePotential(
+  build,
+  nationality,
+  handedness
+) {
+
+  const realism =
+    getBuildRealism(
+      build.attributes,
+      build.archetype
+    );
+
+  let potential =
+    78 +
+    Math.round(
+      realism / 12
+    );
+
+  const physical =
+    calculatePhysicalModifier(
+      build.height,
+      build.weight
+    );
+
+  potential +=
+    Math.max(
+      -2,
+      Math.min(4, physical)
+    );
+
+  const random =
+    Math.floor(
+      Math.random() * 11
+    ) - 5;
+
+  potential +=
+    random;
+
+  if (
+    handedness === "Left"
+  ) {
+    potential += 1;
+  }
+
+  if (
+    nationality === "Canada" ||
+    nationality === "USA" ||
+    nationality === "Sweden" ||
+    nationality === "Finland"
+  ) {
+    potential +=
+      Math.random() < 0.35
+        ? 1
+        : 0;
+  }
+
+  return Math.max(
+    72,
+    Math.min(92, potential)
+  );
+}
+
+
+/* =========================================================
+   CREATE PLAYER
+   ========================================================= */
+
+async function createPlayer() {
+
+  if (!currentUser) {
+
+    alert(
+      "You must be logged in to create a player."
+    );
+
+    showLogin();
+
+    return;
+  }
+
+  if (!creationBuild) {
+
+    alert(
+      "Complete the player information first."
+    );
+
+    return;
+  }
+
+  const firstName =
+    document.getElementById("createFirstName")
+      .value
+      .trim();
+
+  const lastName =
+    document.getElementById("createLastName")
+      .value
+      .trim();
+
+  const secondaryPosition =
+    document.getElementById("createSecondaryPosition")
+      .value || null;
+
+  const handedness =
+    document.getElementById("createHandedness")
+      .value;
+
+  const nationality =
+    document.getElementById("createNationality")
+      .value;
+
+  const message =
+    document.getElementById("createPlayerMessage");
+
+  if (
+    !firstName ||
+    !lastName ||
+    !handedness ||
+    !nationality
+  ) {
+
+    message.className =
+      "warning-message";
+
+    message.textContent =
+      "Please complete every required field.";
+
+    return;
+  }
+
+  const position =
+    creationBuild.position;
+
+  if (
+    position === "G" &&
+    secondaryPosition
+  ) {
+
+    message.className =
+      "warning-message";
+
+    message.textContent =
+      "Goalies cannot have a secondary position.";
+
+    return;
+  }
+
+  message.className =
+    "success-message";
+
+  message.textContent =
+    "Creating player...";
+
+  const overall =
+    calculateOverall(
+      creationBuild.attributes
+    );
+
+  const potential =
+    calculatePotential(
+      creationBuild,
+      nationality,
+      handedness
+    );
+
+  const playerData = {
+
+    first_name:
+      firstName,
+
+    last_name:
+      lastName,
+
+    age:
+      18,
+
+    nationality,
+
+    primary_position:
+      position,
+
+    secondary_position:
+      secondaryPosition,
+
+    archetype:
+      creationBuild.archetype,
+
+    personality:
+      "Balanced",
+
+    overall,
+
+    created_by:
+      currentUser.id,
+
+    height_inches:
+      creationBuild.height,
+
+    weight_lbs:
+      creationBuild.weight,
+
+    handedness
+  };
+
+  try {
+
+    const {
+      data: player,
+      error: playerError
+    } =
+      await supabaseClient
+        .from("players")
+        .insert(playerData)
+        .select()
+        .single();
+
+    if (playerError) {
+      throw playerError;
+    }
+
+    const attributesToInsert = {
+
+      player_id:
+        player.id,
+
+      speed:
+        creationBuild.attributes.speed,
+
+      acceleration:
+        creationBuild.attributes.acceleration,
+
+      agility:
+        creationBuild.attributes.agility,
+
+      wrist_shot:
+        creationBuild.attributes.wrist_shot,
+
+      slap_shot:
+        creationBuild.attributes.slap_shot,
+
+      shot_accuracy:
+        creationBuild.attributes.shot_accuracy,
+
+      shot_power:
+        creationBuild.attributes.shot_power,
+
+      puck_control:
+        creationBuild.attributes.puck_control,
+
+      deking:
+        creationBuild.attributes.deking,
+
+      passing:
+        creationBuild.attributes.passing,
+
+      receiving:
+        creationBuild.attributes.receiving,
+
+      puck_protection:
+        creationBuild.attributes.puck_protection,
+
+      tipping:
+        creationBuild.attributes.tipping,
+
+      offensive_iq:
+        creationBuild.attributes.offensive_iq,
+
+      vision:
+        creationBuild.attributes.vision,
+
+      offensive_positioning:
+        creationBuild.attributes.offensive_positioning,
+
+      rebound_awareness:
+        creationBuild.attributes.rebound_awareness,
+
+      defensive_iq:
+        creationBuild.attributes.defensive_iq,
+
+      defensive_positioning:
+        creationBuild.attributes.defensive_positioning,
+
+      stick_checking:
+        creationBuild.attributes.stick_checking,
+
+      poke_checking:
+        creationBuild.attributes.poke_checking,
+
+      hitting:
+        creationBuild.attributes.hitting,
+
+      shot_blocking:
+        creationBuild.attributes.shot_blocking,
+
+      defensive_awareness:
+        creationBuild.attributes.defensive_awareness,
+
+      strength:
+        creationBuild.attributes.strength,
+
+      endurance:
+        creationBuild.attributes.endurance,
+
+      durability:
+        creationBuild.attributes.durability,
+
+      balance:
+        creationBuild.attributes.balance,
+
+      hockey_iq:
+        creationBuild.attributes.hockey_iq,
+
+      clutch:
+        creationBuild.attributes.clutch,
+
+      discipline:
+        creationBuild.attributes.discipline,
+
+      composure:
+        creationBuild.attributes.composure,
+
+      potential:
+        potential
+    };
+
+    const {
+      error: attributeError
+    } =
+      await supabaseClient
+        .from("player_attributes")
+        .insert(attributesToInsert);
+
+    if (attributeError) {
+
+      console.error(
+        "Attribute creation error:",
+        attributeError
+      );
+
+      message.className =
+        "warning-message";
+
+      message.textContent =
+        "Player was created, but the attribute record failed. We need to fix the database permissions/schema before creating another player.";
 
       return;
     }
 
+    message.className =
+      "success-message";
 
-    container.innerHTML = "";
+    message.innerHTML = `
+
+      <strong>
+        ${escapeHTML(firstName)}
+        ${escapeHTML(lastName)}
+      </strong>
+      was created successfully!
+
+      <br><br>
+
+      Age: 18<br>
+
+      Starting Overall:
+      ${overall}<br>
+
+      Potential:
+      ${potential}<br>
+
+      Nationality:
+      ${getFlag(nationality)}
+      ${escapeHTML(nationality)}
+
+    `;
+
+    creationBuild =
+      null;
+
+    document.getElementById("creationBuildArea").style.display =
+      "none";
+
+    document.getElementById("createFirstName").value =
+      "";
+
+    document.getElementById("createLastName").value =
+      "";
+
+    document.getElementById("createHeight").value =
+      "";
+
+    document.getElementById("createWeight").value =
+      "";
+
+    document.getElementById("createPrimaryPosition").value =
+      "";
+
+    document.getElementById("createSecondaryPosition").innerHTML =
+      '<option value="">None</option>';
+
+    document.getElementById("createHandedness").value =
+      "";
+
+    document.getElementById("createNationality").value =
+      "";
+
+    document.getElementById("createArchetype").value =
+      "";
+
+    await loadPlayers();
+
+  } catch (error) {
+
+    console.error(
+      "Player creation error:",
+      error
+    );
+
+    message.className =
+      "error";
+
+    message.textContent =
+      error.message ||
+      "Unable to create player.";
+  }
+}
 
 
-    players.forEach(player => {
+/* =========================================================
+   SHOW CREATE PLAYER
+   ========================================================= */
 
-      const card =
-        document.createElement("div");
+function showCreatePlayer() {
 
+  if (!currentUser) {
 
-      card.className =
-        "team-card";
+    showLogin();
 
-
-      card.innerHTML = `
-        <div
-          class="team-name"
-          style="cursor: pointer;"
-          onclick="openPlayerProfile('${player.id}')"
-        >
-          ${escapeHTML(player.first_name)}
-          ${escapeHTML(player.last_name)}
-        </div>
-
-        <div class="team-info">
-          ${escapeHTML(player.primary_position)}
-          · Age ${player.age}
-          · Overall ${player.overall}
-        </div>
-
-        <div class="team-info">
-          ${escapeHTML(player.archetype)}
-          · ${escapeHTML(player.personality)}
-        </div>
-      `;
-
-
-      container.appendChild(card);
-
-    });
+    return;
   }
 
+  hideAllMainSections();
 
-  function filterPlayers() {
+  document.getElementById("createPlayerSection").style.display =
+    "block";
 
-    const search =
-      document.getElementById("playerSearch")
-        .value
-        .toLowerCase();
+  initializeCreationForm();
 
-
-    const players =
-      window.iceversePlayers || [];
-
-
-    const filtered =
-      players.filter(player => {
-
-        const fullName =
-          `${player.first_name} ${player.last_name}`
-            .toLowerCase();
+  document.getElementById("createPlayerSection").scrollIntoView({
+    behavior: "smooth"
+  });
+}
 
 
-        return fullName.includes(search);
+/* =========================================================
+   PLAYER PROFILE
+   ========================================================= */
 
-      });
+async function openPlayerProfile(playerId) {
 
+  const players =
+    window.iceversePlayers || [];
 
-    displayPlayers(filtered);
+  const player =
+    players.find(
+      p => p.id === playerId
+    );
+
+  if (!player) {
+    return;
   }
 
+  hideAllMainSections();
 
-  /*
-   * ============================================
-   * ESCAPE HTML
-   * ============================================
-   */
+  document.getElementById("playerProfileSection").style.display =
+    "block";
 
-  function escapeHTML(value) {
+  const profile =
+    document.getElementById("playerProfile");
 
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+  profile.innerHTML =
+    '<div class="loading">Loading player...</div>';
+
+  try {
+
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/players?select=*&id=eq.${encodeURIComponent(playerId)}`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization":
+              `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        `Unable to load player (${response.status})`
+      );
+    }
+
+    const playerRows =
+      await response.json();
+
+    if (!playerRows.length) {
+      throw new Error(
+        "Player not found."
+      );
+    }
+
+    const fullPlayer =
+      playerRows[0];
+
+    const rosterResponse =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/rosters?select=jersey_number,team_id,teams(id,name,abbreviation,owner_id)&player_id=eq.${encodeURIComponent(playerId)}`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization":
+              `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+    let roster =
+      null;
+
+    if (rosterResponse.ok) {
+
+      const rosterRows =
+        await rosterResponse.json();
+
+      roster =
+        rosterRows[0] || null;
+    }
+
+    const team =
+      roster?.teams || null;
+
+    const isOwner =
+      currentUser &&
+      fullPlayer.created_by === currentUser.id;
+
+    const isCoach =
+      currentUser &&
+      team &&
+      team.owner_id === currentUser.id;
+
+    let attributes =
+      null;
+
+    if (isOwner || isCoach) {
+
+      const attributeResponse =
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/player_attributes?select=*&player_id=eq.${encodeURIComponent(playerId)}`,
+          {
+            headers: {
+              "apikey": SUPABASE_KEY,
+              "Authorization":
+                `Bearer ${SUPABASE_KEY}`
+            }
+          }
+        );
+
+      if (attributeResponse.ok) {
+
+        const attributeRows =
+          await attributeResponse.json();
+
+        attributes =
+          attributeRows[0] || null;
+      }
+    }
 
 
-  /*
-   * ============================================
-   * PLAYER PROFILE
-   * ============================================
-   */
-
-  function openPlayerProfile(playerId) {
-
-    const players =
-      window.iceversePlayers || [];
-
-
-    const player =
-      players.find(
-        p => p.id === playerId
+    const flag =
+      getFlag(
+        fullPlayer.nationality
       );
 
 
-    if (!player) {
-      return;
-    }
-
-
-    document.querySelector(".hero").style.display =
-      "none";
-
-    document.getElementById("authSection").style.display =
-      "none";
-
-    document.getElementById("playersSection").style.display =
-      "none";
-
-    document.getElementById("playerProfileSection").style.display =
-      "block";
-
-
-    const profileSection =
-      document.getElementById("playerProfileSection");
-
-
-    const profile =
-      document.getElementById("playerProfile");
-
-
-    const roster =
-      player.rosters?.[0];
-
-
-    const team =
-      roster?.teams;
-
-
-    const teamName =
-      team?.name ?? "Free Agent";
-
-
-    const teamAbbreviation =
-      team?.abbreviation ?? "";
-
-
-    const ownerName =
-      player.profiles?.username;
-
-
     profile.innerHTML = `
-      <div style="max-width: 900px; margin: 0 auto;">
+
+      <div style="
+        max-width: 900px;
+        margin: 0 auto;
+      ">
 
         <div style="
           background: linear-gradient(135deg, #102a43, #071525);
@@ -1165,17 +3585,32 @@ const response = await fetch(
                 margin: 0 0 10px 0;
                 font-size: 36px;
               ">
-                ${escapeHTML(player.first_name)}
-                ${escapeHTML(player.last_name)}
+
+                <span class="flag">
+                  ${flag}
+                </span>
+
+                ${escapeHTML(fullPlayer.first_name)}
+                ${escapeHTML(fullPlayer.last_name)}
+
               </h1>
 
               <div style="
                 color: #9fb3c8;
                 font-size: 18px;
               ">
-                ${escapeHTML(player.primary_position)}
-                • Age ${player.age}
-                • Overall ${player.overall}
+
+                ${escapeHTML(fullPlayer.primary_position)}
+
+                ${fullPlayer.secondary_position
+                  ? " / " +
+                    escapeHTML(fullPlayer.secondary_position)
+                  : ""}
+
+                • Age ${fullPlayer.age}
+
+                • Overall ${fullPlayer.overall}
+
               </div>
 
             </div>
@@ -1183,558 +3618,629 @@ const response = await fetch(
             <div style="
               font-size: 48px;
               font-weight: bold;
-              color: #ffffff;
             ">
+
               ${roster?.jersey_number
                 ? "#" + roster.jersey_number
                 : "—"}
+
             </div>
 
           </div>
 
 
-          <div class="team-info" style="margin-top: 25px;">
+          <div
+            class="country-line"
+            style="margin-top: 22px;"
+          >
 
-            <strong>Team:</strong>
+            <span class="flag">
+              ${flag}
+            </span>
 
-            ${escapeHTML(teamName)}
-
-            ${teamAbbreviation
-              ? ` (${escapeHTML(teamAbbreviation)})`
-              : ""}
-
-          </div>
-
-
-          <div class="team-info" style="margin-top: 10px;">
-
-            <strong>Jersey Number:</strong>
-
-            ${roster?.jersey_number
-              ? "#" + roster.jersey_number
-              : "Not assigned"}
+            <strong>
+              ${escapeHTML(
+                fullPlayer.nationality || "Unknown"
+              )}
+            </strong>
 
           </div>
 
-
-          ${
-            !roster &&
-            currentUser
-              ? `
-                <button
-                  onclick="startPlayerSigning('${player.id}')"
-                  style="
-                    margin-top: 25px;
-                    padding: 14px 24px;
-                    border: none;
-                    border-radius: 10px;
-                    background: #2f80ed;
-                    color: white;
-                    font-size: 16px;
-                    font-weight: bold;
-                    cursor: pointer;
-                  "
-                >
-                  Sign Player
-                </button>
-              `
-              : ""
-          }
-
-        </div>
-
-
-        <h2>Player Bio</h2>
-
-
-        <div style="
-          background: #102a43;
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 30px;
-        ">
-
-          <p>
-            <strong>Position:</strong>
-            ${escapeHTML(player.primary_position)}
-          </p>
-
-          <p>
-            <strong>Age:</strong>
-            ${player.age}
-          </p>
-
-          <p>
-            <strong>Overall:</strong>
-            ${player.overall}
-          </p>
-
-          <p>
-            <strong>Archetype:</strong>
-            ${escapeHTML(player.archetype)}
-          </p>
-
-          <p>
-            <strong>Personality:</strong>
-            ${escapeHTML(player.personality)}
-          </p>
-
-          <p>
-            <strong>Owner:</strong>
-
-            ${
-              ownerName
-                ? `<a
-                    href="#"
-                    onclick="showUserProfile('${player.created_by}'); return false;"
-                    style="
-                      color: #5da9ff;
-                      text-decoration: none;
-                    "
-                  >
-                    ${escapeHTML(ownerName)}
-                  </a>`
-                : "NPC"
-            }
-
-          </p>
-
-        </div>
-
-
-        <h2>Attributes</h2>
-
-
-        <div style="
-          background: #102a43;
-          border-radius: 12px;
-          padding: 20px;
-        ">
-
-          <h3>SKATING</h3>
-
-          <p>
-            Speed:
-            ${player.player_attributes?.[0]?.speed ?? "—"}
-          </p>
-
-          <p>
-            Acceleration:
-            ${player.player_attributes?.[0]?.acceleration ?? "—"}
-          </p>
-
-          <p>
-            Agility:
-            ${player.player_attributes?.[0]?.agility ?? "—"}
-          </p>
-
-
-          <h3>OFFENSE</h3>
-
-          <p>
-            Shooting:
-            ${player.player_attributes?.[0]?.shooting ?? "—"}
-          </p>
-
-          <p>
-            Passing:
-            ${player.player_attributes?.[0]?.passing ?? "—"}
-          </p>
-
-          <p>
-            Puck Control:
-            ${player.player_attributes?.[0]?.puck_control ?? "—"}
-          </p>
-
-        </div>
-
-      </div>
-    `;
-
-
-    profileSection.scrollIntoView({
-      behavior: "smooth"
-    });
-  }
-
-
-  /*
-   * ============================================
-   * USER PROFILE
-   * ============================================
-   */
-
-  async function showUserProfile(userId) {
-
-    if (!userId) {
-      return;
-    }
-
-
-    const profileSection =
-      document.getElementById("playerProfileSection");
-
-
-    const profile =
-      document.getElementById("playerProfile");
-
-
-    document.querySelector(".hero").style.display =
-      "none";
-
-    document.getElementById("authSection").style.display =
-      "none";
-
-    document.getElementById("playersSection").style.display =
-      "none";
-
-    profileSection.style.display =
-      "block";
-
-
-    profile.innerHTML = `
-      <div style="
-        max-width: 900px;
-        margin: 0 auto;
-      ">
-
-        <div style="
-          background: linear-gradient(135deg, #102a43, #071525);
-          border: 1px solid #294766;
-          border-radius: 18px;
-          padding: 30px;
-        ">
-
-          <h1>
-            User Profile
-          </h1>
 
           <div
-            id="userProfileContent"
-            class="loading"
-            style="margin-top: 20px;"
+            class="team-info"
+            style="margin-top: 15px;"
           >
-            Loading user...
-          </div>
 
-        </div>
+            <strong>
+              Team:
+            </strong>
 
-      </div>
-    `;
+            ${
+              team
+                ? `${escapeHTML(team.name)}
+                   (${escapeHTML(team.abbreviation)})`
+                : "Free Agent"
+            }
 
-
-    try {
-
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=id,username`,
-        {
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-          }
-        }
-      );
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          `Supabase error ${response.status}`
-        );
-      }
-
-
-      const profiles =
-        await response.json();
-
-
-      const userProfileContent =
-        document.getElementById("userProfileContent");
-
-
-      if (!profiles.length) {
-
-        userProfileContent.innerHTML =
-          "User profile not found.";
-
-        return;
-      }
-
-
-      const user =
-        profiles[0];
-
-
-      userProfileContent.innerHTML = `
-        <p style="font-size: 22px;">
-          <strong>
-            ${escapeHTML(user.username || "Unknown User")}
-          </strong>
-        </p>
-      `;
-
-
-    } catch (error) {
-
-      console.error(error);
-
-
-      document.getElementById("userProfileContent").innerHTML = `
-        <div class="error">
-          Unable to load user profile.
-        </div>
-      `;
-    }
-
-
-    profileSection.scrollIntoView({
-      behavior: "smooth"
-    });
-  }
-
-
-  /*
-   * ============================================
-   * PLAYER SIGNING
-   * ============================================
-   */
-
-  async function startPlayerSigning(playerId) {
-
-    const players =
-      window.iceversePlayers || [];
-
-
-    const player =
-      players.find(
-        p => p.id === playerId
-      );
-
-
-    if (!player) {
-      return;
-    }
-
-
-    const profile =
-      document.getElementById("playerProfile");
-
-
-    profile.innerHTML = `
-      <div style="
-        max-width: 900px;
-        margin: 0 auto;
-      ">
-
-        <div style="
-          background: linear-gradient(135deg, #102a43, #071525);
-          padding: 30px;
-          border-radius: 18px;
-          border: 1px solid #244a6b;
-          margin-bottom: 30px;
-        ">
-
-          <h1 style="
-            margin: 0 0 10px 0;
-            font-size: 36px;
-          ">
-            Sign ${escapeHTML(player.first_name)}
-            ${escapeHTML(player.last_name)}
-          </h1>
-
-          <div style="
-            color: #9fc5e8;
-            font-size: 18px;
-          ">
-            Choose a team
           </div>
 
         </div>
 
 
         <h2>
-          Available Teams
+          Player Bio
         </h2>
 
+        <div style="
+          background: #102a43;
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 30px;
+          line-height: 2;
+        ">
 
-        <div id="signingTeams">
+          <p>
+            <strong>Position:</strong>
+            ${escapeHTML(fullPlayer.primary_position)}
+          </p>
 
-          <div class="loading">
-            Loading teams...
-          </div>
+          <p>
+            <strong>Secondary Position:</strong>
+            ${
+              fullPlayer.secondary_position
+                ? escapeHTML(fullPlayer.secondary_position)
+                : "None"
+            }
+          </p>
+
+          <p>
+            <strong>Age:</strong>
+            ${fullPlayer.age}
+          </p>
+
+          <p>
+            <strong>Height:</strong>
+            ${formatHeight(fullPlayer.height_inches)}
+          </p>
+
+          <p>
+            <strong>Weight:</strong>
+            ${fullPlayer.weight_lbs || "—"} lbs
+          </p>
+
+          <p>
+            <strong>Handedness:</strong>
+            ${escapeHTML(fullPlayer.handedness || "—")}
+          </p>
+
+          <p>
+            <strong>Nationality:</strong>
+            ${flag}
+            ${escapeHTML(fullPlayer.nationality || "—")}
+          </p>
+
+          <p>
+            <strong>Overall:</strong>
+            ${fullPlayer.overall}
+          </p>
+
+          <p>
+            <strong>Archetype:</strong>
+            ${escapeHTML(fullPlayer.archetype)}
+          </p>
+
+          <p>
+            <strong>Personality:</strong>
+            ${escapeHTML(fullPlayer.personality || "Balanced")}
+          </p>
 
         </div>
+
+
+        <h2>
+          Skill Ratings
+        </h2>
+
+        <div style="
+          background: #102a43;
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 30px;
+        ">
+
+          ${renderPublicSkillRatings(
+            attributes,
+            fullPlayer.primary_position
+          )}
+
+        </div>
+
+
+        ${
+          attributes
+            ? `
+
+              <h2>
+                Exact Attributes
+              </h2>
+
+              <div style="
+                background: #102a43;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 30px;
+              ">
+
+                <div style="
+                  margin-bottom: 15px;
+                  color: #86efac;
+                  font-weight: bold;
+                ">
+
+                  ${
+                    isOwner
+                      ? "You own this player."
+                      : "You are the coach of this player."
+                  }
+
+                  Exact attributes are visible to you.
+
+                </div>
+
+                ${renderExactAttributes(attributes)}
+
+              </div>
+
+            `
+            : `
+
+              <div style="
+                background: #102a43;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 30px;
+              ">
+
+                <strong>
+                  Exact attributes are private.
+                </strong>
+
+                <div class="privacy-note">
+
+                  Only the player owner and that player's
+                  current team coach can see exact individual
+                  attribute numbers.
+
+                </div>
+
+              </div>
+
+            `
+        }
 
       </div>
     `;
 
+    document.getElementById("playerProfileSection")
+      .scrollIntoView({
+        behavior: "smooth"
+      });
 
-    try {
+  } catch (error) {
 
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,owner_id,money&order=name.asc`,
+    console.error(error);
+
+    profile.innerHTML = `
+      <div class="error">
+        Unable to load player profile.<br>
+        ${escapeHTML(error.message)}
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   PUBLIC STAR RATINGS
+   ========================================================= */
+
+function calculateCategoryRating(
+  attributes,
+  category,
+  position
+) {
+
+  if (!attributes) {
+    return 0;
+  }
+
+  let keys =
+    ATTRIBUTE_GROUPS[category] || [];
+
+  if (
+    position === "G"
+  ) {
+
+    keys = [
+      "reflexes",
+      "goalie_positioning",
+      "glove",
+      "blocker",
+      "rebound_control",
+      "athleticism",
+      "puck_handling",
+      "goalie_iq",
+      "goalie_endurance"
+    ];
+
+  }
+
+  const values =
+    keys
+      .map(key => Number(attributes[key]))
+      .filter(value => !Number.isNaN(value));
+
+  if (!values.length) {
+    return 0;
+  }
+
+  const average =
+    values.reduce(
+      (sum, value) => sum + value,
+      0
+    ) / values.length;
+
+  /*
+   * Public ratings are deliberately broad.
+   * They do not reveal exact attributes.
+   */
+
+  if (average >= 82) return 5;
+  if (average >= 76) return 4;
+  if (average >= 70) return 3;
+  if (average >= 64) return 2;
+
+  return 1;
+}
+
+
+function renderStars(rating) {
+
+  let html = "";
+
+  for (let i = 1; i <= 5; i++) {
+
+    html +=
+      i <= rating
+        ? '<span class="star-filled">★</span>'
+        : '<span class="star-empty">★</span>';
+  }
+
+  return html;
+}
+
+
+function renderPublicSkillRatings(
+  attributes,
+  position
+) {
+
+  if (!attributes) {
+
+    return `
+      <div class="privacy-note">
+        Skill ratings are unavailable until the
+        player's attributes have been generated.
+      </div>
+    `;
+  }
+
+  let categories = [
+    "Skating",
+    "Shooting",
+    "Puck Skills",
+    "Offensive",
+    "Defense",
+    "Physical",
+    "Mental"
+  ];
+
+  if (position === "G") {
+    categories = [
+      "Skating",
+      "Puck Skills",
+      "Defense",
+      "Physical",
+      "Mental"
+    ];
+  }
+
+  return categories.map(category => {
+
+    const rating =
+      calculateCategoryRating(
+        attributes,
+        category,
+        position
+      );
+
+    return `
+
+      <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding: 13px 0;
+        border-bottom: 1px solid #294766;
+      ">
+
+        <strong>
+          ${category}
+        </strong>
+
+        <div class="star-rating">
+          ${renderStars(rating)}
+        </div>
+
+      </div>
+
+    `;
+
+  }).join("");
+}
+
+
+/* =========================================================
+   EXACT ATTRIBUTES
+   ========================================================= */
+
+function renderExactAttributes(attributes) {
+
+  if (!attributes) {
+    return "";
+  }
+
+  let html = "";
+
+  Object.entries(ATTRIBUTE_GROUPS)
+    .forEach(([group, keys]) => {
+
+      html += `
+
+        <div class="attribute-group">
+
+          <h4>
+            ${group}
+          </h4>
+
+      `;
+
+      keys.forEach(key => {
+
+        html += `
+
+          <div class="attribute-row">
+
+            <div class="attribute-name">
+              ${ATTRIBUTE_LABELS[key]}
+            </div>
+
+            <div class="attribute-value">
+              ${attributes[key] ?? "—"}
+            </div>
+
+            <div></div>
+
+          </div>
+
+        `;
+      });
+
+      html += `
+        </div>
+      `;
+    });
+
+  return html;
+}
+
+
+/* =========================================================
+   FORMAT HEIGHT
+   ========================================================= */
+
+function formatHeight(inches) {
+
+  if (!inches) {
+    return "—";
+  }
+
+  const feet =
+    Math.floor(
+      Number(inches) / 12
+    );
+
+  const remaining =
+    Number(inches) % 12;
+
+  return `${feet}'${remaining}"`;
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+/* =========================================================
+   USER PROFILE
+   ========================================================= */
+
+async function showUserProfile(userId) {
+
+  if (!userId) {
+    return;
+  }
+
+  const profileSection =
+    document.getElementById("playerProfileSection");
+
+  const profile =
+    document.getElementById("playerProfile");
+
+  hideAllMainSections();
+
+  profileSection.style.display =
+    "block";
+
+  profile.innerHTML = `
+
+    <div style="
+      max-width: 900px;
+      margin: 0 auto;
+    ">
+
+      <div style="
+        background: linear-gradient(135deg, #102a43, #071525);
+        border: 1px solid #294766;
+        border-radius: 18px;
+        padding: 30px;
+      ">
+
+        <h1>
+          User Profile
+        </h1>
+
+        <div
+          id="userProfileContent"
+          class="loading"
+          style="margin-top: 20px;"
+        >
+          Loading user...
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  try {
+
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=id,username`,
         {
           headers: {
             "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
+            "Authorization":
+              `Bearer ${SUPABASE_KEY}`
           }
         }
       );
 
+    if (!response.ok) {
 
-      if (!response.ok) {
-
-        throw new Error(
-          "Unable to load teams."
-        );
-      }
-
-
-      const teams =
-        await response.json();
-
-
-      const container =
-        document.getElementById("signingTeams");
-
-
-      container.innerHTML = "";
-
-
-      if (teams.length === 0) {
-
-        container.innerHTML = `
-          <div class="loading">
-            No teams are currently available.
-          </div>
-        `;
-
-        return;
-      }
-
-
-      teams.forEach(team => {
-
-        const card =
-          document.createElement("div");
-
-
-        card.style.cssText = `
-          background: #102a43;
-          border: 1px solid #244a6b;
-          border-radius: 14px;
-          padding: 20px;
-          margin-bottom: 15px;
-        `;
-
-
-        const isUnowned =
-          team.owner_id === null;
-
-
-        card.innerHTML = `
-
-          <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-          ">
-
-            <div>
-
-              <h3 style="
-                margin: 0 0 6px 0;
-              ">
-                ${escapeHTML(team.name)}
-              </h3>
-
-              <div style="
-                color: #9fc5e8;
-              ">
-                ${escapeHTML(team.city)}
-                · ${escapeHTML(team.abbreviation)}
-              </div>
-
-              <div style="
-                margin-top: 8px;
-                color: ${isUnowned ? "#7dd3fc" : "#9fb3c8"};
-                font-weight: bold;
-              ">
-
-                ${
-                  isUnowned
-                    ? "Unowned — Automatic Contract"
-                    : "Owner Required — Contract Offer"
-                }
-
-              </div>
-
-            </div>
-
-
-            <button
-              type="button"
-              onclick="chooseSigningTeam(
-                '${player.id}',
-                '${team.id}'
-              )"
-              style="
-                padding: 12px 20px;
-                border: none;
-                border-radius: 8px;
-                background: #2f80ed;
-                color: white;
-                font-weight: bold;
-                cursor: pointer;
-              "
-            >
-              Choose Team
-            </button>
-
-          </div>
-        `;
-
-
-        container.appendChild(card);
-
-      });
-
-
-    } catch (error) {
-
-      console.error(error);
-
-
-      document.getElementById("signingTeams").innerHTML = `
-        <div class="error">
-          Unable to load available teams.
-        </div>
-      `;
+      throw new Error(
+        `Supabase error ${response.status}`
+      );
     }
+
+    const profiles =
+      await response.json();
+
+    const content =
+      document.getElementById(
+        "userProfileContent"
+      );
+
+    if (!profiles.length) {
+
+      content.innerHTML =
+        "User profile not found.";
+
+      return;
+    }
+
+    const user =
+      profiles[0];
+
+    content.innerHTML = `
+
+      <p style="font-size: 22px;">
+
+        <strong>
+          ${escapeHTML(
+            user.username ||
+            "Unknown User"
+          )}
+        </strong>
+
+      </p>
+
+    `;
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById(
+      "userProfileContent"
+    ).innerHTML = `
+
+      <div class="error">
+        Unable to load user profile.
+      </div>
+
+    `;
   }
 
-
-  function chooseSigningTeam(playerId, teamId) {
-
-    alert(
-      "Team selected. The contract offer and jersey number selection will be added next."
-    );
-  }
+  profileSection.scrollIntoView({
+    behavior: "smooth"
+  });
+}
 
 
-  /*
-   * ============================================
-   * START ICEVERSE
-   * ============================================
-   */
+/* =========================================================
+   PLAYER SIGNING
+   ========================================================= */
 
-  loadCurrentUser().then(() => {
+async function startPlayerSigning(playerId) {
+
+  alert(
+    "Player signing will be connected to contracts next."
+  );
+}
+
+
+/* =========================================================
+   START ICEVERSE
+   ========================================================= */
+
+initializeCreationForm();
+
+loadCurrentUser()
+  .then(() => {
+
     updateAuthNavigation();
+
   });
 
-
-  loadTeams();
+loadTeams();
 
 </script>
+
+</body>
+</html>
