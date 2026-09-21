@@ -9436,5 +9436,110 @@ function ivRenderExhibitionBoxScore(stats,homeId,awayId,homeName,awayName){
 runSimulationLab=runSimulationLabGame;
 </script>
 
+
+<style id="iceverse-v12-7">
+.iv-player-link{background:none!important;border:0!important;padding:0!important;color:#9fc9ef!important;font:inherit;font-weight:800;cursor:pointer;text-decoration:underline}
+.iv-player-link:hover{color:#fff!important}
+</style>
+<script>
+/* ICEVERSE V12.7 — RETIRED FILTER + NORMALIZED LIVE SIM + CLICKABLE BOX SCORE */
+let ivHideRetired=false;
+
+// Extend the V12.6 player directory filters.
+const iv127OldShowPlayers=showPlayers;
+showPlayers=async function(){
+  await iv127OldShowPlayers();
+  const search=document.getElementById("playerSearch");
+  if(search && !document.getElementById("ivHideRetired")){
+    const row=document.createElement("label");
+    row.className="iv-toggle";
+    row.innerHTML=`<input id="ivHideRetired" type="checkbox"><strong>Hide retired players</strong>`;
+    const npcRow=document.getElementById("ivHideNPCs")?.closest("label");
+    (npcRow||search).insertAdjacentElement("afterend",row);
+    document.getElementById("ivHideRetired").checked=ivHideRetired;
+    document.getElementById("ivHideRetired").addEventListener("change",e=>{
+      ivHideRetired=e.target.checked;
+      filterPlayers();
+    });
+  }
+  filterPlayers();
+};
+
+filterPlayers=function(){
+  const search=(document.getElementById("playerSearch")?.value||"").toLowerCase();
+  const players=window.iceversePlayers||[];
+  displayPlayers(players.filter(p=>{
+    const match=`${p.first_name||""} ${p.last_name||""}`.toLowerCase().includes(search);
+    const npcOK=!ivHideNPCs || !!p.created_by;
+    const retired=!!(p.is_retired ?? p.retired);
+    const retiredOK=!ivHideRetired || !retired;
+    return match && npcOK && retiredOK;
+  }));
+};
+
+// Use the normalized V12.7 backend for Simulation Lab.
+runSimulationLabGame=async function(){
+  const home=document.getElementById("simLabHome"),away=document.getElementById("simLabAway");
+  const box=document.getElementById("simLabResult");
+  if(!home||!away||home.value===away.value){alert("Choose two different teams.");return;}
+  const delay=Number(document.getElementById("simSpeed")?.value)||650;
+  const hn=home.options[home.selectedIndex].text,an=away.options[away.selectedIndex].text;
+  box.innerHTML=`<div class="panel"><div class="muted">Generating a regulation-length exhibition...</div></div>`;
+
+  const {data:runId,error}=await supabaseClient.rpc("run_live_exhibition_v12_7",{
+    p_home:home.value,p_away:away.value,p_seed:null
+  });
+  if(error){box.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return;}
+
+  const [{data:events,error:ee},{data:stats,error:se}]=await Promise.all([
+    supabaseClient.from("simulation_snapshots").select("*").eq("run_id",runId).order("sequence_no"),
+    supabaseClient.from("simulation_player_stats").select("*").eq("run_id",runId).order("points",{ascending:false})
+  ]);
+  if(ee||se){box.innerHTML=`<div class="error">${escapeHTML((ee||se).message)}</div>`;return;}
+
+  box.innerHTML=`<div class="panel">
+    <div id="ivLiveStatus" class="pill">LIVE · P1 20:00</div>
+    <div class="iv-scoreboard"><div><strong>${escapeHTML(an)}</strong></div><div id="ivLiveScore" class="iv-score-big">0 – 0</div><div><strong>${escapeHTML(hn)}</strong></div></div>
+    <div id="ivLiveFeed" class="iv-live-feed" aria-live="polite"></div>
+   </div><div id="ivPostgame" style="display:none;margin-top:16px"></div>`;
+
+  const feed=document.getElementById("ivLiveFeed");
+  for(const e of events||[]){
+    await new Promise(r=>setTimeout(r,delay));
+    document.getElementById("ivLiveScore").textContent=`${e.away_score} – ${e.home_score}`;
+    const clock=`${Math.floor((e.clock_seconds||0)/60)}:${String((e.clock_seconds||0)%60).padStart(2,"0")}`;
+    document.getElementById("ivLiveStatus").textContent=`LIVE · ${e.period===4?"OT":"P"+e.period} ${clock}`;
+    feed.insertAdjacentHTML("beforeend",`<div class="iv-live-event"><strong>${e.period===4?"OT":"P"+e.period} ${clock}</strong> — ${escapeHTML(e.description||e.event_type)}</div>`);
+    feed.scrollTop=feed.scrollHeight;
+  }
+  document.getElementById("ivLiveStatus").textContent="FINAL · EXHIBITION";
+  ivRenderExhibitionBoxScore(stats||[],home.value,away.value,hn,an);
+};
+
+function ivRenderExhibitionBoxScore(stats,homeId,awayId,homeName,awayName){
+  const post=document.getElementById("ivPostgame");
+  post.style.display="block";
+  const table=(rows)=>`<div style="overflow-x:auto"><table class="iv-box-table">
+   <thead><tr><th>Player</th><th>Pos</th><th>G</th><th>A</th><th>PTS</th><th>S</th><th>HIT</th><th>BLK</th><th>FO</th><th>FO%</th><th>SV</th><th>GA</th></tr></thead><tbody>
+   ${rows.map(s=>{
+      const attempts=(s.faceoff_wins||0)+(s.faceoff_losses||0);
+      const pct=attempts?Math.round(100*(s.faceoff_wins||0)/attempts)+"%":"—";
+      return `<tr>
+       <td><button class="iv-player-link" onclick="openPlayerProfile('${s.player_id}')">${escapeHTML(s.player_name)}</button></td>
+       <td>${escapeHTML(s.position||"")}</td><td>${s.goals||0}</td><td>${s.assists||0}</td><td>${s.points||0}</td>
+       <td>${s.shots||0}</td><td>${s.hits||0}</td><td>${s.blocks||0}</td>
+       <td>${s.faceoff_wins||0}-${s.faceoff_losses||0}</td><td>${pct}</td><td>${s.saves||0}</td><td>${s.goals_against||0}</td>
+      </tr>`;
+    }).join("")||'<tr><td colspan="12">No stats</td></tr>'}
+   </tbody></table></div>`;
+  post.innerHTML=`<div class="panel"><h2>Box Score</h2>
+    <div class="muted">Skater and goalie totals from this exhibition. Player names open their player card.</div>
+    <h3 style="margin-top:16px">${escapeHTML(awayName)}</h3>${table(stats.filter(s=>s.team_id===awayId))}
+    <h3 style="margin-top:22px">${escapeHTML(homeName)}</h3>${table(stats.filter(s=>s.team_id===homeId))}
+   </div><button class="secondary-button" style="margin-top:12px" onclick="showTestSimulator()">Sim Another Game</button>`;
+}
+runSimulationLab=runSimulationLabGame;
+</script>
+
 </body>
 </html>
