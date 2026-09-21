@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Iceverse</title>
-  <!-- Iceverse Foundation Build: post-design rewrite -->
 
   <style>
     * {
@@ -380,6 +379,9 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ===== ICEVERSE REBUILD UI ===== */
+    .app-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.metric-card,.panel{background:#0d2035;border:1px solid #203c59;border-radius:14px;padding:20px}.metric-value{font-size:30px;font-weight:900;margin-top:6px}.muted{color:#9fb1c5}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#142b45;border:1px solid #294766;font-size:12px}.data-list{display:grid;gap:10px}.data-row{display:flex;justify-content:space-between;gap:15px;padding:12px;border-bottom:1px solid #203854}.section-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs button{background:#142b45;color:white;border:1px solid #294766;border-radius:8px;padding:9px 12px;cursor:pointer}.danger{color:#ffb7bd}.good{color:#86efac}.gold{color:#ffd166}.table-wrap{overflow-x:auto}.iv-table{width:100%;border-collapse:collapse}.iv-table th,.iv-table td{padding:11px;border-bottom:1px solid #203854;text-align:left}.iv-table th{color:#9fb1c5;font-size:12px;text-transform:uppercase}.empty-state{padding:30px;text-align:center;color:#9fb1c5}.profile-link{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -418,6 +420,13 @@
     >
       Create Player
     </button>
+
+
+    <button id="dashboardNavButton" onclick="showDashboard()" style="display:none;">Dashboard</button>
+    <button onclick="showStandings()">Standings</button>
+    <button onclick="showFreeAgents()">Free Agents</button>
+    <button onclick="showNews()">News</button>
+    <button id="myProfileNavButton" onclick="showMyProfile()" style="display:none;">My Profile</button>
 
     <button
       id="loginButton"
@@ -1160,6 +1169,14 @@
 
 </section>
 
+
+<section id="dashboardSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Manager Dashboard</h2><span class="pill">Persistent Iceverse</span></div><div id="dashboardContent"><div class="loading">Loading dashboard...</div></div></section>
+<section id="standingsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>IHL Standings</h2><span class="pill">2 pts W · 1 pt OTL</span></div><div id="standingsContent"><div class="loading">Loading standings...</div></div></section>
+<section id="freeAgentsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Free Agents</h2><span class="pill">Unrostered players</span></div><div id="freeAgentsContent"><div class="loading">Loading free agents...</div></div></section>
+<section id="newsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse News</h2><span class="pill">Iceverse Network</span></div><div id="newsContent"><div class="loading">Loading news...</div></div></section>
+<section id="myProfileSection" class="section" style="display:none;"><div class="section-toolbar"><h2>My Iceverse</h2><span class="pill">Manager & Player Careers</span></div><div id="myProfileContent"><div class="loading">Loading profile...</div></div></section>
+<section id="contractsSection" class="section" style="display:none;"><div id="contractsContent"></div></section>
+
 </main>
 
 
@@ -1277,15 +1294,9 @@ const ATTRIBUTE_GROUPS = {
 
 
 const GOALIE_ATTRIBUTE_GROUPS = {
-  "Goalie": [
-    "reflexes", "goalie_positioning", "glove", "blocker",
-    "rebound_control", "athleticism", "puck_handling",
-    "goalie_iq", "recovery", "goalie_endurance", "goalie_discipline"
-  ],
-  "Physical": ["strength", "durability", "balance"],
-  "Mental": ["hockey_iq", "clutch", "composure"]
+  "Goalie": ["reflexes","goalie_positioning","glove","blocker","rebound_control","athleticism","puck_handling","goalie_iq","recovery","goalie_endurance","goalie_discipline"],
+  "Mental": ["clutch","composure"]
 };
-
 
 const ATTRIBUTE_LABELS = {
 
@@ -1420,7 +1431,7 @@ const ARCHETYPES = {
       "A balanced forward who contributes effectively at both ends of the ice."
   },
 
-  "Dangler": {
+  "dangler": {
     displayName: "Dangler",
     positions: ["C", "LW", "RW"],
     preferred: [
@@ -1679,8 +1690,9 @@ function updateAuthNavigation() {
     createPlayerNavButton.style.display =
       "inline-block";
 
-    createPlayerButton.style.display =
-      "inline-block";
+    createPlayerButton.style.display = "inline-block";
+    document.getElementById("dashboardNavButton").style.display = "inline-block";
+    document.getElementById("myProfileNavButton").style.display = "inline-block";
 
   } else {
 
@@ -1696,8 +1708,9 @@ function updateAuthNavigation() {
     createPlayerNavButton.style.display =
       "none";
 
-    createPlayerButton.style.display =
-      "none";
+    createPlayerButton.style.display = "none";
+    document.getElementById("dashboardNavButton").style.display = "none";
+    document.getElementById("myProfileNavButton").style.display = "none";
   }
 }
 
@@ -2027,6 +2040,8 @@ function hideAllMainSections() {
     teamCustomizeSection.style.display = "none";
   }
 
+
+  ["dashboardSection","standingsSection","freeAgentsSection","newsSection","myProfileSection","contractsSection"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
 
   const teamManagementSection =
     document.getElementById("teamManagementSection");
@@ -6132,10 +6147,10 @@ function getBaseAttribute(
     value += 5;
   }
 
-  if (position === "G") {
-    if (archetypeData.preferred.includes(attribute)) value += 3;
-    if (archetypeData.weaker.includes(attribute)) value -= 2;
-    return Math.max(56, Math.min(70, value));
+  if (
+    position === "G"
+  ) {
+    return 60;
   }
 
   return Math.max(
@@ -6191,9 +6206,6 @@ function getUpgradeCost(
 
 function calculateOverall(attributes) {
 
-  // Overall is calculated only from attributes that belong to the current build.
-  // Goalie builds therefore use goalie/physical/mental ratings rather than hidden
-  // default skater ratings.
   const values =
     Object.values(attributes);
 
@@ -6308,12 +6320,7 @@ function updateCreationBuild() {
 
   const attributes = {};
 
-  const creationGroups =
-    position === "G"
-      ? GOALIE_ATTRIBUTE_GROUPS
-      : ATTRIBUTE_GROUPS;
-
-  Object.values(creationGroups)
+  Object.values(position === "G" ? GOALIE_ATTRIBUTE_GROUPS : ATTRIBUTE_GROUPS)
     .flat()
     .forEach(attribute => {
 
@@ -6365,12 +6372,7 @@ function renderAttributeEditor() {
 
   container.innerHTML = "";
 
-  const editorGroups =
-    creationBuild.position === "G"
-      ? GOALIE_ATTRIBUTE_GROUPS
-      : ATTRIBUTE_GROUPS;
-
-  Object.entries(editorGroups)
+  Object.entries(creationBuild.position === "G" ? GOALIE_ATTRIBUTE_GROUPS : ATTRIBUTE_GROUPS)
     .forEach(([group, attributes]) => {
 
       const groupDiv =
@@ -6705,16 +6707,7 @@ async function createPlayer() {
     weight_lbs:
       creationBuild.weight,
 
-    handedness,
-
-    skating_stars: calculateCategoryRating(creationBuild.attributes, "Skating", position) || 1,
-    shooting_stars: position === "G" ? 1 : (calculateCategoryRating(creationBuild.attributes, "Shooting", position) || 1),
-    puck_skills_stars: calculateCategoryRating(creationBuild.attributes, "Puck Skills", position) || 1,
-    offense_stars: position === "G" ? 1 : (calculateCategoryRating(creationBuild.attributes, "Offensive", position) || 1),
-    defense_stars: calculateCategoryRating(creationBuild.attributes, "Defense", position) || 1,
-    physical_stars: calculateCategoryRating(creationBuild.attributes, "Physical", position) || 1,
-    mental_stars: calculateCategoryRating(creationBuild.attributes, "Mental", position) || 1,
-    goalie_stars: position === "G" ? (calculateCategoryRating(creationBuild.attributes, "Goalie", position) || 1) : 1
+    handedness
   };
 
   try {
@@ -6733,118 +6726,7 @@ async function createPlayer() {
       throw playerError;
     }
 
-    const attributesToInsert = {
-
-      player_id:
-        player.id,
-
-      speed:
-        creationBuild.attributes.speed,
-
-      acceleration:
-        creationBuild.attributes.acceleration,
-
-      agility:
-        creationBuild.attributes.agility,
-
-      wrist_shot:
-        creationBuild.attributes.wrist_shot,
-
-      slap_shot:
-        creationBuild.attributes.slap_shot,
-
-      shot_accuracy:
-        creationBuild.attributes.shot_accuracy,
-
-      shot_power:
-        creationBuild.attributes.shot_power,
-
-      puck_control:
-        creationBuild.attributes.puck_control,
-
-      deking:
-        creationBuild.attributes.deking,
-
-      passing:
-        creationBuild.attributes.passing,
-
-      receiving:
-        creationBuild.attributes.receiving,
-
-      puck_protection:
-        creationBuild.attributes.puck_protection,
-
-      tipping:
-        creationBuild.attributes.tipping,
-
-      offensive_iq:
-        creationBuild.attributes.offensive_iq,
-
-      vision:
-        creationBuild.attributes.vision,
-
-      offensive_positioning:
-        creationBuild.attributes.offensive_positioning,
-
-      rebound_awareness:
-        creationBuild.attributes.rebound_awareness,
-
-      defensive_iq:
-        creationBuild.attributes.defensive_iq,
-
-      defensive_positioning:
-        creationBuild.attributes.defensive_positioning,
-
-      stick_checking:
-        creationBuild.attributes.stick_checking,
-
-      poke_checking:
-        creationBuild.attributes.poke_checking,
-
-      hitting:
-        creationBuild.attributes.hitting,
-
-      shot_blocking:
-        creationBuild.attributes.shot_blocking,
-
-      defensive_awareness:
-        creationBuild.attributes.defensive_awareness,
-
-      strength:
-        creationBuild.attributes.strength,
-
-      endurance:
-        creationBuild.attributes.endurance,
-
-      durability:
-        creationBuild.attributes.durability,
-
-      balance:
-        creationBuild.attributes.balance,
-
-      hockey_iq:
-        creationBuild.attributes.hockey_iq,
-
-      clutch:
-        creationBuild.attributes.clutch,
-
-      discipline:
-        creationBuild.attributes.discipline,
-
-      composure: creationBuild.attributes.composure ?? 50,
-
-      reflexes: creationBuild.attributes.reflexes ?? 50,
-      goalie_positioning: creationBuild.attributes.goalie_positioning ?? 50,
-      glove: creationBuild.attributes.glove ?? 50,
-      blocker: creationBuild.attributes.blocker ?? 50,
-      rebound_control: creationBuild.attributes.rebound_control ?? 50,
-      athleticism: creationBuild.attributes.athleticism ?? 50,
-      puck_handling: creationBuild.attributes.puck_handling ?? 50,
-      goalie_iq: creationBuild.attributes.goalie_iq ?? 50,
-      recovery: creationBuild.attributes.recovery ?? 50,
-      goalie_endurance: creationBuild.attributes.goalie_endurance ?? 50,
-      goalie_discipline: creationBuild.attributes.goalie_discipline ?? 50
-    };
+    const attributesToInsert = { player_id: player.id, ...creationBuild.attributes };
 
     const {
       error: attributeError
@@ -7156,21 +7038,6 @@ async function openPlayerProfile(playerId) {
 
 
     /*
-      Load exact attributes only when Supabase authorizes this user
-      (permanent player owner or current team manager).
-    */
-    let privateAttributes = null;
-    if (currentUser) {
-      const { data: privateRows, error: privateError } =
-        await supabaseClient.rpc("get_private_player_attributes", {
-          target_player_id: player.id
-        });
-      if (!privateError && privateRows && privateRows.length) {
-        privateAttributes = privateRows[0];
-      }
-    }
-
-    /*
       Build player profile.
     */
 
@@ -7286,22 +7153,14 @@ async function openPlayerProfile(playerId) {
           "
         >
 
-          <h3>Skills</h3>
+          <h3>
+            Skills
+          </h3>
 
-          <div style="margin-top:14px;">
-            ${renderStoredPublicStars(player)}
-          </div>
-
-          ${privateAttributes ? `
-            <div style="margin-top:24px;">
-              <h3 style="margin-bottom:12px;">Private Exact Attributes</h3>
-              ${renderExactAttributesForPosition(privateAttributes, player.primary_position)}
-            </div>
-          ` : `
-            <p class="privacy-note" style="margin-top:14px;">
-              Exact attributes are private to the permanent player owner and the manager of the player's current team.
-            </p>
-          `}
+          <p>
+            Detailed attributes are visible to the
+            player owner and appropriate team staff.
+          </p>
 
         </div>
 
@@ -7969,18 +7828,6 @@ async function openUserProfile(userId) {
    PUBLIC STAR RATINGS
    ========================================================= */
 
-function renderStoredPublicStars(player) {
-  const rows = player.primary_position === "G"
-    ? [["Goalie", player.goalie_stars], ["Physical", player.physical_stars], ["Mental", player.mental_stars]]
-    : [["Skating", player.skating_stars], ["Shooting", player.shooting_stars], ["Puck Skills", player.puck_skills_stars], ["Offense", player.offense_stars], ["Defense", player.defense_stars], ["Physical", player.physical_stars], ["Mental", player.mental_stars]];
-
-  return rows.map(([label, rating]) => `
-    <div style="display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #294766;">
-      <strong>${escapeHTML(label)}</strong>
-      <span class="star-rating">${renderStars(Number(rating) || 1)}</span>
-    </div>`).join("");
-}
-
 function calculateCategoryRating(
   attributes,
   category,
@@ -7994,8 +7841,22 @@ function calculateCategoryRating(
   let keys =
     ATTRIBUTE_GROUPS[category] || [];
 
-  if (position === "G") {
-    keys = GOALIE_ATTRIBUTE_GROUPS[category] || [];
+  if (
+    position === "G"
+  ) {
+
+    keys = [
+      "reflexes",
+      "goalie_positioning",
+      "glove",
+      "blocker",
+      "rebound_control",
+      "athleticism",
+      "puck_handling",
+      "goalie_iq",
+      "goalie_endurance"
+    ];
+
   }
 
   const values =
@@ -8070,7 +7931,9 @@ function renderPublicSkillRatings(
 
   if (position === "G") {
     categories = [
-      "Goalie",
+      "Skating",
+      "Puck Skills",
+      "Defense",
       "Physical",
       "Mental"
     ];
@@ -8115,19 +7978,6 @@ function renderPublicSkillRatings(
 /* =========================================================
    EXACT ATTRIBUTES
    ========================================================= */
-
-function renderExactAttributesForPosition(attributes, position) {
-  const groups = position === "G" ? GOALIE_ATTRIBUTE_GROUPS : ATTRIBUTE_GROUPS;
-  let html = "";
-  Object.entries(groups).forEach(([group, keys]) => {
-    html += `<div class="attribute-group"><h4>${escapeHTML(group)}</h4>`;
-    keys.forEach(key => {
-      html += `<div class="attribute-row"><div class="attribute-name">${escapeHTML(ATTRIBUTE_LABELS[key] || key)}</div><div class="attribute-value">${attributes[key] ?? "—"}</div><div></div></div>`;
-    });
-    html += `</div>`;
-  });
-  return html;
-}
 
 function renderExactAttributes(attributes) {
 
@@ -8357,6 +8207,24 @@ async function startPlayerSigning(playerId) {
   );
 }
 
+
+
+/* =========================================================
+   ICEVERSE REBUILD: DASHBOARD / STANDINGS / MARKET / NEWS
+   ========================================================= */
+function showSection(id){hideAllMainSections();const el=document.getElementById(id);if(el){el.style.display="block";window.scrollTo({top:0,behavior:"smooth"});}}
+function fmtMoney(v){return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(v||0));}
+async function getMyTeam(){if(!currentUser)return null;const {data}=await supabaseClient.from("teams").select("*").eq("owner_id",currentUser.id).maybeSingle();return data||null;}
+async function showDashboard(){if(!currentUser){showLogin();return;}showSection("dashboardSection");const c=document.getElementById("dashboardContent");c.innerHTML='<div class="loading">Loading your Iceverse...</div>';try{const [profileQ,team,playersQ,offersQ,notesQ]=await Promise.all([supabaseClient.from("profiles").select("username,icepoints,player_slots,manager_reputation,manager_experience").eq("id",currentUser.id).single(),getMyTeam(),supabaseClient.from("players").select("id,first_name,last_name,overall,primary_position,is_retired").eq("created_by",currentUser.id),supabaseClient.from("contract_offers").select("id,status").eq("status","active"),supabaseClient.from("notifications").select("id,title,body,read,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(5)]);const p=profileQ.data||{};const owned=playersQ.data||[];const active=owned.filter(x=>!x.is_retired);c.innerHTML=`<div class="app-grid"><div class="metric-card"><div class="muted">Manager</div><div class="metric-value">${escapeHTML(p.username||"Manager")}</div></div><div class="metric-card"><div class="muted">Icepoints</div><div class="metric-value gold">${p.icepoints??0}</div></div><div class="metric-card"><div class="muted">Player Slots</div><div class="metric-value">${active.length}/${p.player_slots??3}</div></div><div class="metric-card"><div class="muted">Team</div><div class="metric-value" style="font-size:20px">${team?escapeHTML(team.name):"Unclaimed"}</div></div></div><div class="app-grid" style="margin-top:18px"><div class="panel"><h3>Your Players</h3><div class="data-list" style="margin-top:10px">${active.length?active.map(x=>`<div class="data-row profile-link" onclick="openPlayerProfile('${x.id}')"><span>${escapeHTML(x.first_name)} ${escapeHTML(x.last_name)}</span><span>${escapeHTML(x.primary_position)} · ${x.overall} OVR</span></div>`).join(""):'<div class="empty-state">No active player characters yet.</div>'}</div></div><div class="panel"><h3>Notifications</h3><div class="data-list" style="margin-top:10px">${(notesQ.data||[]).length?(notesQ.data||[]).map(n=>`<div class="data-row"><span><strong>${escapeHTML(n.title)}</strong><br><span class="muted">${escapeHTML(n.body)}</span></span>${n.read?'':'<span class="pill">NEW</span>'}</div>`).join(""):'<div class="empty-state">No notifications yet.</div>'}</div></div></div>${team?`<div style="margin-top:18px"><button class="primary-button" onclick="openTeamProfile('${team.id}')">Open ${escapeHTML(team.name)}</button> <button class="secondary-button" onclick="openTeamManagement('${team.id}')">Lines & Tactics</button> <button class="secondary-button" onclick="showTeamOperations('${team.id}')">Team Operations</button></div>`:''}`;}catch(e){console.error(e);c.innerHTML=`<div class="error">Dashboard error: ${escapeHTML(e.message)}</div>`;}}
+async function showStandings(){showSection("standingsSection");const c=document.getElementById("standingsContent");try{const {data:teams,error}=await supabaseClient.from("teams").select("id,name,abbreviation,conference,division,wins,losses,overtime_losses").order("wins",{ascending:false});if(error)throw error;const rows=(teams||[]).map(t=>({...t,points:(t.wins||0)*2+(t.overtime_losses||0)})).sort((a,b)=>b.points-a.points||b.wins-a.wins);c.innerHTML=`<div class="panel table-wrap"><table class="iv-table"><thead><tr><th>#</th><th>Team</th><th>Conf.</th><th>Div.</th><th>W</th><th>L</th><th>OTL</th><th>PTS</th></tr></thead><tbody>${rows.map((t,i)=>`<tr class="profile-link" onclick="openTeamProfile('${t.id}')"><td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${escapeHTML(t.conference||'—')}</td><td>${escapeHTML(t.division||'—')}</td><td>${t.wins||0}</td><td>${t.losses||0}</td><td>${t.overtime_losses||0}</td><td><strong>${t.points}</strong></td></tr>`).join("")}</tbody></table></div>`;}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
+async function showFreeAgents(){showSection("freeAgentsSection");const c=document.getElementById("freeAgentsContent");try{const [{data:players,error},{data:rosters}]=await Promise.all([supabaseClient.from("players").select("id,first_name,last_name,age,nationality,primary_position,secondary_position,overall,archetype,created_by,is_retired").eq("is_retired",false).order("overall",{ascending:false}),supabaseClient.from("rosters").select("player_id")]);if(error)throw error;const rostered=new Set((rosters||[]).map(r=>r.player_id));const fa=(players||[]).filter(p=>!rostered.has(p.id));c.innerHTML=fa.length?`<div class="app-grid">${fa.map(p=>`<div class="team-card"><div class="team-name profile-link" onclick="openPlayerProfile('${p.id}')">${getFlag(p.nationality)} ${escapeHTML(p.first_name)} ${escapeHTML(p.last_name)}</div><div class="team-info">${escapeHTML(p.primary_position)} · ${p.overall} OVR · Age ${p.age}<br>${escapeHTML(p.archetype||'')}</div><button class="secondary-button" style="margin-top:12px" onclick="startPlayerSigning('${p.id}')">Contract Offer</button></div>`).join("")}</div>`:'<div class="empty-state">No free agents available.</div>';}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
+async function showNews(){showSection("newsSection");const c=document.getElementById("newsContent");try{const {data,error}=await supabaseClient.from("news_posts").select("*").order("created_at",{ascending:false}).limit(50);if(error)throw error;c.innerHTML=(data||[]).length?`<div class="data-list">${data.map(n=>`<article class="panel"><div class="muted">${escapeHTML(n.outlet)} · ${escapeHTML(n.reporter)} · ${new Date(n.created_at).toLocaleString()}</div><h3 style="margin:8px 0">${escapeHTML(n.headline)}</h3><p class="muted" style="line-height:1.6">${escapeHTML(n.body)}</p></article>`).join("")}</div>`:'<div class="empty-state">The Iceverse Network has no stories yet. News will populate as the world begins producing games, signings, injuries and milestones.</div>';}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
+async function showMyProfile(){if(!currentUser){showLogin();return;}showSection("myProfileSection");const c=document.getElementById("myProfileContent");try{const [{data:p,error},{data:players},{data:team}]=await Promise.all([supabaseClient.from("profiles").select("*").eq("id",currentUser.id).single(),supabaseClient.from("players").select("id,first_name,last_name,overall,primary_position,is_retired,career_stage,reputation").eq("created_by",currentUser.id).order("created_at"),supabaseClient.from("teams").select("*").eq("owner_id",currentUser.id).maybeSingle()]);if(error)throw error;const active=(players||[]).filter(x=>!x.is_retired),retired=(players||[]).filter(x=>x.is_retired);c.innerHTML=`<div class="panel"><h2>${escapeHTML(p.username||'Manager')}</h2><div class="app-grid" style="margin-top:16px"><div><span class="muted">Icepoints</span><div class="metric-value gold">${p.icepoints||0}</div></div><div><span class="muted">Manager Reputation</span><div class="metric-value">${p.manager_reputation||0}</div></div><div><span class="muted">Manager Experience</span><div class="metric-value">${p.manager_experience||0}</div></div></div></div>${team?`<div class="panel" style="margin-top:16px"><h3>Owned Team</h3><div class="profile-link" onclick="openTeamProfile('${team.id}')" style="margin-top:10px;font-size:20px">${escapeHTML(team.city)} ${escapeHTML(team.name)}</div></div>`:''}<div class="panel" style="margin-top:16px"><h3>Active Players (${active.length}/${p.player_slots||3})</h3>${playerRows(active)}</div><div class="panel" style="margin-top:16px"><h3>Retired Players</h3>${playerRows(retired,true)}</div>`;}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
+function playerRows(arr,retired=false){return arr.length?`<div class="data-list">${arr.map(x=>`<div class="data-row profile-link" onclick="openPlayerProfile('${x.id}')"><span>${escapeHTML(x.first_name)} ${escapeHTML(x.last_name)} ${retired?'<span class="pill">Retired</span>':''}</span><span>${escapeHTML(x.primary_position)} · ${x.overall} OVR</span></div>`).join("")}</div>`:'<div class="empty-state">None</div>';}
+async function showTeamOperations(teamId){showSection("contractsSection");const c=document.getElementById("contractsContent");c.innerHTML='<div class="loading">Loading team operations...</div>';try{const [{data:team,error},{data:contracts},{data:staffContracts},{data:facilities}]=await Promise.all([supabaseClient.from("teams").select("*").eq("id",teamId).single(),supabaseClient.from("player_contracts").select("*,players(first_name,last_name,primary_position,overall)").eq("team_id",teamId).eq("status","active"),supabaseClient.from("staff_contracts").select("*,staff(first_name,last_name,primary_role,overall,specialty)").eq("team_id",teamId).eq("status","active"),supabaseClient.from("facilities").select("*").eq("team_id",teamId).order("facility_type")]);if(error)throw error;c.innerHTML=`<button class="secondary-button" onclick="openTeamProfile('${teamId}')">← Back to Team</button><div class="section-toolbar" style="margin-top:20px"><h2>${escapeHTML(team.name)} Operations</h2><span class="pill">Cash ${fmtMoney(team.money)}</span></div><div class="app-grid"><div class="panel"><h3>Player Contracts</h3>${(contracts||[]).length?contracts.map(x=>`<div class="data-row"><span>${escapeHTML(x.players?.first_name||'')} ${escapeHTML(x.players?.last_name||'')}</span><span>${fmtMoney(x.salary)} · ${x.seasons_remaining} yr</span></div>`).join(''):'<div class="empty-state">No active contracts recorded.</div>'}</div><div class="panel"><h3>Staff</h3>${(staffContracts||[]).length?staffContracts.map(x=>`<div class="data-row"><span>${escapeHTML(x.staff?.first_name||'')} ${escapeHTML(x.staff?.last_name||'')}<br><span class="muted">${escapeHTML(x.role)}</span></span><span>${x.staff?.overall||50} OVR</span></div>`).join(''):'<div class="empty-state">No staff signed yet.</div>'}</div></div><div class="panel" style="margin-top:16px"><h3>Facilities</h3><div class="app-grid" style="margin-top:12px">${(facilities||[]).map(f=>`<div class="metric-card"><strong>${escapeHTML(f.facility_type)}</strong><div class="metric-value">Lv. ${f.level}</div><div class="muted">Condition ${f.condition}% · Maintenance ${fmtMoney(f.maintenance_cost)}</div></div>`).join('')}</div></div>`;}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
+
+/* Contract offer flow: team manager -> player owner */
+async function startPlayerSigning(playerId){if(!currentUser){showLogin();return;}const team=await getMyTeam();if(!team){alert("Claim a team before making contract offers.");return;}const salary=Number(prompt("Annual salary offer?","100000"));if(!salary||salary<0)return;const seasons=Number(prompt("Contract length (1-7 seasons)?","1"));if(!Number.isInteger(seasons)||seasons<1||seasons>7){alert("Length must be 1-7 seasons.");return;}const role=prompt("Projected role (example: 1st Line, 2nd Pair, Starter)","")||null;const ntc=confirm("Include a no-trade clause?");const days=Number(prompt("Offer expires in how many days (1-7)?","3"));if(!Number.isInteger(days)||days<1||days>7){alert("Expiry must be 1-7 days.");return;}const expires=new Date(Date.now()+days*86400000).toISOString();const {error}=await supabaseClient.from("contract_offers").insert({player_id:playerId,team_id:team.id,salary,seasons,projected_role:role,no_trade_clause:ntc,expires_at:expires,status:"active"});if(error){alert("Offer failed: "+error.message);return;}alert("Contract offer sent.");}
 
 /* =========================================================
    START ICEVERSE
