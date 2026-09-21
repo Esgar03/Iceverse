@@ -1731,18 +1731,27 @@ function showLogin() {
 async function createAccount() {
 
   const username =
-    document.getElementById("authUsername").value.trim();
+    document.getElementById("authUsername")
+      .value
+      .trim();
 
   const email =
-    document.getElementById("authEmail").value.trim();
+    document.getElementById("authEmail")
+      .value
+      .trim();
 
   const password =
-    document.getElementById("authPassword").value;
+    document.getElementById("authPassword")
+      .value;
 
   const message =
     document.getElementById("authMessage");
 
-  if (!username || !email || !password) {
+  if (
+    !username ||
+    !email ||
+    !password
+  ) {
 
     message.textContent =
       "Please enter a username, email, and password.";
@@ -1758,13 +1767,25 @@ async function createAccount() {
     error
   } =
     await supabaseClient.auth.signUp({
+
       email,
-      password
+
+      password,
+
+      options: {
+        data: {
+          username
+        }
+      }
+
     });
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "Account creation error:",
+      error
+    );
 
     message.textContent =
       error.message;
@@ -1782,29 +1803,6 @@ async function createAccount() {
 
   currentUser =
     data.user;
-
-  const {
-    error: profileError
-  } =
-    await supabaseClient
-      .from("profiles")
-      .upsert({
-        id: data.user.id,
-        username
-      });
-
-  if (profileError) {
-
-    console.error(
-      "Profile error:",
-      profileError
-    );
-
-    message.textContent =
-      "Account created, but username could not be saved.";
-
-    return;
-  }
 
   updateAuthNavigation();
 
