@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Iceverse</title>
+  <!-- Iceverse Foundation Build: post-design rewrite -->
 
   <style>
     * {
@@ -1275,6 +1276,17 @@ const ATTRIBUTE_GROUPS = {
 };
 
 
+const GOALIE_ATTRIBUTE_GROUPS = {
+  "Goalie": [
+    "reflexes", "goalie_positioning", "glove", "blocker",
+    "rebound_control", "athleticism", "puck_handling",
+    "goalie_iq", "recovery", "goalie_endurance", "goalie_discipline"
+  ],
+  "Physical": ["strength", "durability", "balance"],
+  "Mental": ["hockey_iq", "clutch", "composure"]
+};
+
+
 const ATTRIBUTE_LABELS = {
 
   speed: "Speed",
@@ -1324,7 +1336,9 @@ const ATTRIBUTE_LABELS = {
   athleticism: "Athleticism",
   puck_handling: "Puck Handling",
   goalie_iq: "Goalie IQ",
-  goalie_endurance: "Endurance"
+  goalie_endurance: "Endurance",
+  recovery: "Recovery",
+  goalie_discipline: "Discipline"
 };
 
 
@@ -1406,7 +1420,7 @@ const ARCHETYPES = {
       "A balanced forward who contributes effectively at both ends of the ice."
   },
 
-  "dangler": {
+  "Dangler": {
     displayName: "Dangler",
     positions: ["C", "LW", "RW"],
     preferred: [
@@ -6118,10 +6132,10 @@ function getBaseAttribute(
     value += 5;
   }
 
-  if (
-    position === "G"
-  ) {
-    return 60;
+  if (position === "G") {
+    if (archetypeData.preferred.includes(attribute)) value += 3;
+    if (archetypeData.weaker.includes(attribute)) value -= 2;
+    return Math.max(56, Math.min(70, value));
   }
 
   return Math.max(
@@ -6291,7 +6305,12 @@ function updateCreationBuild() {
 
   const attributes = {};
 
-  Object.values(ATTRIBUTE_GROUPS)
+  const creationGroups =
+    position === "G"
+      ? GOALIE_ATTRIBUTE_GROUPS
+      : ATTRIBUTE_GROUPS;
+
+  Object.values(creationGroups)
     .flat()
     .forEach(attribute => {
 
@@ -6343,7 +6362,12 @@ function renderAttributeEditor() {
 
   container.innerHTML = "";
 
-  Object.entries(ATTRIBUTE_GROUPS)
+  const editorGroups =
+    creationBuild.position === "G"
+      ? GOALIE_ATTRIBUTE_GROUPS
+      : ATTRIBUTE_GROUPS;
+
+  Object.entries(editorGroups)
     .forEach(([group, attributes]) => {
 
       const groupDiv =
@@ -6678,7 +6702,16 @@ async function createPlayer() {
     weight_lbs:
       creationBuild.weight,
 
-    handedness
+    handedness,
+
+    skating_stars: calculateCategoryRating(creationBuild.attributes, "Skating", position) || 1,
+    shooting_stars: position === "G" ? 1 : (calculateCategoryRating(creationBuild.attributes, "Shooting", position) || 1),
+    puck_skills_stars: calculateCategoryRating(creationBuild.attributes, "Puck Skills", position) || 1,
+    offense_stars: position === "G" ? 1 : (calculateCategoryRating(creationBuild.attributes, "Offensive", position) || 1),
+    defense_stars: calculateCategoryRating(creationBuild.attributes, "Defense", position) || 1,
+    physical_stars: calculateCategoryRating(creationBuild.attributes, "Physical", position) || 1,
+    mental_stars: calculateCategoryRating(creationBuild.attributes, "Mental", position) || 1,
+    goalie_stars: position === "G" ? (calculateCategoryRating(creationBuild.attributes, "Goalie", position) || 1) : 1
   };
 
   try {
@@ -6795,10 +6828,19 @@ async function createPlayer() {
       discipline:
         creationBuild.attributes.discipline,
 
-      composure:
-        creationBuild.attributes.composure,
+      composure: creationBuild.attributes.composure ?? 50,
 
-  
+      reflexes: creationBuild.attributes.reflexes ?? 50,
+      goalie_positioning: creationBuild.attributes.goalie_positioning ?? 50,
+      glove: creationBuild.attributes.glove ?? 50,
+      blocker: creationBuild.attributes.blocker ?? 50,
+      rebound_control: creationBuild.attributes.rebound_control ?? 50,
+      athleticism: creationBuild.attributes.athleticism ?? 50,
+      puck_handling: creationBuild.attributes.puck_handling ?? 50,
+      goalie_iq: creationBuild.attributes.goalie_iq ?? 50,
+      recovery: creationBuild.attributes.recovery ?? 50,
+      goalie_endurance: creationBuild.attributes.goalie_endurance ?? 50,
+      goalie_discipline: creationBuild.attributes.goalie_discipline ?? 50
     };
 
     const {
@@ -7111,6 +7153,21 @@ async function openPlayerProfile(playerId) {
 
 
     /*
+      Load exact attributes only when Supabase authorizes this user
+      (permanent player owner or current team manager).
+    */
+    let privateAttributes = null;
+    if (currentUser) {
+      const { data: privateRows, error: privateError } =
+        await supabaseClient.rpc("get_private_player_attributes", {
+          target_player_id: player.id
+        });
+      if (!privateError && privateRows && privateRows.length) {
+        privateAttributes = privateRows[0];
+      }
+    }
+
+    /*
       Build player profile.
     */
 
@@ -7226,14 +7283,22 @@ async function openPlayerProfile(playerId) {
           "
         >
 
-          <h3>
-            Skills
-          </h3>
+          <h3>Skills</h3>
 
-          <p>
-            Detailed attributes are visible to the
-            player owner and appropriate team staff.
-          </p>
+          <div style="margin-top:14px;">
+            ${renderStoredPublicStars(player)}
+          </div>
+
+          ${privateAttributes ? `
+            <div style="margin-top:24px;">
+              <h3 style="margin-bottom:12px;">Private Exact Attributes</h3>
+              ${renderExactAttributesForPosition(privateAttributes, player.primary_position)}
+            </div>
+          ` : `
+            <p class="privacy-note" style="margin-top:14px;">
+              Exact attributes are private to the permanent player owner and the manager of the player's current team.
+            </p>
+          `}
 
         </div>
 
@@ -7901,6 +7966,18 @@ async function openUserProfile(userId) {
    PUBLIC STAR RATINGS
    ========================================================= */
 
+function renderStoredPublicStars(player) {
+  const rows = player.primary_position === "G"
+    ? [["Goalie", player.goalie_stars], ["Physical", player.physical_stars], ["Mental", player.mental_stars]]
+    : [["Skating", player.skating_stars], ["Shooting", player.shooting_stars], ["Puck Skills", player.puck_skills_stars], ["Offense", player.offense_stars], ["Defense", player.defense_stars], ["Physical", player.physical_stars], ["Mental", player.mental_stars]];
+
+  return rows.map(([label, rating]) => `
+    <div style="display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #294766;">
+      <strong>${escapeHTML(label)}</strong>
+      <span class="star-rating">${renderStars(Number(rating) || 1)}</span>
+    </div>`).join("");
+}
+
 function calculateCategoryRating(
   attributes,
   category,
@@ -8051,6 +8128,19 @@ function renderPublicSkillRatings(
 /* =========================================================
    EXACT ATTRIBUTES
    ========================================================= */
+
+function renderExactAttributesForPosition(attributes, position) {
+  const groups = position === "G" ? GOALIE_ATTRIBUTE_GROUPS : ATTRIBUTE_GROUPS;
+  let html = "";
+  Object.entries(groups).forEach(([group, keys]) => {
+    html += `<div class="attribute-group"><h4>${escapeHTML(group)}</h4>`;
+    keys.forEach(key => {
+      html += `<div class="attribute-row"><div class="attribute-name">${escapeHTML(ATTRIBUTE_LABELS[key] || key)}</div><div class="attribute-value">${attributes[key] ?? "—"}</div><div></div></div>`;
+    });
+    html += `</div>`;
+  });
+  return html;
+}
 
 function renderExactAttributes(attributes) {
 
