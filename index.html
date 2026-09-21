@@ -531,9 +531,7 @@ function displayPlayers(players) {
   loadTeams();
   
 function openPlayerProfile(playerId) {
-
   const players = window.iceversePlayers || [];
-
   const player = players.find(
     p => p.id === playerId
   );
@@ -549,8 +547,6 @@ function openPlayerProfile(playerId) {
   const profileSection =
     document.getElementById("playerProfileSection");
 
-  profileSection.style.display = "block";
-
   const profile =
     document.getElementById("playerProfile");
 
@@ -561,38 +557,56 @@ function openPlayerProfile(playerId) {
   const teamAbbreviation = team?.abbreviation ?? "";
 
   profile.innerHTML = `
-    <div style="
-      max-width: 900px;
-      margin: 0 auto;
-    ">
+    <div style="max-width: 900px; margin: 0 auto;">
 
       <div style="
         background: linear-gradient(135deg, #102a43, #071525);
-        padding: 30px;
+        border: 1px solid #294766;
         border-radius: 18px;
+        padding: 30px;
         margin-bottom: 30px;
-        border: 1px solid #244a6b;
       ">
 
-        <h1 style="
-          margin: 0 0 10px 0;
-          font-size: 38px;
-        ">
-          ${escapeHTML(player.first_name)}
-          ${escapeHTML(player.last_name)}
-        </h1>
-
         <div style="
-          font-size: 20px;
-          color: #9fc5e8;
-          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 20px;
+          flex-wrap: wrap;
         ">
-          ${escapeHTML(player.primary_position)}
-          • Age ${player.age}
-          • Overall ${player.overall}
+
+          <div>
+            <h1 style="
+              margin: 0 0 10px 0;
+              font-size: 36px;
+            ">
+              ${escapeHTML(player.first_name)}
+              ${escapeHTML(player.last_name)}
+            </h1>
+
+            <div style="
+              color: #9fb3c8;
+              font-size: 18px;
+            ">
+              ${escapeHTML(player.primary_position)}
+              • Age ${player.age}
+              • Overall ${player.overall}
+            </div>
+          </div>
+
+          <div style="
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffffff;
+          ">
+            ${roster?.jersey_number
+              ? "#" + roster.jersey_number
+              : "—"}
+          </div>
+
         </div>
 
-        <div class="team-info">
+        <div class="team-info" style="margin-top: 25px;">
           <strong>Team:</strong>
           ${escapeHTML(teamName)}
           ${teamAbbreviation
@@ -600,100 +614,135 @@ function openPlayerProfile(playerId) {
             : ""}
         </div>
 
-        <div class="team-info">
+        <div class="team-info" style="margin-top: 10px;">
           <strong>Jersey Number:</strong>
-          Not assigned yet
+          ${roster?.jersey_number
+            ? "#" + roster.jersey_number
+            : "Not assigned"}
         </div>
+
+        ${
+          !roster
+            ? `
+              <button
+                onclick="startPlayerSigning('${player.id}')"
+                style="
+                  margin-top: 25px;
+                  padding: 14px 24px;
+                  border: none;
+                  border-radius: 10px;
+                  background: #2f80ed;
+                  color: white;
+                  font-size: 16px;
+                  font-weight: bold;
+                  cursor: pointer;
+                "
+              >
+                Sign Player
+              </button>
+            `
+            : ""
+        }
 
       </div>
 
       <h2>Player Bio</h2>
 
       <div style="
-        background: #0d2035;
-        padding: 20px;
+        background: #102a43;
         border-radius: 12px;
-        margin-bottom: 20px;
+        padding: 20px;
+        margin-bottom: 30px;
       ">
-
-        <div class="team-info">
+        <p>
           <strong>Position:</strong>
           ${escapeHTML(player.primary_position)}
-        </div>
+        </p>
 
-        <div class="team-info">
+        <p>
           <strong>Age:</strong>
           ${player.age}
-        </div>
+        </p>
 
-        <div class="team-info">
+        <p>
           <strong>Overall:</strong>
           ${player.overall}
-        </div>
+        </p>
 
-        <div class="team-info">
+        <p>
           <strong>Archetype:</strong>
           ${escapeHTML(player.archetype)}
-        </div>
+        </p>
 
-        <div class="team-info">
+        <p>
           <strong>Personality:</strong>
           ${escapeHTML(player.personality)}
-        </div>
-
+        </p>
       </div>
 
       <h2>Attributes</h2>
 
       <div style="
-        background: #0d2035;
-        padding: 20px;
+        background: #102a43;
         border-radius: 12px;
-        margin-bottom: 20px;
+        padding: 20px;
       ">
 
-        <h3>Skating</h3>
+        <h3>SKATING</h3>
+        <p>
+          Speed:
+          ${player.player_attributes?.[0]?.speed ?? "—"}
+        </p>
 
-        <div class="team-info">
-          <strong>Speed:</strong>
-          ${player.player_attributes?.[0]?.speed ?? "N/A"}
-        </div>
+        <p>
+          Acceleration:
+          ${player.player_attributes?.[0]?.acceleration ?? "—"}
+        </p>
 
-        <div class="team-info">
-          <strong>Acceleration:</strong>
-          ${player.player_attributes?.[0]?.acceleration ?? "N/A"}
-        </div>
+        <p>
+          Agility:
+          ${player.player_attributes?.[0]?.agility ?? "—"}
+        </p>
 
-        <div class="team-info">
-          <strong>Agility:</strong>
-          ${player.player_attributes?.[0]?.agility ?? "N/A"}
-        </div>
+        <h3>OFFENSE</h3>
+        <p>
+          Shooting:
+          ${player.player_attributes?.[0]?.shooting ?? "—"}
+        </p>
 
-        <h3>Offense</h3>
+        <p>
+          Passing:
+          ${player.player_attributes?.[0]?.passing ?? "—"}
+        </p>
 
-        <div class="team-info">
-          <strong>Shooting:</strong>
-          ${player.player_attributes?.[0]?.shooting ?? "N/A"}
-        </div>
-
-        <div class="team-info">
-          <strong>Passing:</strong>
-          ${player.player_attributes?.[0]?.passing ?? "N/A"}
-        </div>
-
-        <div class="team-info">
-          <strong>Puck Control:</strong>
-          ${player.player_attributes?.[0]?.puck_control ?? "N/A"}
-        </div>
+        <p>
+          Puck Control:
+          ${player.player_attributes?.[0]?.puck_control ?? "—"}
+        </p>
 
       </div>
 
     </div>
   `;
 
-  profileSection.scrollIntoView({
-    behavior: "smooth"
-  });
+  profileSection.scrollIntoView({ behavior: "smooth" });
+}
+
+
+function startPlayerSigning(playerId) {
+  const players = window.iceversePlayers || [];
+
+  const player = players.find(
+    p => p.id === playerId
+  );
+
+  if (!player) {
+    return;
+  }
+
+  alert(
+    `Contract signing for ${player.first_name} ${player.last_name} will be added next.`
+  );
 }
   
 </script>
