@@ -419,63 +419,15 @@
   </div>
 
   <nav>
-
-    <button onclick="showHome()">
-      Home
-    </button>
-
-    <button onclick="showLeague()">
-      League
-    </button>
-
-    <button onclick="showTeams()">
-      Teams
-    </button>
-
-    <button onclick="showPlayers()">
-      Players
-    </button>
-
-    <button
-      id="createPlayerNavButton"
-      onclick="showCreatePlayer()"
-      style="display: none;"
-    >
-      Create Player
-    </button>
-
-
-    <button id="dashboardNavButton" onclick="showDashboard()" style="display:none;">Dashboard</button>
-    <button onclick="showStandings()">Standings</button>
-    <button onclick="showFreeAgents()">Free Agents</button>
-    <button onclick="showNews()">News</button>
-    <button id="myProfileNavButton" onclick="showMyProfile()" style="display:none;">My Profile</button>
-    <button onclick="showSchedule()">Schedule</button>
+    <button onclick="showDashboard()">Dashboard</button>
+    <button onclick="showLeagueHub()">League</button>
+    <button onclick="showPlayersHub()">Players</button>
+    <button id="teamNavButton" onclick="showMyTeamOrTeams()">Team</button>
     <button onclick="showWorldHub()">World</button>
     <button id="adminNavButton" onclick="showAdmin()" style="display:none;">Admin</button>
-
-    <button
-      id="loginButton"
-      onclick="showLogin()"
-    >
-      Log In
-    </button>
-
-    <button
-      id="signupButton"
-      onclick="showSignup()"
-    >
-      Create Account
-    </button>
-
-    <button
-      id="logoutButton"
-      onclick="logoutUser()"
-      style="display: none;"
-    >
-      Log Out
-    </button>
-
+    <button id="loginButton" onclick="showLogin()">Log In</button>
+    <button id="signupButton" onclick="showSignup()">Create Account</button>
+    <button id="logoutButton" onclick="logoutUser()" style="display:none;">Log Out</button>
   </nav>
 
 </header>
@@ -1205,6 +1157,12 @@
 <section id="scheduleSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Schedule & Games</h2><span class="pill">Live Iceverse</span></div><div id="scheduleContent"></div></section>
 <section id="worldSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse World</h2><span class="pill">Career · Competition · Legacy</span></div><div id="worldContent"></div></section>
 
+
+
+<section id="leagueHubSection" class="section" style="display:none;"><div id="leagueHubContent"></div></section>
+<section id="playersHubSection" class="section" style="display:none;"><div id="playersHubContent"></div></section>
+<section id="marketplaceSection" class="section" style="display:none;"><div id="marketplaceContent"></div></section>
+<section id="testSimSection" class="section" style="display:none;"><div id="testSimContent"></div></section>
 
 <section id="adminSection" class="section" style="display:none;">
   <div class="section-toolbar"><h2>Iceverse Admin</h2><span class="pill">Owner Only</span></div>
@@ -7906,7 +7864,7 @@ async function startPlayerSigning(playerId) {
 function showSection(id){hideAllMainSections();const el=document.getElementById(id);if(el){el.style.display="block";window.scrollTo({top:0,behavior:"smooth"});}}
 function fmtMoney(v){return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(v||0));}
 async function getMyTeam(){if(!currentUser)return null;const {data}=await supabaseClient.from("teams").select("*").eq("owner_id",currentUser.id).maybeSingle();return data||null;}
-async function showDashboard(){if(!currentUser){showLogin();return;}showSection("dashboardSection");const c=document.getElementById("dashboardContent");c.innerHTML='<div class="loading">Loading your Iceverse...</div>';try{const [profileQ,team,playersQ,offersQ,notesQ]=await Promise.all([supabaseClient.from("profiles").select("username,icepoints,player_slots,manager_reputation,manager_experience").eq("id",currentUser.id).single(),getMyTeam(),supabaseClient.from("players").select("id,first_name,last_name,overall,primary_position,is_retired").eq("created_by",currentUser.id),supabaseClient.from("contract_offers").select("id,status").eq("status","active"),supabaseClient.from("notifications").select("id,title,body,read,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(5)]);const p=profileQ.data||{};const owned=playersQ.data||[];const active=owned.filter(x=>!x.is_retired);c.innerHTML=`<div class="app-grid"><div class="metric-card"><div class="muted">Manager</div><div class="metric-value">${escapeHTML(p.username||"Manager")}</div></div><div class="metric-card"><div class="muted">Icepoints</div><div class="metric-value gold">${p.icepoints??0}</div></div><div class="metric-card"><div class="muted">Player Slots</div><div class="metric-value">${active.length}/${p.player_slots??5}</div></div><div class="metric-card"><div class="muted">Team</div><div class="metric-value" style="font-size:20px">${team?escapeHTML(team.name):"Unclaimed"}</div></div></div><div class="app-grid" style="margin-top:18px"><div class="panel"><h3>Your Players</h3><div class="data-list" style="margin-top:10px">${active.length?active.map(x=>`<div class="data-row profile-link" onclick="openPlayerProfile('${x.id}')"><span>${escapeHTML(x.first_name)} ${escapeHTML(x.last_name)}</span><span>${escapeHTML(x.primary_position)} · ${x.overall} OVR</span></div>`).join(""):'<div class="empty-state">No active player characters yet.</div>'}</div></div><div class="panel"><h3>Notifications</h3><div class="data-list" style="margin-top:10px">${(notesQ.data||[]).length?(notesQ.data||[]).map(n=>`<div class="data-row"><span><strong>${escapeHTML(n.title)}</strong><br><span class="muted">${escapeHTML(n.body)}</span></span>${n.read?'':'<span class="pill">NEW</span>'}</div>`).join(""):'<div class="empty-state">No notifications yet.</div>'}</div></div></div>${team?`<div style="margin-top:18px"><button class="primary-button" onclick="openTeamProfile('${team.id}')">Open ${escapeHTML(team.name)}</button> <button class="secondary-button" onclick="openTeamManagement('${team.id}')">Lines & Tactics</button> <button class="secondary-button" onclick="showTeamOperations('${team.id}')">Team Operations</button></div>`:''}`;}catch(e){console.error(e);c.innerHTML=`<div class="error">Dashboard error: ${escapeHTML(e.message)}</div>`;}}
+async function showDashboard(){if(!currentUser){showLogin();return;}showSection("dashboardSection");const c=document.getElementById("dashboardContent");c.innerHTML='<div class="loading">Loading your Iceverse...</div>';try{const [profileQ,team,playersQ,offersQ,notesQ]=await Promise.all([supabaseClient.from("profiles").select("username,icepoints,player_slots,manager_reputation,manager_experience").eq("id",currentUser.id).single(),getMyTeam(),supabaseClient.from("players").select("id,first_name,last_name,overall,primary_position,is_retired").eq("created_by",currentUser.id),supabaseClient.from("contract_offers").select("id,status").eq("status","active"),supabaseClient.from("notifications").select("id,title,body,read,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(5)]);const p=profileQ.data||{};const owned=playersQ.data||[];const active=owned.filter(x=>!x.is_retired);c.innerHTML=`<div class="app-grid"><div class="metric-card"><div class="muted">Manager</div><div class="metric-value">${escapeHTML(p.username||"Manager")}</div></div><div class="metric-card"><div class="muted">Icepoints</div><div class="metric-value gold">${p.icepoints??0}</div></div><div class="metric-card"><div class="muted">Player Slots</div><div class="metric-value">${active.length}/${p.player_slots??5}</div></div><div class="metric-card"><div class="muted">Team</div><div class="metric-value" style="font-size:20px">${team?escapeHTML(team.name):"Unclaimed"}</div></div></div><div class="app-grid" style="margin-top:18px"><div class="panel"><h3>Your Players</h3><div class="data-list" style="margin-top:10px">${active.length?active.map(x=>`<div class="data-row profile-link" onclick="openPlayerProfile('${x.id}')"><span>${escapeHTML(x.first_name)} ${escapeHTML(x.last_name)}</span><span>${escapeHTML(x.primary_position)} · ${x.overall} OVR</span></div>`).join(""):'<div class="empty-state">No active player characters yet.</div>'}</div></div><div class="panel"><h3>Notifications</h3><div class="data-list" style="margin-top:10px">${(notesQ.data||[]).length?(notesQ.data||[]).map(n=>`<div class="data-row"><span><strong>${escapeHTML(n.title)}</strong><br><span class="muted">${escapeHTML(n.body)}</span></span>${n.read?'':'<span class="pill">NEW</span>'}</div>`).join(""):'<div class="empty-state">No notifications yet.</div>'}</div></div></div>${team?`<div style="margin-top:18px"><button class="primary-button" onclick="openTeamProfile('${team.id}')">Open ${escapeHTML(team.name)}</button> <button class="secondary-button" onclick="openTeamManagement('${team.id}')">Lines & Tactics</button> <button class="secondary-button" onclick="showTeamOperations('${team.id}')">Team Operations</button> <button class="secondary-button" onclick="showMarketplace()">Icepoints Shop</button></div>`:`<div style="margin-top:18px"><button class="secondary-button" onclick="showMarketplace()">Icepoints Shop</button></div>`}`;}catch(e){console.error(e);c.innerHTML=`<div class="error">Dashboard error: ${escapeHTML(e.message)}</div>`;}}
 async function showStandings(){showSection("standingsSection");const c=document.getElementById("standingsContent");try{const {data:teams,error}=await supabaseClient.from("teams").select("id,name,abbreviation,conference,division,wins,losses,overtime_losses").order("wins",{ascending:false});if(error)throw error;const rows=(teams||[]).map(t=>({...t,points:(t.wins||0)*2+(t.overtime_losses||0)})).sort((a,b)=>b.points-a.points||b.wins-a.wins);c.innerHTML=`<div class="panel table-wrap"><table class="iv-table"><thead><tr><th>#</th><th>Team</th><th>Conf.</th><th>Div.</th><th>W</th><th>L</th><th>OTL</th><th>PTS</th></tr></thead><tbody>${rows.map((t,i)=>`<tr class="profile-link" onclick="openTeamProfile('${t.id}')"><td>${i+1}</td><td>${escapeHTML(t.name)}</td><td>${escapeHTML(t.conference||'—')}</td><td>${escapeHTML(t.division||'—')}</td><td>${t.wins||0}</td><td>${t.losses||0}</td><td>${t.overtime_losses||0}</td><td><strong>${t.points}</strong></td></tr>`).join("")}</tbody></table></div>`;}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
 async function showFreeAgents(){showSection("freeAgentsSection");const c=document.getElementById("freeAgentsContent");try{const [{data:players,error},{data:rosters}]=await Promise.all([supabaseClient.from("players").select("id,first_name,last_name,age,nationality,primary_position,secondary_position,overall,archetype,created_by,is_retired").eq("is_retired",false).order("overall",{ascending:false}),supabaseClient.from("rosters").select("player_id")]);if(error)throw error;const rostered=new Set((rosters||[]).map(r=>r.player_id));const fa=(players||[]).filter(p=>!rostered.has(p.id));c.innerHTML=fa.length?`<div class="app-grid">${fa.map(p=>`<div class="team-card"><div class="team-name profile-link" onclick="openPlayerProfile('${p.id}')">${getFlag(p.nationality)} ${escapeHTML(p.first_name)} ${escapeHTML(p.last_name)}</div><div class="team-info">${escapeHTML(p.primary_position)} · ${p.overall} OVR · Age ${p.age}<br>${escapeHTML(p.archetype||'')}</div><button class="secondary-button" style="margin-top:12px" onclick="startPlayerSigning('${p.id}')">Contract Offer</button></div>`).join("")}</div>`:'<div class="empty-state">No free agents available.</div>';}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
 async function showNews(){showSection("newsSection");const c=document.getElementById("newsContent");try{const {data,error}=await supabaseClient.from("news_posts").select("*").order("created_at",{ascending:false}).limit(50);if(error)throw error;c.innerHTML=(data||[]).length?`<div class="data-list">${data.map(n=>`<article class="panel"><div class="muted">${escapeHTML(n.outlet)} · ${escapeHTML(n.reporter)} · ${new Date(n.created_at).toLocaleString()}</div><h3 style="margin:8px 0">${escapeHTML(n.headline)}</h3><p class="muted" style="line-height:1.6">${escapeHTML(n.body)}</p></article>`).join("")}</div>`:'<div class="empty-state">The Iceverse Network has no stories yet. News will populate as the world begins producing games, signings, injuries and milestones.</div>';}catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}}
@@ -7950,6 +7908,141 @@ async function showWorldPanel(kind){const p=document.getElementById('worldPanel'
 }
 
 
+
+async function openTeamCustomize(teamId){
+  if(!currentUser){showLogin();return;}
+  hideAllMainSections();
+  const section=document.getElementById("teamCustomizeSection");
+  const c=document.getElementById("teamCustomize");
+  section.style.display="block";
+  c.innerHTML='<div class="loading">Loading team customization...</div>';
+  try{
+    const {data:team,error}=await supabaseClient.from("teams").select("*").eq("id",teamId).single();
+    if(error)throw error;
+    if(team.owner_id!==currentUser.id)throw new Error("Only this team's manager can customize it.");
+    c.innerHTML=`<div class="form-card">
+      <button class="secondary-button" onclick="openTeamProfile('${team.id}')">← Back to Team</button>
+      <h2 style="margin-top:20px">Customize ${escapeHTML(team.name)}</h2>
+      <p class="muted">Update the franchise identity and jersey colors. Previous identities can be preserved in franchise history later.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px">
+        <label>City<input id="customCity" value="${escapeHTML(team.city||'')}"></label>
+        <label>Team Name<input id="customName" value="${escapeHTML(team.name||'')}"></label>
+        <label>Abbreviation<input id="customAbbr" maxlength="4" value="${escapeHTML(team.abbreviation||'')}"></label>
+        <label>Primary Color<input id="customPrimary" type="color" value="${escapeHTML(team.primary_color||'#1D4ED8')}"></label>
+        <label>Secondary Color<input id="customSecondary" type="color" value="${escapeHTML(team.secondary_color||'#FFFFFF')}"></label>
+        <label>Tertiary Color<input id="customTertiary" type="color" value="${escapeHTML(team.tertiary_color||'#111827')}"></label>
+      </div>
+      <div id="customJerseyPreview" style="margin:28px auto;max-width:240px">${getTeamJerseyHTML(team,"large")}</div>
+      <button class="primary-button" onclick="saveTeamCustomization('${team.id}')">Save Team</button>
+      <div id="customTeamMessage" class="muted" style="margin-top:10px"></div>
+    </div>`;
+    ["customPrimary","customSecondary","customTertiary"].forEach(id=>document.getElementById(id)?.addEventListener("input",()=>{
+      document.getElementById("customJerseyPreview").innerHTML=getTeamJerseyHTML({
+        primary_color:document.getElementById("customPrimary").value,
+        secondary_color:document.getElementById("customSecondary").value,
+        tertiary_color:document.getElementById("customTertiary").value
+      },"large");
+    }));
+  }catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}
+}
+async function saveTeamCustomization(teamId){
+  const payload={
+    city:document.getElementById("customCity").value.trim(),
+    name:document.getElementById("customName").value.trim(),
+    abbreviation:document.getElementById("customAbbr").value.trim().toUpperCase(),
+    primary_color:document.getElementById("customPrimary").value,
+    secondary_color:document.getElementById("customSecondary").value,
+    tertiary_color:document.getElementById("customTertiary").value
+  };
+  const m=document.getElementById("customTeamMessage");
+  if(!payload.city||!payload.name||!payload.abbreviation){m.textContent="City, team name and abbreviation are required.";return;}
+  m.textContent="Saving...";
+  const {error}=await supabaseClient.from("teams").update(payload).eq("id",teamId).eq("owner_id",currentUser.id);
+  if(error){m.textContent="Save failed: "+error.message;return;}
+  m.textContent="Saved!";
+  setTimeout(()=>openTeamProfile(teamId),400);
+}
+
+async function showLeagueHub(){
+  showSection("leagueHubSection");
+  const c=document.getElementById("leagueHubContent");
+  const {data:leagues}=await supabaseClient.from("leagues").select("*").eq("active",true).order("level");
+  const league=(leagues||[])[0];
+  c.innerHTML=`<div class="section-toolbar"><div><h2>${escapeHTML(league?.name||"Iceverse Hockey League")}</h2><div class="muted">${escapeHTML(league?.abbreviation||"IHL")} · Current league</div></div></div>
+  <div class="app-grid">
+    <button class="panel profile-link" onclick="showStandings()"><h3>Standings</h3><p class="muted">Records, points and division races.</p></button>
+    <button class="panel profile-link" onclick="showSchedule()"><h3>Daily Schedule</h3><p class="muted">Today's games and the upcoming calendar.</p></button>
+    <button class="panel profile-link" onclick="showNews()"><h3>League News</h3><p class="muted">Luke Davenport and Iceverse Network stories.</p></button>
+  </div>`;
+}
+function showPlayersHub(){
+  showSection("playersHubSection");
+  document.getElementById("playersHubContent").innerHTML=`<div class="section-toolbar"><h2>Players</h2></div><div class="app-grid">
+    <button class="panel profile-link" onclick="showPlayers()"><h3>Player Directory</h3><p class="muted">Browse every player in Iceverse.</p></button>
+    <button class="panel profile-link" onclick="showFreeAgents()"><h3>Free Agency</h3><p class="muted">Find unsigned players and make contract offers.</p></button>
+    <button class="panel profile-link" onclick="showCreatePlayer()"><h3>Create Player</h3><p class="muted">Use an available creation slot and 1,000 Icepoints.</p></button>
+    <button class="panel profile-link" onclick="showMarketplace()"><h3>Icepoints Shop</h3><p class="muted">Purchase player slots and Superstar slots.</p></button>
+  </div>`;
+}
+async function showMyTeamOrTeams(){
+  if(currentUser){
+    const team=await getMyTeam();
+    if(team){openTeamProfile(team.id);return;}
+  }
+  showTeams();
+}
+async function showMarketplace(){
+  if(!currentUser){showLogin();return;}
+  showSection("marketplaceSection");
+  const c=document.getElementById("marketplaceContent");
+  const {data:p,error}=await supabaseClient.from("profiles").select("icepoints,player_slots,superstar_slots").eq("id",currentUser.id).single();
+  if(error){c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return;}
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Icepoints Shop</h2><div class="muted">Permanent account upgrades purchased with earned Icepoints.</div></div><span class="pill">${p.icepoints||0} IP</span></div>
+  <div class="app-grid">
+    <div class="panel"><h3>+1 Player Creation Slot</h3><div class="metric-value gold">2,500 IP</div><p class="muted">Current slots: ${p.player_slots||5}</p><button class="primary-button" onclick="buyAccountUpgrade('player_slot')">Purchase</button></div>
+    <div class="panel"><h3>+1 Superstar Slot</h3><div class="metric-value gold">5,000 IP</div><p class="muted">Current Superstar slots: ${p.superstar_slots||0}</p><p class="muted">Reserved for future elite-player creation rules.</p><button class="primary-button" onclick="buyAccountUpgrade('superstar_slot')">Purchase</button></div>
+  </div>`;
+}
+async function buyAccountUpgrade(kind){
+  const {error}=await supabaseClient.rpc("purchase_account_upgrade",{p_kind:kind});
+  if(error){alert("Purchase failed: "+error.message);return;}
+  await showMarketplace();
+}
+
+async function showTestSimulator(){
+  if(!currentUser||currentUser.id!==ICEVERSE_ADMIN_ID){alert("Admin only.");return;}
+  showSection("testSimSection");
+  const c=document.getElementById("testSimContent");
+  const {data:teams}=await supabaseClient.from("teams").select("id,name,city").order("name");
+  const opts=(teams||[]).map(t=>`<option value="${t.id}">${escapeHTML(t.city||'')} ${escapeHTML(t.name)}</option>`).join("");
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Simulation Lab</h2><div class="muted">Exhibition only. Nothing is written to standings, stats, records, rewards or player history.</div></div><span class="pill">ADMIN TEST</span></div>
+  <div class="panel"><div style="display:grid;grid-template-columns:1fr 1fr;gap:15px"><label>Home Team<select id="simHome">${opts}</select></label><label>Away Team<select id="simAway">${opts}</select></label></div><button class="primary-button" style="margin-top:15px" onclick="runLiveTestSim()">Live Sim Exhibition</button></div>
+  <div id="simBoard" class="panel" style="margin-top:16px"><div class="empty-state">Choose two teams to begin.</div></div>`;
+}
+async function runLiveTestSim(){
+  const home=document.getElementById("simHome"),away=document.getElementById("simAway"),board=document.getElementById("simBoard");
+  if(home.value===away.value){alert("Choose two different teams.");return;}
+  const hn=home.options[home.selectedIndex].text, an=away.options[away.selectedIndex].text;
+  board.innerHTML=`<h3>${escapeHTML(an)} @ ${escapeHTML(hn)}</h3><div id="simScore" class="metric-value" style="margin:14px 0">0 - 0</div><div id="simClock" class="pill">1st · 20:00</div><div id="simFeed" class="data-list" style="margin-top:15px"></div>`;
+  let hs=0,as=0;
+  const feed=document.getElementById("simFeed");
+  const events=["wins the faceoff","enters the offensive zone","cycles the puck down low","fires a wrist shot","blocks the shot","forces a turnover","lands a clean hit","makes a glove save","controls the rebound","misses the net"];
+  for(let period=1;period<=3;period++){
+    for(let step=0;step<10;step++){
+      await new Promise(r=>setTimeout(r,220));
+      const secs=1200-step*120;
+      document.getElementById("simClock").textContent=`${period===1?"1st":period===2?"2nd":"3rd"} · ${String(Math.floor(secs/60)).padStart(2,"0")}:${String(secs%60).padStart(2,"0")}`;
+      const homeEvent=Math.random()>.5, team=homeEvent?hn:an;
+      let desc=`${team} ${events[Math.floor(Math.random()*events.length)]}.`;
+      if(Math.random()<.12){if(homeEvent)hs++;else as++;desc=`GOAL — ${team}!`;document.getElementById("simScore").textContent=`${as} - ${hs}`;}
+      feed.insertAdjacentHTML("afterbegin",`<div class="data-row"><span>${escapeHTML(desc)}</span><span>P${period}</span></div>`);
+    }
+  }
+  if(hs===as){hs++;feed.insertAdjacentHTML("afterbegin",`<div class="data-row"><strong>Overtime exhibition winner — ${escapeHTML(hn)}</strong><span>OT</span></div>`);}
+  document.getElementById("simScore").textContent=`${as} - ${hs}`;
+  document.getElementById("simClock").textContent="FINAL · EXHIBITION";
+}
+
 const ICEVERSE_ADMIN_ID = "b1f73467-ca8a-4fbb-bbd0-4983cf5ef105";
 const TEAM_PURCHASE_COST = 3000;
 const PLAYER_CREATION_COST = 1000;
@@ -7961,54 +8054,48 @@ function updateAdminNavigation() {
 }
 
 async function showAdmin() {
-  if (!currentUser || currentUser.id !== ICEVERSE_ADMIN_ID) {
-    alert("Admin access is restricted.");
-    return;
-  }
+  if (!currentUser || currentUser.id !== ICEVERSE_ADMIN_ID) { alert("Admin access is restricted."); return; }
   showSection("adminSection");
-  const c = document.getElementById("adminContent");
-  c.innerHTML = `
-    <div class="app-grid">
-      <div class="panel">
-        <h3>Add Team</h3>
-        <input id="adminTeamCity" placeholder="City" style="margin-top:10px">
-        <input id="adminTeamName" placeholder="Team name" style="margin-top:10px">
-        <input id="adminTeamAbbr" placeholder="Abbreviation" maxlength="4" style="margin-top:10px">
-        <button class="primary-button" style="margin-top:12px" onclick="adminAddTeam()">Add Team</button>
-      </div>
-      <div class="panel">
-        <h3>Give Icepoints</h3>
-        <input id="adminUsername" placeholder="Username" style="margin-top:10px">
-        <input id="adminIcepoints" type="number" min="1" value="1000" style="margin-top:10px">
-        <button class="primary-button" style="margin-top:12px" onclick="adminGiveIcepoints()">Give Icepoints</button>
-      </div>
-      <div class="panel">
-        <h3>Schedule Tools</h3>
-        <p class="muted">Generate the next 7 days of weekday league games. Existing games are preserved.</p>
-        <button class="primary-button" style="margin-top:12px" onclick="adminGenerateSchedule()">Generate 7-Day Schedule</button>
-      </div>
-    </div>
-    <div class="panel" style="margin-top:18px">
-      <h3>Economy</h3>
-      <div class="data-row"><span>New account Icepoints</span><strong>5,000</strong></div>
-      <div class="data-row"><span>Starting player slots</span><strong>5</strong></div>
-      <div class="data-row"><span>Team purchase</span><strong>3,000 IP</strong></div>
-      <div class="data-row"><span>Player creation</span><strong>1,000 IP</strong></div>
-      <div class="data-row"><span>Win reward</span><strong>100 IP</strong></div>
-    </div>`;
+  const c=document.getElementById("adminContent");
+  const {data:leagues,error}=await supabaseClient.from("leagues").select("*").order("level");
+  if(error){c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return;}
+  const active=(leagues||[]).filter(l=>l.active);
+  const opts=active.map(l=>`<option value="${l.id}">${escapeHTML(l.name)} (${escapeHTML(l.abbreviation)})</option>`).join("");
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Iceverse Admin</h2><div class="muted">Server-authorized controls for the Iceverse world.</div></div><span class="pill">OWNER ONLY</span></div>
+  <div class="app-grid">
+    <div class="panel"><h3>Add Team</h3><label>League<select id="adminTeamLeague" style="margin-top:6px">${opts}</select></label><input id="adminTeamCity" placeholder="City" style="margin-top:10px"><input id="adminTeamName" placeholder="Team name" style="margin-top:10px"><input id="adminTeamAbbr" placeholder="Abbreviation" maxlength="4" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminAddTeam()">Add Team</button></div>
+    <div class="panel"><h3>Add League</h3><input id="adminLeagueName" placeholder="League name" style="margin-top:10px"><input id="adminLeagueAbbr" placeholder="Abbreviation" maxlength="6" style="margin-top:10px"><input id="adminLeagueLevel" type="number" min="1" value="${(leagues||[]).length+1}" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminAddLeague()">Add League</button><p class="muted" style="margin-top:10px">There is currently ${active.length} active league${active.length===1?"":"s"}.</p></div>
+    <div class="panel"><h3>Give Icepoints</h3><input id="adminUsername" placeholder="Username" style="margin-top:10px"><input id="adminIcepoints" type="number" min="1" value="1000" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminGiveIcepoints()">Give Icepoints</button></div>
+    <div class="panel"><h3>Season Tools</h3><p class="muted">Schedules are generated automatically when a season is created.</p><button class="secondary-button" onclick="adminRegenerateSchedule()">Regenerate Active Season Schedule</button></div>
+    <div class="panel"><h3>Simulation Lab</h3><p class="muted">Run a live exhibition simulation that does not count toward anything.</p><button class="primary-button" onclick="showTestSimulator()">Open Test Simulator</button></div>
+  </div>`;
 }
-
 async function adminAddTeam() {
-  const city = document.getElementById("adminTeamCity").value.trim();
-  const name = document.getElementById("adminTeamName").value.trim();
-  const abbreviation = document.getElementById("adminTeamAbbr").value.trim().toUpperCase();
-  if (!city || !name || !abbreviation) return alert("Enter city, name and abbreviation.");
-  const {data,error} = await supabaseClient.rpc("admin_add_team", {p_city:city,p_name:name,p_abbreviation:abbreviation});
-  if (error) return alert("Add team failed: " + error.message);
-  alert("Team added.");
-  await loadTeams();
+  const leagueId=document.getElementById("adminTeamLeague").value;
+  const city=document.getElementById("adminTeamCity").value.trim();
+  const name=document.getElementById("adminTeamName").value.trim();
+  const abbreviation=document.getElementById("adminTeamAbbr").value.trim().toUpperCase();
+  if(!leagueId||!city||!name||!abbreviation)return alert("Enter league, city, name and abbreviation.");
+  const {error}=await supabaseClient.rpc("admin_add_team_v2",{p_league_id:leagueId,p_city:city,p_name:name,p_abbreviation:abbreviation});
+  if(error)return alert("Add team failed: "+error.message);
+  alert("Team added."); await showAdmin();
 }
 
+
+async function adminAddLeague(){
+  const name=document.getElementById("adminLeagueName").value.trim(),abbr=document.getElementById("adminLeagueAbbr").value.trim().toUpperCase(),level=Number(document.getElementById("adminLeagueLevel").value);
+  if(!name||!abbr||!Number.isInteger(level)||level<1)return alert("Enter valid league information.");
+  const {error}=await supabaseClient.rpc("admin_add_league",{p_name:name,p_abbreviation:abbr,p_level:level});
+  if(error)return alert("Add league failed: "+error.message);
+  alert("League added."); await showAdmin();
+}
+async function adminRegenerateSchedule(){
+  if(!confirm("Replace future scheduled games in the active season with a fresh 60-game-per-team schedule?"))return;
+  const {data,error}=await supabaseClient.rpc("admin_regenerate_active_schedule");
+  if(error)return alert("Schedule failed: "+error.message);
+  alert(`Schedule generated: ${data} games.`);
+  showSchedule();
+}
 async function adminGiveIcepoints() {
   const username = document.getElementById("adminUsername").value.trim();
   const amount = Number(document.getElementById("adminIcepoints").value);
