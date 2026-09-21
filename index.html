@@ -638,13 +638,11 @@ async function loginUser() {
    */
 
   async function loadTeams() {
-
   const container = document.getElementById("teams");
 
   try {
-
     const response = await fetch(
-     `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,profiles(username),player_attributes(*),rosters(team_id,teams(name,abbreviation))&order=overall.desc`,
+      `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
       {
         headers: {
           "apikey": SUPABASE_KEY,
@@ -653,24 +651,32 @@ async function loginUser() {
       }
     );
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      throw new Error("Unable to connect to Iceverse database.");
+      console.error("Supabase teams error:", response.status, responseText);
+
+      container.innerHTML = `
+        <div class="error">
+          Supabase error ${response.status}:<br>
+          ${escapeHTML(responseText)}
+        </div>
+      `;
+
+      return;
     }
 
-    const teams = await response.json();
+    const teams = JSON.parse(responseText);
 
     if (teams.length === 0) {
-
       container.innerHTML =
         '<div class="loading">No teams currently exist.</div>';
-
       return;
     }
 
     container.innerHTML = "";
 
     teams.forEach(team => {
-
       const card = document.createElement("div");
 
       card.className = "team-card";
@@ -692,22 +698,19 @@ async function loginUser() {
       `;
 
       container.appendChild(card);
-
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Unable to load teams:", error);
 
     container.innerHTML = `
       <div class="error">
-        Unable to connect to the Iceverse database.
-        Check your Supabase URL and publishable key.
+        JavaScript error while loading teams:<br>
+        ${escapeHTML(error.message)}
       </div>
     `;
-
   }
-
 }
 
 
