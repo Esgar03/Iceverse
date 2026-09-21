@@ -520,25 +520,22 @@ function showLogin() {
 }
 
 
-async function createAccount() {
-
+aasync function createAccount() {
   const username =
-  document.getElementById("authUsername").value.trim();
+    document.getElementById("authUsername").value.trim();
 
-const email =
-  document.getElementById("authEmail").value.trim();
+  const email =
+    document.getElementById("authEmail").value.trim();
 
-const password =
-  document.getElementById("authPassword").value;
+  const password =
+    document.getElementById("authPassword").value;
 
   const message =
     document.getElementById("authMessage");
 
-  if (!email || !password) {
-
+  if (!username || !email || !password) {
     message.textContent =
-      "Please enter an email and password.";
-
+      "Please enter a username, email, and password.";
     return;
   }
 
@@ -554,28 +551,43 @@ const password =
   });
 
   if (error) {
-
     console.error(error);
+    message.textContent = error.message;
+    return;
+  }
+
+  if (!data.user) {
+    message.textContent =
+      "Account could not be created.";
+    return;
+  }
+
+  currentUser = data.user;
+
+  const {
+    error: profileError
+  } = await supabaseClient
+    .from("profiles")
+    .upsert({
+      id: data.user.id,
+      username: username
+    });
+
+  if (profileError) {
+    console.error("Profile error:", profileError);
 
     message.textContent =
-      error.message;
+      "Account created, but username could not be saved.";
 
     return;
   }
 
-  if (data.user) {
+  updateAuthNavigation();
 
-    currentUser = data.user;
+  message.textContent =
+    "Account created successfully!";
 
-    updateAuthNavigation();
-
-    message.textContent =
-      "Account created successfully!";
-
-    showHome();
-
-  }
-
+  showHome();
 }
 
 
