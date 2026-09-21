@@ -8031,7 +8031,7 @@ async function saveVisualLineup(){
   if(sums.F!==100||sums.D!==100||sums.G!==100)return alert(`Usage must total exactly 100%. Forwards ${sums.F}%, Defense ${sums.D}%, Goalies ${sums.G}%.`);
   const g1=lineupEditorState.players.find(p=>p.id===lineupEditorState.lines.G1),g2=lineupEditorState.players.find(p=>p.id===lineupEditorState.lines.G2);
   if((g1&&g1.primary_position!=="G")||(g2&&g2.primary_position!=="G"))return alert("Only goalies may occupy goalie slots.");
-  const payload={team_id:lineupEditorState.teamId,lines:lineupEditorState.lines,line_usage:usage,starting_goalie_id:g1?.id||null,backup_goalie_id:g2?.id||null,goalie_rotation:usage.G1||70,offensive_tactic:document.getElementById("visualOffense").value,defensive_tactic:document.getElementById("visualDefense").value,forecheck:document.getElementById("visualForecheck").value,updated_at:new Date().toISOString()};
+  const payload={team_id:lineupEditorState.teamId,lines:lineupEditorState.lines,line_usage:usage,starting_goalie_id:g1?.id||null,backup_goalie_id:g2?.id||null,goalie_rotation:(usage.G1>=70?'Starter Heavy':usage.G1>=55?'Starter Lean':'Even Split'),offensive_tactic:document.getElementById("visualOffense").value,defensive_tactic:document.getElementById("visualDefense").value,forecheck:document.getElementById("visualForecheck").value,updated_at:new Date().toISOString()};
   const {error}=await supabaseClient.from("team_settings").upsert(payload,{onConflict:"team_id"});
   const m=document.getElementById("lineupSaveMsg");if(error){m.textContent="Save failed: "+error.message;return;}m.textContent="Lineup saved.";
 }
@@ -8086,15 +8086,15 @@ async function appendOwnedPlayerControls(player){
 async function acceptContractOffer(offerId){
   if(!confirm("Accept this contract offer?"))return;
   const {error}=await supabaseClient.rpc("accept_contract_offer",{p_offer_id:offerId});
-  if(error)return alert("Accept failed: "+error.message);
-  alert("Contract accepted.");
-  showMyProfile();
+  if(error){console.error("accept_contract_offer",error);return alert("Contract acceptance failed: "+error.message);}
+  alert("Contract accepted. The player is now on the team's roster.");
+  if(document.getElementById("notificationsSection")?.style.display!=="none") showNotifications(); else showMyProfile();
 }
 async function rejectContractOffer(offerId){
   const {error}=await supabaseClient.rpc("reject_contract_offer",{p_offer_id:offerId});
-  if(error)return alert("Reject failed: "+error.message);
+  if(error){console.error("reject_contract_offer",error);return alert("Offer rejection failed: "+error.message);}
   alert("Offer rejected.");
-  showMyProfile();
+  if(document.getElementById("notificationsSection")?.style.display!=="none") showNotifications(); else showMyProfile();
 }
 async function retireOwnedPlayer(playerId,name){
   if(!confirm(`Retire ${name}? This ends the player's active career and frees the creation slot.`))return;
@@ -8222,24 +8222,20 @@ async function showTestSimulator(){
 async function runLiveTestSim(){
   const home=document.getElementById("simHome"),away=document.getElementById("simAway"),board=document.getElementById("simBoard");
   if(home.value===away.value){alert("Choose two different teams.");return;}
-  const hn=home.options[home.selectedIndex].text, an=away.options[away.selectedIndex].text;
+  const hn=home.options[home.selectedIndex].text,an=away.options[away.selectedIndex].text;
+  board.innerHTML=`<h3>${escapeHTML(an)} @ ${escapeHTML(hn)}</h3><div class="loading">Iceverse Engine is simulating...</div>`;
+  const {data:runId,error}=await supabaseClient.rpc("run_exhibition_sim",{p_home:home.value,p_away:away.value,p_seed:null});
+  if(error){board.innerHTML=`<div class="error">Engine error: ${escapeHTML(error.message)}</div>`;return;}
+  const {data:snaps,error:se}=await supabaseClient.from("simulation_snapshots").select("*").eq("run_id",runId).order("sequence_no");
+  if(se){board.innerHTML=`<div class="error">${escapeHTML(se.message)}</div>`;return;}
   board.innerHTML=`<h3>${escapeHTML(an)} @ ${escapeHTML(hn)}</h3><div id="simScore" class="metric-value" style="margin:14px 0">0 - 0</div><div id="simClock" class="pill">1st · 20:00</div><div id="simFeed" class="data-list" style="margin-top:15px"></div>`;
-  let hs=0,as=0;
   const feed=document.getElementById("simFeed");
-  const events=["wins the faceoff","enters the offensive zone","cycles the puck down low","fires a wrist shot","blocks the shot","forces a turnover","lands a clean hit","makes a glove save","controls the rebound","misses the net"];
-  for(let period=1;period<=3;period++){
-    for(let step=0;step<10;step++){
-      await new Promise(r=>setTimeout(r,220));
-      const secs=1200-step*120;
-      document.getElementById("simClock").textContent=`${period===1?"1st":period===2?"2nd":"3rd"} · ${String(Math.floor(secs/60)).padStart(2,"0")}:${String(secs%60).padStart(2,"0")}`;
-      const homeEvent=Math.random()>.5, team=homeEvent?hn:an;
-      let desc=`${team} ${events[Math.floor(Math.random()*events.length)]}.`;
-      if(Math.random()<.12){if(homeEvent)hs++;else as++;desc=`GOAL — ${team}!`;document.getElementById("simScore").textContent=`${as} - ${hs}`;}
-      feed.insertAdjacentHTML("afterbegin",`<div class="data-row"><span>${escapeHTML(desc)}</span><span>P${period}</span></div>`);
-    }
+  for(const s of snaps){
+    await new Promise(r=>setTimeout(r,90));
+    document.getElementById("simScore").textContent=`${s.away_score} - ${s.home_score}`;
+    document.getElementById("simClock").textContent=`${s.period===1?"1st":s.period===2?"2nd":s.period===3?"3rd":"OT"} · ${Math.floor(s.clock_seconds/60)}:${String(s.clock_seconds%60).padStart(2,"0")}`;
+    feed.insertAdjacentHTML("afterbegin",`<div class="data-row"><span>${escapeHTML(s.description)}</span><span>${escapeHTML(s.event_type)}</span></div>`);
   }
-  if(hs===as){hs++;feed.insertAdjacentHTML("afterbegin",`<div class="data-row"><strong>Overtime exhibition winner — ${escapeHTML(hn)}</strong><span>OT</span></div>`);}
-  document.getElementById("simScore").textContent=`${as} - ${hs}`;
   document.getElementById("simClock").textContent="FINAL · EXHIBITION";
 }
 
@@ -8274,7 +8270,9 @@ async function showAdmin() {
     <div class="panel"><h3>Add League</h3><input id="adminLeagueName" placeholder="League name" style="margin-top:10px"><input id="adminLeagueAbbr" placeholder="Abbreviation" maxlength="6" style="margin-top:10px"><input id="adminLeagueLevel" type="number" min="1" value="${(leagues||[]).length+1}" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminAddLeague()">Add League</button><p class="muted" style="margin-top:10px">There is currently ${active.length} active league${active.length===1?"":"s"}.</p></div>
     <div class="panel"><h3>Give Icepoints</h3><input id="adminUsername" placeholder="Username" style="margin-top:10px"><input id="adminIcepoints" type="number" min="1" value="1000" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminGiveIcepoints()">Give Icepoints</button></div>
     <div class="panel"><h3>Season Tools</h3><p class="muted">Schedules are generated automatically when a season is created.</p><button class="secondary-button" onclick="adminRegenerateSchedule()">Regenerate Active Season Schedule</button></div>
-    <div class="panel"><h3>Simulation Lab</h3><p class="muted">Run a live exhibition simulation that does not count toward anything.</p><button class="primary-button" onclick="showTestSimulator()">Open Test Simulator</button></div>
+    <div class="panel"><h3>System Status</h3><p class="muted">Verify your session, admin permission and core database services.</p><button class="secondary-button" onclick="runSystemCheck()">Run System Check</button><div id="systemCheckResult" class="muted" style="margin-top:10px"></div></div>
+    <div class="panel"><h3>Simulation Lab</h3><p class="muted">Run the real engine in exhibition mode without changing official records.</p><button class="primary-button" onclick="showTestSimulator()">Open Test Simulator</button></div>
+    <div class="panel"><h3>Official Game Engine</h3><p class="muted">Simulate the next scheduled official game and permanently write the result, play-by-play and stats.</p><button class="secondary-button" onclick="adminSimNextGame()">Sim Next Official Game</button></div>
   </div>`;
 }
 async function adminAddTeam() {
@@ -8296,6 +8294,37 @@ async function adminAddLeague(){
   if(error)return alert("Add league failed: "+error.message);
   alert("League added."); await showAdmin();
 }
+
+
+async function runSystemCheck(){
+  const out=document.getElementById("systemCheckResult");
+  if(!out)return;
+  out.innerHTML="Checking...";
+  const checks=[];
+  checks.push(`Session: ${currentUser?escapeHTML(currentUser.id):"NOT LOGGED IN"}`);
+  if(currentUser){
+    const {data:a,error:ae}=await supabaseClient.rpc("is_iceverse_admin");
+    checks.push(`Admin: ${ae?"ERROR "+escapeHTML(ae.message):(a?"YES":"NO")}`);
+    const {data:t,error:te}=await supabaseClient.from("teams").select("id",{count:"exact"}).limit(1);
+    checks.push(`Database: ${te?"ERROR "+escapeHTML(te.message):"CONNECTED"}`);
+    const {data:o,error:oe}=await supabaseClient.from("contract_offers").select("id").limit(1);
+    checks.push(`Contracts: ${oe?"ERROR "+escapeHTML(oe.message):"READY"}`);
+    const {data:g,error:ge}=await supabaseClient.from("games").select("id").eq("status","scheduled").limit(1);
+    checks.push(`Schedule: ${ge?"ERROR "+escapeHTML(ge.message):(g?.length?"READY":"NO SCHEDULED GAMES")}`);
+  }
+  out.innerHTML=checks.map(x=>`<div>${x}</div>`).join("");
+}
+
+async function adminSimNextGame(){
+  if(!confirm("Simulate the next scheduled official game? This result WILL count."))return;
+  const {data:g,error:e}=await supabaseClient.from("games").select("id,scheduled_at").eq("status","scheduled").order("scheduled_at").limit(1).maybeSingle();
+  if(e||!g)return alert(e?.message||"No scheduled game found.");
+  const {data:run,error}=await supabaseClient.rpc("admin_simulate_official_game",{p_game_id:g.id,p_seed:null});
+  if(error)return alert("Simulation failed: "+error.message);
+  alert("Official game simulated.");
+  openGameDetail(g.id);
+}
+
 async function adminRegenerateSchedule(){
   if(!confirm("Replace future scheduled games in the active season with a fresh 60-game-per-team schedule?"))return;
   const {data,error}=await supabaseClient.rpc("admin_regenerate_active_schedule");
