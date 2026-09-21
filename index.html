@@ -1162,6 +1162,7 @@
 <section id="leagueHubSection" class="section" style="display:none;"><div id="leagueHubContent"></div></section>
 <section id="playersHubSection" class="section" style="display:none;"><div id="playersHubContent"></div></section>
 <section id="marketplaceSection" class="section" style="display:none;"><div id="marketplaceContent"></div></section>
+<section id="gameDetailSection" class="section" style="display:none;"><div id="gameDetailContent"></div></section>
 <section id="testSimSection" class="section" style="display:none;"><div id="testSimContent"></div></section>
 
 <section id="adminSection" class="section" style="display:none;">
@@ -1657,55 +1658,18 @@ async function loadCurrentUser() {
    ========================================================= */
 
 function updateAuthNavigation() {
-
-  const loginButton =
-    document.getElementById("loginButton");
-
-  const signupButton =
-    document.getElementById("signupButton");
-
-  const logoutButton =
-    document.getElementById("logoutButton");
-
-  const createPlayerNavButton =
-    document.getElementById("createPlayerNavButton");
-
-  const createPlayerButton =
-    document.getElementById("createPlayerButton");
-
-  if (currentUser) {
-
-    loginButton.style.display = "none";
-    signupButton.style.display = "none";
-    logoutButton.style.display = "inline-block";
-
-    createPlayerNavButton.style.display =
-      "inline-block";
-
-    createPlayerButton.style.display = "inline-block";
-    document.getElementById("dashboardNavButton").style.display = "inline-block";
-    document.getElementById("myProfileNavButton").style.display = "inline-block";
-
-  } else {
-
-    loginButton.style.display =
-      "inline-block";
-
-    signupButton.style.display =
-      "inline-block";
-
-    logoutButton.style.display =
-      "none";
-
-    createPlayerNavButton.style.display =
-      "none";
-
-    createPlayerButton.style.display = "none";
-    document.getElementById("dashboardNavButton").style.display = "none";
-    document.getElementById("myProfileNavButton").style.display = "none";
+  const setDisplay=(id,value)=>{const el=document.getElementById(id);if(el)el.style.display=value;};
+  if(currentUser){
+    setDisplay("loginButton","none");
+    setDisplay("signupButton","none");
+    setDisplay("logoutButton","inline-block");
+  }else{
+    setDisplay("loginButton","inline-block");
+    setDisplay("signupButton","inline-block");
+    setDisplay("logoutButton","none");
   }
+  updateAdminNavigation();
 }
-
 
 /* =========================================================
    LOG OUT
@@ -3566,17 +3530,21 @@ async function openTeamManagement(
         </h2>
 
 
-        <p>
-          Set the instructions that will control
-          how your team is used during games.
-        </p>
+        <p>Build your lineup first, then set usage and team strategy. Changes are saved together.</p>
+        <div class="world-nav" style="position:sticky;top:8px;z-index:5;background:#081421;padding:10px;border-radius:12px;margin-top:18px">
+          <button class="secondary-button" onclick="document.getElementById('mgmtLines')?.scrollIntoView({behavior:'smooth'})">Lines</button>
+          <button class="secondary-button" onclick="document.getElementById('mgmtSpecial')?.scrollIntoView({behavior:'smooth'})">Special Teams</button>
+          <button class="secondary-button" onclick="document.getElementById('mgmtGoalies')?.scrollIntoView({behavior:'smooth'})">Goalies</button>
+          <button class="secondary-button" onclick="document.getElementById('mgmtUsage')?.scrollIntoView({behavior:'smooth'})">Usage</button>
+          <button class="secondary-button" onclick="document.getElementById('mgmtTactics')?.scrollIntoView({behavior:'smooth'})">Tactics</button>
+        </div>
 
 
         <!-- ================================================= -->
         <!-- TACTICS -->
         <!-- ================================================= -->
 
-        <div
+        <div id="mgmtTactics"
           class="management-section"
           style="
             margin-top: 30px;
@@ -3930,7 +3898,7 @@ async function openTeamManagement(
         <!-- GOALIES -->
         <!-- ================================================= -->
 
-        <div
+        <div id="mgmtGoalies"
           style="
             margin-top: 35px;
             padding-top: 25px;
@@ -4026,7 +3994,7 @@ async function openTeamManagement(
         <!-- LINE USAGE -->
         <!-- ================================================= -->
 
-        <div
+        <div id="mgmtUsage"
           style="
             margin-top: 35px;
             padding-top: 25px;
@@ -6822,6 +6790,8 @@ async function openPlayerProfile(playerId) {
       Back to Players button.
     */
 
+    await appendOwnedPlayerControls(player);
+
     const backButton =
       document.getElementById(
         "backToPlayersButton"
@@ -7891,17 +7861,32 @@ async function startPlayerSigning(playerId){
 }
 async function showWorldHub(){
   showSection("worldSection"); const c=document.getElementById("worldContent"); c.innerHTML='<div class="loading">Loading the Iceverse...</div>';
-  try{const [tourQ,recordQ,staffQ,injQ,seasonQ]=await Promise.all([supabaseClient.from("tournaments").select("*").order("starts_at",{ascending:true}).limit(12),supabaseClient.from("league_records").select("*").eq("active",true).order("achieved_at",{ascending:false}).limit(12),supabaseClient.from("staff").select("*").eq("retired",false).order("overall",{ascending:false}).limit(12),supabaseClient.from("injuries").select("*,players(first_name,last_name)").eq("status","active").limit(12),supabaseClient.from("seasons").select("*").order("created_at",{ascending:false}).limit(1)]);
+  try{const [tourQ,recordQ,staffQ,injQ,seasonQ]=await Promise.all([supabaseClient.from("tournaments").select("*").order("starts_at",{ascending:true}).limit(12),supabaseClient.from("league_records").select("*").eq("active",true).order("achieved_at",{ascending:false}).limit(12),supabaseClient.from("staff").select("*").eq("retired",false).order("overall",{ascending:false}).limit(50),supabaseClient.from("injuries").select("*,players(first_name,last_name)").eq("status","active").limit(12),supabaseClient.from("seasons").select("*").order("created_at",{ascending:false}).limit(1)]);
     const season=seasonQ.data?.[0];
     c.innerHTML=`<div class="app-grid"><div class="metric-card"><div class="muted">Current Season</div><div class="metric-value">${escapeHTML(season?.name||season?.season_label||'Preseason')}</div></div><div class="metric-card"><div class="muted">Active Tournaments</div><div class="metric-value">${(tourQ.data||[]).filter(t=>t.status!=='completed').length}</div></div><div class="metric-card"><div class="muted">Active Injuries</div><div class="metric-value">${(injQ.data||[]).length}</div></div><div class="metric-card"><div class="muted">Staff Market</div><div class="metric-value">${(staffQ.data||[]).length}+</div></div></div>
     <div class="world-nav"><button class="secondary-button" onclick="showWorldPanel('tournaments')">Tournaments</button><button class="secondary-button" onclick="showWorldPanel('records')">Records</button><button class="secondary-button" onclick="showWorldPanel('staff')">Staff Market</button><button class="secondary-button" onclick="showWorldPanel('injuries')">Injuries</button><button class="secondary-button" onclick="showWorldPanel('international')">International</button><button class="secondary-button" onclick="showWorldPanel('systems')">Career Systems</button></div><div id="worldPanel"></div>`;
     window.iceverseWorld={tournaments:tourQ.data||[],records:recordQ.data||[],staff:staffQ.data||[],injuries:injQ.data||[]}; showWorldPanel('systems');
   }catch(e){c.innerHTML=`<div class="error">World hub: ${escapeHTML(e.message)}</div>`;}
 }
+async 
+async function signStaffMember(staffId){
+  if(!currentUser){showLogin();return;}
+  const team=await getMyTeam();
+  if(!team)return alert("You need a team before signing staff.");
+  const salary=Number(prompt("Annual salary offer?","75000"));
+  if(!salary||salary<0)return;
+  const seasons=Number(prompt("Contract length (1-4 seasons)?","1"));
+  if(!Number.isInteger(seasons)||seasons<1||seasons>4)return alert("Staff contracts must be 1-4 seasons.");
+  const {error}=await supabaseClient.rpc("sign_staff_member",{p_staff_id:staffId,p_salary:salary,p_seasons:seasons});
+  if(error)return alert("Staff signing failed: "+error.message);
+  alert("Staff member signed.");
+  showWorldHub();
+}
+
 async function showWorldPanel(kind){const p=document.getElementById('worldPanel');if(!p)return;const w=window.iceverseWorld||{};
  if(kind==='tournaments'){p.innerHTML=`<div class="feature-grid">${w.tournaments?.length?w.tournaments.map(t=>`<div class="feature-card"><h3>${escapeHTML(t.name)}</h3><div class="muted">${escapeHTML(t.tournament_type)} · ${escapeHTML(t.status)}</div><p style="margin-top:8px">${t.starts_at?new Date(t.starts_at).toLocaleDateString():'Date TBD'}${t.host_country?' · Host: '+escapeHTML(t.host_country):''}</p></div>`).join(''):'<div class="empty-state">Weekend and international tournaments will appear here.</div>'}</div>`;return;}
  if(kind==='records'){p.innerHTML=`<div class="panel"><h3>Iceverse Record Book</h3><div class="data-list">${w.records?.length?w.records.map(r=>`<div class="data-row"><span>${escapeHTML(r.record_name)}<br><span class="muted">${escapeHTML(r.competition)}</span></span><strong>${r.value}</strong></div>`).join(''):'<div class="empty-state">Records begin when official games are played.</div>'}</div></div>`;return;}
- if(kind==='staff'){p.innerHTML=`<div class="feature-grid">${w.staff?.length?w.staff.map(s=>`<div class="feature-card"><h3>${escapeHTML(s.first_name)} ${escapeHTML(s.last_name)}</h3><div class="muted">${escapeHTML(s.primary_role)} · ${escapeHTML(s.specialty||'Generalist')}</div><div class="metric-value">${s.overall} OVR</div><div class="muted">Expected ${fmtMoney(s.salary_expectation)}</div></div>`).join(''):'<div class="empty-state">Staff candidates will populate the market.</div>'}</div>`;return;}
+ if(kind==='staff'){p.innerHTML=`<div class="feature-grid">${w.staff?.length?w.staff.map(s=>`<div class="feature-card"><h3>${escapeHTML(s.first_name)} ${escapeHTML(s.last_name)}</h3><div class="muted">${escapeHTML(s.primary_role)} · ${escapeHTML(s.specialty||'Generalist')}</div><div class="metric-value">${s.overall} OVR</div><div class="muted">Expected ${fmtMoney(s.salary_expectation)}</div>${currentUser?`<button class="primary-button" style="margin-top:12px" onclick="signStaffMember('${s.id}')">Offer Contract</button>`:''}</div>`).join(''):'<div class="empty-state">No unsigned staff candidates are available.</div>'}</div>`;return;}
  if(kind==='injuries'){p.innerHTML=`<div class="panel"><h3>League Injury Report</h3>${w.injuries?.length?w.injuries.map(i=>`<div class="data-row"><span>${escapeHTML(i.players?.first_name||'')} ${escapeHTML(i.players?.last_name||'')}</span><span>${escapeHTML(i.injury_type)} · ${escapeHTML(i.severity)}</span></div>`).join(''):'<div class="empty-state">No active injuries.</div>'}</div>`;return;}
  if(kind==='international'){const {data}=await supabaseClient.from('national_teams').select('*').order('world_ranking',{ascending:true});p.innerHTML=`<div class="feature-grid">${(data||[]).map(n=>`<div class="feature-card"><h3>${getFlag(n.country)} ${escapeHTML(n.country)}</h3><div class="muted">World Ranking</div><div class="metric-value">#${n.world_ranking||'—'}</div><div>Prestige ${n.prestige||0}</div></div>`).join('')||'<div class="empty-state">National programs will appear here.</div>'}</div>`;return;}
  p.innerHTML=`<div class="feature-grid"><div class="feature-card"><h3>Player Careers</h3><p class="muted">Age 18 creation, hidden potential, automatic development, breakouts, decline, retirement, reputation, milestones and Hall of Fame legacy.</p></div><div class="feature-card"><h3>Team Management</h3><p class="muted">23-player rosters, position-aware lines, PP/PK/3v3 units, tactics, goalie rotation, roles, staff, facilities and finances.</p></div><div class="feature-card"><h3>Competition</h3><p class="muted">60-game weekday seasons, 2-point standings, best-of-seven playoffs, weekend double-elimination tournaments and international events.</p></div><div class="feature-card"><h3>Simulation</h3><p class="muted">Shift-based events, fatigue, chemistry, momentum, special teams, injuries, detailed play-by-play, box scores and advanced stats.</p></div><div class="feature-card"><h3>Player Market</h3><p class="muted">Contracts, projected roles, 1-7 year terms, NTCs, free agency, CPU signings, trades and transaction history.</p></div><div class="feature-card"><h3>Living World</h3><p class="muted">Luke Davenport and fictional media, notifications, records, awards, rivalries, franchise histories and persistent career stories.</p></div></div>`;
@@ -7961,6 +7946,73 @@ async function saveTeamCustomization(teamId){
   if(error){m.textContent="Save failed: "+error.message;return;}
   m.textContent="Saved!";
   setTimeout(()=>openTeamProfile(teamId),400);
+}
+
+
+async function openGameDetail(gameId){
+  showSection("gameDetailSection");
+  const c=document.getElementById("gameDetailContent");
+  c.innerHTML='<div class="loading">Loading game...</div>';
+  try{
+    const {data:g,error}=await supabaseClient.from("games").select("*").eq("id",gameId).single();
+    if(error)throw error;
+    const ids=[g.home_team_id,g.away_team_id].filter(Boolean);
+    const {data:teams}=await supabaseClient.from("teams").select("id,name,city,abbreviation").in("id",ids);
+    const tm=Object.fromEntries((teams||[]).map(t=>[t.id,t]));
+    const {data:events}=await supabaseClient.from("game_events").select("*").eq("game_id",gameId).order("sequence_no",{ascending:false}).limit(100);
+    const home=tm[g.home_team_id],away=tm[g.away_team_id];
+    c.innerHTML=`<button class="secondary-button" onclick="showSchedule()">← Back to Schedule</button>
+      <div class="panel" style="margin-top:16px;text-align:center">
+        <div class="muted">${new Date(g.scheduled_at).toLocaleString()} · ${escapeHTML((g.competition||'regular_season').replaceAll('_',' '))}</div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;margin-top:20px">
+          <div><h2>${escapeHTML(away?.city||'')} ${escapeHTML(away?.name||'TBD')}</h2></div>
+          <div><div class="metric-value">${g.away_score} - ${g.home_score}</div><span class="pill">${escapeHTML(g.status)}</span></div>
+          <div><h2>${escapeHTML(home?.city||'')} ${escapeHTML(home?.name||'TBD')}</h2></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:16px"><h3>Play-by-Play</h3>${(events||[]).length?`<div class="data-list">${events.map(e=>`<div class="data-row"><span>${escapeHTML(e.description)}</span><span>P${e.period} · ${Math.floor(e.clock_seconds/60)}:${String(e.clock_seconds%60).padStart(2,'0')}</span></div>`).join('')}</div>`:'<div class="empty-state">Play-by-play will appear here when the game is simulated.</div>'}</div>`;
+  }catch(e){c.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;}
+}
+
+async function appendOwnedPlayerControls(player){
+  if(!currentUser || player.created_by!==currentUser.id || player.is_retired)return;
+  const card=document.querySelector("#playerProfile .player-profile-card");
+  if(!card)return;
+  const {data:offers,error}=await supabaseClient.from("contract_offers")
+    .select("id,team_id,salary,seasons,projected_role,no_trade_clause,expires_at,status")
+    .eq("player_id",player.id).eq("status","active").order("created_at",{ascending:false});
+  let teams={};
+  if(!error && offers?.length){
+    const {data:t}=await supabaseClient.from("teams").select("id,city,name").in("id",[...new Set(offers.map(o=>o.team_id))]);
+    teams=Object.fromEntries((t||[]).map(x=>[x.id,x]));
+  }
+  const wrap=document.createElement("div");
+  wrap.style.cssText="margin-top:25px;padding-top:20px;border-top:1px solid #1b3550";
+  wrap.innerHTML=`<h3>Player Owner Controls</h3>
+    <button class="danger-button secondary-button" onclick="retireOwnedPlayer('${player.id}','${escapeHTML(player.first_name)} ${escapeHTML(player.last_name)}')">Retire Player</button>
+    <h3 style="margin-top:22px">Contract Offers</h3>
+    ${error?`<div class="error">${escapeHTML(error.message)}</div>`:(offers||[]).length?`<div class="data-list">${offers.map(o=>{const t=teams[o.team_id];return `<div class="data-row"><span><strong>${escapeHTML(t?.city||'')} ${escapeHTML(t?.name||'Team')}</strong><br><span class="muted">${fmtMoney(o.salary)} / season · ${o.seasons} yr${o.no_trade_clause?' · NTC':''}${o.projected_role?' · '+escapeHTML(o.projected_role):''}</span></span><span><button class="primary-button" onclick="acceptContractOffer('${o.id}')">Accept</button> <button class="secondary-button" onclick="rejectContractOffer('${o.id}')">Reject</button></span></div>`}).join('')}</div>`:'<div class="empty-state">No active contract offers.</div>'}`;
+  card.appendChild(wrap);
+}
+async function acceptContractOffer(offerId){
+  if(!confirm("Accept this contract offer?"))return;
+  const {error}=await supabaseClient.rpc("accept_contract_offer",{p_offer_id:offerId});
+  if(error)return alert("Accept failed: "+error.message);
+  alert("Contract accepted.");
+  showMyProfile();
+}
+async function rejectContractOffer(offerId){
+  const {error}=await supabaseClient.rpc("reject_contract_offer",{p_offer_id:offerId});
+  if(error)return alert("Reject failed: "+error.message);
+  alert("Offer rejected.");
+  showMyProfile();
+}
+async function retireOwnedPlayer(playerId,name){
+  if(!confirm(`Retire ${name}? This ends the player's active career and frees the creation slot.`))return;
+  const {error}=await supabaseClient.rpc("retire_owned_player",{p_player_id:playerId});
+  if(error)return alert("Retirement failed: "+error.message);
+  alert(`${name} has retired.`);
+  showMyProfile();
 }
 
 async function showLeagueHub(){
