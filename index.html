@@ -3720,6 +3720,255 @@ async function openPlayerProfile(playerId) {
   }
 }
 
+async function openUserProfile(userId) {
+
+  showSection("userProfileSection");
+
+  const userProfile =
+    document.getElementById("userProfile");
+
+  userProfile.innerHTML = `
+    <div class="loading">
+      Loading user...
+    </div>
+  `;
+
+  try {
+
+    /*
+      Get username
+    */
+
+    const {
+      data: username,
+      error: usernameError
+    } =
+      await supabaseClient.rpc(
+        "get_public_username",
+        {
+          target_user_id: userId
+        }
+      );
+
+    if (usernameError) {
+      throw usernameError;
+    }
+
+
+    /*
+      Get every player permanently owned
+      by this user.
+    */
+
+    const {
+      data: players,
+      error: playersError
+    } =
+      await supabaseClient
+        .from("players")
+        .select("*")
+        .eq("created_by", userId)
+        .order(
+          "created_at",
+          {
+            ascending: true
+          }
+        );
+
+    if (playersError) {
+      throw playersError;
+    }
+
+
+    /*
+      Get the user's team, if they own one.
+    */
+
+    const {
+      data: teams,
+      error: teamsError
+    } =
+      await supabaseClient
+        .from("teams")
+        .select(
+          "name, abbreviation"
+        )
+        .eq(
+          "owner_id",
+          userId
+        );
+
+    if (teamsError) {
+      console.error(
+        "Team lookup error:",
+        teamsError
+      );
+    }
+
+
+    const team =
+      teams &&
+      teams.length > 0
+        ? teams[0]
+        : null;
+
+
+    /*
+      Build the owned-player list.
+    */
+
+    let playersHTML = "";
+
+    if (!players || players.length === 0) {
+
+      playersHTML = `
+        <p>
+          This user does not own any players yet.
+        </p>
+      `;
+
+    } else {
+
+      playersHTML =
+        players.map(player => `
+
+          <div
+            class="player-list-item"
+            data-player-id="${player.id}"
+            style="
+              cursor: pointer;
+              padding: 15px;
+              margin-bottom: 10px;
+              border: 1px solid #1b3550;
+              border-radius: 8px;
+            "
+          >
+
+            <strong>
+              ${player.first_name}
+              ${player.last_name}
+            </strong>
+
+            <div style="margin-top: 5px;">
+
+              ${player.primary_position}
+
+              ·
+
+              OVR ${player.overall}
+
+            </div>
+
+          </div>
+
+        `).join("");
+
+    }
+
+
+    /*
+      Render the user profile.
+    */
+
+    userProfile.innerHTML = `
+
+      <div>
+
+        <h1>
+          ${username || "Unknown User"}
+        </h1>
+
+        ${
+          team
+            ? `
+              <p>
+                <strong>Team:</strong>
+                ${team.name}
+              </p>
+            `
+            : `
+              <p>
+                <strong>Team:</strong>
+                No team
+              </p>
+            `
+        }
+
+        <hr
+          style="
+            margin: 25px 0;
+            border: 0;
+            border-top: 1px solid #1b3550;
+          "
+        >
+
+        <h2>
+          Owned Players
+        </h2>
+
+        <div>
+          ${playersHTML}
+        </div>
+
+        <hr
+          style="
+            margin: 30px 0;
+            border: 0;
+            border-top: 1px solid #1b3550;
+          "
+        >
+
+        <h2>
+          Awards
+        </h2>
+
+        <p>
+          No awards yet.
+        </p>
+
+      </div>
+
+    `;
+
+
+    /*
+      Make owned players clickable.
+    */
+
+    userProfile
+      .querySelectorAll(
+        "[data-player-id]"
+      )
+      .forEach(element => {
+
+        element.addEventListener(
+          "click",
+          function() {
+
+            openPlayerProfile(
+              this.dataset.playerId
+            );
+
+          }
+        );
+
+      });
+
+  } catch (error) {
+
+    console.error(
+      "User profile error:",
+      error
+    );
+
+    userProfile.innerHTML = `
+      <p>
+        Unable to load user profile.
+      </p>
+    `;
+
+  }
+}
 
 /* =========================================================
    PUBLIC STAR RATINGS
