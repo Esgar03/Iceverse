@@ -9651,5 +9651,206 @@ async function ivSimWorldTournament(){
 }
 </script>
 
+
+<style id="iceverse-v12-9">
+.iv-completed-game{cursor:pointer!important;transition:transform .12s ease,border-color .12s ease}
+.iv-completed-game:hover{transform:translateY(-1px);border-color:#6da8d8!important}
+.iv-game-link{background:none!important;border:0!important;padding:0!important;color:inherit!important;font:inherit!important;text-align:inherit!important;cursor:pointer!important;width:100%}
+.iv-game-box-team{margin-top:20px}
+</style>
+<script>
+/* ICEVERSE V12.9 — COMPLETED GAME BOX SCORES */
+
+// Any rendered element carrying data-game-id can open the completed game.
+// This also makes existing schedule/game cards clickable without requiring inline onclick.
+document.addEventListener("click",async e=>{
+  const gameEl=e.target.closest("[data-game-id]");
+  if(!gameEl)return;
+  const gid=gameEl.getAttribute("data-game-id");
+  if(gid) await ivOpenCompletedGame(gid);
+});
+
+async function ivOpenCompletedGame(gameId){
+  const {data:g,error}=await supabaseClient.from("games")
+    .select("id,status,period,clock_seconds,home_team_id,away_team_id,home_score,away_score,scheduled_at,competition")
+    .eq("id",gameId).single();
+  if(error){alert(error.message);return;}
+  if(!["completed","final"].includes(String(g.status||"").toLowerCase())){
+    if(typeof showGame==="function") return showGame(gameId);
+    return;
+  }
+
+  const [{data:teams},{data:skaters},{data:goalies},{data:events}]=await Promise.all([
+    supabaseClient.from("teams").select("id,name").in("id",[g.home_team_id,g.away_team_id]),
+    supabaseClient.from("player_game_stats").select("*,players(id,first_name,last_name,primary_position)").eq("game_id",gameId),
+    supabaseClient.from("goalie_game_stats").select("*,players(id,first_name,last_name)").eq("game_id",gameId),
+    supabaseClient.from("game_events").select("*").eq("game_id",gameId).order("sequence_no")
+  ]);
+
+  const tn=id=>teams?.find(t=>t.id===id)?.name||"Team";
+  const modal=document.createElement("div");
+  modal.id="ivGameBoxModal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(2,8,15,.86);z-index:10000;overflow:auto;padding:28px";
+  modal.addEventListener("click",e=>{if(e.target===modal)modal.remove()});
+
+  const skaterTable=(teamId)=>{
+    const rows=(skaters||[]).filter(s=>s.team_id===teamId && (s.players?.primary_position||"")!=="G");
+    return `<div style="overflow-x:auto"><table class="iv-box-table"><thead><tr><th>Player</th><th>Pos</th><th>G</th><th>A</th><th>PTS</th><th>SOG</th><th>HIT</th><th>BLK</th><th>FOW</th><th>FOL</th><th>FO%</th></tr></thead><tbody>
+    ${rows.map(s=>{const fw=s.faceoff_wins||0,fl=s.faceoff_losses||0,fa=fw+fl;return `<tr>
+      <td><button type="button" class="iv-player-link" data-iv-player="${s.player_id}">${escapeHTML(`${s.players?.first_name||""} ${s.players?.last_name||""}`.trim())}</button></td>
+      <td>${escapeHTML(s.players?.primary_position||"")}</td><td>${s.goals||0}</td><td>${s.assists||0}</td><td>${s.points||0}</td>
+      <td>${s.shots||0}</td><td>${s.hits||0}</td><td>${s.blocks||0}</td><td>${fw}</td><td>${fl}</td><td>${fa?(100*fw/fa).toFixed(1)+"%":"—"}</td>
+    </tr>`}).join("")||'<tr><td colspan="11">No skater statistics recorded.</td></tr>'}</tbody></table></div>`;
+  };
+
+  const goalieTable=(teamId)=>{
+    const rows=(goalies||[]).filter(x=>x.team_id===teamId);
+    return `<div class="iv-box-subhead">Goaltending</div><div style="overflow-x:auto"><table class="iv-box-table"><thead><tr><th>Goalie</th><th>GA</th><th>SV</th><th>SV%</th></tr></thead><tbody>
+    ${rows.map(x=>{const sv=x.saves||0,ga=x.goals_against||0,sa=sv+ga;return `<tr>
+      <td><button type="button" class="iv-player-link" data-iv-player="${x.player_id}">${escapeHTML(`${x.players?.first_name||""} ${x.players?.last_name||""}`.trim())}</button></td>
+      <td>${ga}</td><td>${sv}</td><td>${sa?(100*sv/sa).toFixed(1)+"%":"—"}</td></tr>`}).join("")||'<tr><td colspan="4">No goalie statistics recorded.</td></tr>'}</tbody></table></div>`;
+  };
+
+  modal.innerHTML=`<div class="panel" style="max-width:1100px;margin:0 auto">
+    <button class="secondary-button" style="float:right" id="ivCloseGameBox">Close</button>
+    <div class="muted">${escapeHTML(g.competition||"Game")} · FINAL</div>
+    <h1 style="margin:8px 0 20px">${escapeHTML(tn(g.away_team_id))} ${g.away_score} — ${g.home_score} ${escapeHTML(tn(g.home_team_id))}</h1>
+    <div class="iv-game-box-team"><h2>${escapeHTML(tn(g.away_team_id))}</h2>${skaterTable(g.away_team_id)}${goalieTable(g.away_team_id)}</div>
+    <div class="iv-game-box-team"><h2>${escapeHTML(tn(g.home_team_id))}</h2>${skaterTable(g.home_team_id)}${goalieTable(g.home_team_id)}</div>
+    <h2 style="margin-top:28px">Play-by-Play</h2>
+    <div class="iv-live-feed">${(events||[]).map(ev=>{const c=`${Math.floor((ev.clock_seconds||0)/60)}:${String((ev.clock_seconds||0)%60).padStart(2,"0")}`;return `<div class="iv-live-event"><strong>P${ev.period} ${c}</strong> — ${escapeHTML(ev.description||ev.event_type||"Event")}</div>`}).join("")||'<div class="muted">No play-by-play recorded.</div>'}</div>
+  </div>`;
+  document.body.appendChild(modal);
+  document.getElementById("ivCloseGameBox").onclick=()=>modal.remove();
+}
+
+// Make completed game cards from the Schedule clickable after render.
+const iv129OldShowSchedule=showSchedule;
+showSchedule=async function(...args){
+  await iv129OldShowSchedule.apply(this,args);
+  const {data:games}=await supabaseClient.from("games").select("id,home_team_id,away_team_id,status,scheduled_at").order("scheduled_at");
+  // Existing implementations vary, so tag links/cards whose onclick/text already contains the game id.
+  for(const g of games||[]){
+    if(!["completed","final"].includes(String(g.status||"").toLowerCase()))continue;
+    document.querySelectorAll(`[onclick*="${g.id}"], [href*="${g.id}"]`).forEach(el=>{
+      el.setAttribute("data-game-id",g.id); el.classList.add("iv-completed-game");
+    });
+  }
+};
+</script>
+
+
+<style id="iceverse-v12-10">
+.iv-feed-card{border:1px solid #24425f;border-radius:14px;padding:15px 17px;margin:10px 0;background:linear-gradient(180deg,#10263a,#0c1e30)}
+.iv-feed-label{display:inline-flex;padding:4px 9px;border-radius:999px;background:#193a56;color:#bcdcf6;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.iv-trophy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.iv-trophy{border:1px solid #715d2b;background:linear-gradient(180deg,#241f12,#151b22);border-radius:12px;padding:13px}
+.iv-trophy strong{display:block;color:#ffe293;margin-bottom:4px}
+</style>
+<script>
+/* ICEVERSE V12.10 — feed polish, retired filter fix, trophies, completed box scores,
+   release controls, automatic world heartbeat */
+
+// Fix retired filtering at the source: V12.9's original REST select omitted retirement fields.
+loadPlayers=async function(){
+  const container=document.getElementById("players");
+  container.innerHTML='<div class="loading">Loading Iceverse players...</div>';
+  try{
+    const {data,error}=await supabaseClient.from("players")
+      .select("id,first_name,last_name,age,nationality,primary_position,secondary_position,overall,archetype,personality,created_by,height_inches,weight_lbs,handedness,is_retired,retired_at")
+      .order("overall",{ascending:false});
+    if(error)throw error;
+    window.iceversePlayers=data||[];
+    filterPlayers();
+  }catch(error){container.innerHTML=`<div class="error">Unable to load Iceverse players.<br>${escapeHTML(error.message)}</div>`;}
+};
+
+// Human-readable feed. No raw database/code-looking labels.
+showFeed=async function(){
+  showSection("feedSection");
+  const c=document.getElementById("feedContent");
+  c.innerHTML='<div class="loading">Loading Iceverse news...</div>';
+  const [{data:feed,error},{data:games}]=await Promise.all([
+    supabaseClient.from("iceverse_feed").select("*").order("created_at",{ascending:false}).limit(75),
+    supabaseClient.from("games").select("id,scheduled_at,status,home_score,away_score,home_team_id,away_team_id").eq("status","completed").order("scheduled_at",{ascending:false}).limit(15)
+  ]);
+  if(error){c.innerHTML=`<div class="error">Feed error: ${escapeHTML(error.message)}</div>`;return;}
+  const ids=[...new Set((games||[]).flatMap(g=>[g.home_team_id,g.away_team_id]))];let tm={};
+  if(ids.length){const {data:t}=await supabaseClient.from("teams").select("id,city,name").in("id",ids);(t||[]).forEach(x=>tm[x.id]=x);}
+  const gameFeed=(games||[]).map(g=>({id:g.id,created_at:g.scheduled_at,feed_type:"game",title:"Final Score",
+    body:`${tm[g.away_team_id]?.city||""} ${tm[g.away_team_id]?.name||"Away"} ${g.away_score} — ${g.home_score} ${tm[g.home_team_id]?.city||""} ${tm[g.home_team_id]?.name||"Home"}`,game_id:g.id}));
+  const labels={game:"Game",contract:"Transaction",transaction:"Transaction",award:"Award",league:"League News",tournament:"Tournament",international:"International",development:"Player Development",news:"Iceverse News"};
+  const all=[...(feed||[]),...gameFeed].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,80);
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Iceverse Feed</h2><div class="muted">News and activity from around the hockey world.</div></div><button class="secondary-button" onclick="showFeed()">Refresh</button></div>
+    ${all.length?all.map(x=>`<article class="iv-feed-card ${x.game_id?"profile-link":""}" ${x.game_id?`onclick="openGameDetail('${x.game_id}')"`:""}>
+      <span class="iv-feed-label">${escapeHTML(labels[x.feed_type]||String(x.feed_type||"News").replaceAll("_"," "))}</span>
+      <h3 style="margin:9px 0 5px">${escapeHTML(x.title||"Iceverse Update")}</h3>
+      <div>${escapeHTML(x.body||"")}</div><div class="muted" style="margin-top:8px;font-size:12px">${new Date(x.created_at).toLocaleString()}</div>
+    </article>`).join(""):'<div class="empty-state">The feed will populate as the Iceverse world runs.</div>'}`;
+};
+
+// Completed schedule games always open the full V12.9 box score.
+const iv1210OriginalGameDetail=openGameDetail;
+openGameDetail=async function(gameId){
+  const {data:g,error}=await supabaseClient.from("games").select("id,status").eq("id",gameId).single();
+  if(!error && ["completed","final"].includes(String(g?.status||"").toLowerCase())) return ivOpenCompletedGame(gameId);
+  return iv1210OriginalGameDetail(gameId);
+};
+
+// Add trophy cases to every player profile after the normal card loads.
+const iv1210OriginalPlayerProfile=openPlayerProfile;
+openPlayerProfile=async function(playerId){
+  await iv1210OriginalPlayerProfile(playerId);
+  const card=document.querySelector("#playerProfile .player-profile-card")||document.getElementById("playerProfile");
+  if(!card)return;
+  const {data:awards,error}=await supabaseClient.rpc("get_player_trophy_case",{p_player:playerId});
+  const old=document.getElementById("ivTrophyCase"); if(old)old.remove();
+  const wrap=document.createElement("div");wrap.id="ivTrophyCase";wrap.className="panel";wrap.style.marginTop="16px";
+  wrap.innerHTML=`<h2>🏆 Trophy Case</h2>${error?`<div class="error">${escapeHTML(error.message)}</div>`:(awards||[]).length?
+    `<div class="iv-trophy-grid">${awards.map(a=>`<div class="iv-trophy"><strong>${escapeHTML(a.award_name)}</strong><span>${escapeHTML(a.competition||"Iceverse")}</span>${a.season_label?`<div class="muted">${escapeHTML(a.season_label)}</div>`:""}</div>`).join("")}</div>`:
+    '<div class="empty-state">No trophies yet. Awards earned during seasons and tournaments will appear here permanently.</div>'}`;
+  card.appendChild(wrap);
+};
+
+// Team owner can release contracted players.
+const iv1210OriginalTeamOps=showTeamOperations;
+showTeamOperations=async function(teamId){
+  await iv1210OriginalTeamOps(teamId);
+  const c=document.getElementById("contractsContent");
+  const {data:team}=await supabaseClient.from("teams").select("id,owner_id").eq("id",teamId).single();
+  if(!c||team?.owner_id!==currentUser?.id)return;
+  const {data:contracts}=await supabaseClient.from("player_contracts")
+    .select("id,player_id,salary,seasons_remaining,players(first_name,last_name,primary_position,overall)")
+    .eq("team_id",teamId).eq("status","active");
+  const p=document.createElement("div");p.className="panel";p.style.marginTop="16px";
+  p.innerHTML=`<h3>Roster Decisions</h3><div class="muted">Releasing a player removes them from your roster and ends their active contract. The player becomes a free agent.</div>
+    <div class="data-list" style="margin-top:12px">${(contracts||[]).map(x=>`<div class="data-row"><span><strong>${escapeHTML(x.players?.first_name||"")} ${escapeHTML(x.players?.last_name||"")}</strong><br><span class="muted">${escapeHTML(x.players?.primary_position||"")} · ${x.players?.overall||0} OVR · ${fmtMoney(x.salary)}/season</span></span>
+    <button class="danger-button secondary-button" onclick="releaseTeamPlayer('${x.player_id}','${escapeHTML((x.players?.first_name||"")+" "+(x.players?.last_name||""))}')">Release Player</button></div>`).join("")||'<div class="empty-state">No active player contracts.</div>'}</div>`;
+  c.appendChild(p);
+};
+async function releaseTeamPlayer(playerId,name){
+  if(!confirm(`Release ${name.trim()}? They will become a free agent and their active contract will end.`))return;
+  const {error}=await supabaseClient.rpc("release_team_player",{p_player_id:playerId});
+  if(error)return alert("Release failed: "+error.message);
+  alert(`${name.trim()} has been released.`);
+  const team=await getMyTeam(); if(team)showTeamOperations(team.id);
+}
+
+// Automatic heartbeat: due games, daily development/payroll, schedule upkeep and
+// tournament processing occur whenever the universe has an active visitor.
+let ivWorldHeartbeatBusy=false;
+async function ivAutomaticWorldHeartbeat(){
+  if(ivWorldHeartbeatBusy)return;
+  ivWorldHeartbeatBusy=true;
+  try{
+    await supabaseClient.rpc("iceverse_world_tick",{p_game_limit:20});
+    await ivRefreshWorldClock();
+  }catch(e){console.warn("Iceverse heartbeat:",e?.message||e);}
+  finally{ivWorldHeartbeatBusy=false;}
+}
+window.addEventListener("load",()=>setTimeout(ivAutomaticWorldHeartbeat,2500));
+setInterval(ivAutomaticWorldHeartbeat,60000);
+</script>
+
 </body>
 </html>
