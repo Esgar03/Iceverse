@@ -160,6 +160,7 @@
       }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -266,12 +267,19 @@
 
   const SUPABASE_URL = "https://lmafzfqsnzvwckpjjuwe.supabase.co";
 
-  const SUPABASE_KEY = "sb_publishable_2raUKflPiqDcX_Pn-EfN_Q_u2MvT4AO";
+const SUPABASE_KEY = "sb_publishable_2raUKflPiqDcX_Pn-EfN_Q_u2MvT4AO";
+
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
-  /*
-   * ============================================
-   * LOAD TEAMS
+/*
+ * ============================================
+ * LOAD TEAMS
    * ============================================
    */
 
