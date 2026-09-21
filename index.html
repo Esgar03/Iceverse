@@ -7406,7 +7406,18 @@ async function openUserProfile(userId) {
   hideAllMainSections();
 
   const userProfileSection =
-    document.getElementById("userProfileSection");
+    document.getElementById(
+      "userProfileSection"
+    );
+
+  if (!userProfileSection) {
+
+    console.error(
+      "User profile section was not found."
+    );
+
+    return;
+  }
 
   userProfileSection.style.display =
     "block";
@@ -7417,7 +7428,10 @@ async function openUserProfile(userId) {
 
 
   const userProfile =
-    document.getElementById("userProfile");
+    document.getElementById(
+      "userProfile"
+    );
+
 
   userProfile.innerHTML = `
     <div class="loading">
@@ -7429,7 +7443,9 @@ async function openUserProfile(userId) {
   try {
 
     /*
-      Get username.
+      --------------------------------------------------------
+      USERNAME
+      --------------------------------------------------------
     */
 
     const {
@@ -7439,9 +7455,11 @@ async function openUserProfile(userId) {
       await supabaseClient.rpc(
         "get_public_username",
         {
-          target_user_id: userId
+          target_user_id:
+            userId
         }
       );
+
 
     if (usernameError) {
       throw usernameError;
@@ -7449,11 +7467,9 @@ async function openUserProfile(userId) {
 
 
     /*
-      Get every player permanently owned
-      by this user.
-
-      This is based on players.created_by,
-      NOT the player's current team.
+      --------------------------------------------------------
+      OWNED PLAYERS
+      --------------------------------------------------------
     */
 
     const {
@@ -7474,7 +7490,10 @@ async function openUserProfile(userId) {
           overall,
           created_at
         `)
-        .eq("created_by", userId)
+        .eq(
+          "created_by",
+          userId
+        )
         .order(
           "created_at",
           {
@@ -7482,13 +7501,16 @@ async function openUserProfile(userId) {
           }
         );
 
+
     if (playersError) {
       throw playersError;
     }
 
 
     /*
-      Get the user's team, if they own one.
+      --------------------------------------------------------
+      OWNED TEAMS
+      --------------------------------------------------------
     */
 
     const {
@@ -7500,34 +7522,42 @@ async function openUserProfile(userId) {
         .select(`
           id,
           name,
-          abbreviation
+          abbreviation,
+          city,
+          primary_color,
+          secondary_color,
+          tertiary_color
         `)
-        .eq("owner_id", userId);
+        .eq(
+          "owner_id",
+          userId
+        )
+        .order(
+          "name",
+          {
+            ascending: true
+          }
+        );
+
 
     if (teamsError) {
-
-      console.error(
-        "Team lookup error:",
-        teamsError
-      );
-
+      throw teamsError;
     }
 
 
-    const team =
-      teams &&
-      teams.length > 0
-        ? teams[0]
-        : null;
-
-
     /*
-      Build owned-player list.
+      --------------------------------------------------------
+      OWNED PLAYER HTML
+      --------------------------------------------------------
     */
 
     let playersHTML = "";
 
-    if (!players || players.length === 0) {
+
+    if (
+      !players ||
+      players.length === 0
+    ) {
 
       playersHTML = `
         <p>
@@ -7538,73 +7568,205 @@ async function openUserProfile(userId) {
     } else {
 
       playersHTML =
-        players.map(player => `
-
-          <div
-            class="player-list-item"
-            data-player-id="${player.id}"
-            style="
-              cursor: pointer;
-              padding: 15px;
-              margin-bottom: 10px;
-              border: 1px solid #1b3550;
-              border-radius: 8px;
-            "
-          >
-
-            <strong>
-
-              ${escapeHTML(player.first_name)}
-              ${escapeHTML(player.last_name)}
-
-            </strong>
-
+        players.map(
+          player => `
 
             <div
+              class="player-list-item"
+              data-player-id="${player.id}"
               style="
-                margin-top: 5px;
+                cursor: pointer;
+                padding: 15px;
+                margin-bottom: 10px;
+                border: 1px solid #1b3550;
+                border-radius: 8px;
               "
             >
 
-              ${getFlag(player.nationality)}
+              <strong>
 
-              ${escapeHTML(
-                player.primary_position
-              )}
+                ${escapeHTML(
+                  player.first_name
+                )}
 
-              ·
+                ${escapeHTML(
+                  player.last_name
+                )}
 
-              OVR ${player.overall}
+              </strong>
+
+
+              <div
+                style="
+                  margin-top: 5px;
+                "
+              >
+
+                ${getFlag(
+                  player.nationality
+                )}
+
+                ${escapeHTML(
+                  player.primary_position
+                )}
+
+                ${
+                  player.secondary_position
+                    ? " / " +
+                      escapeHTML(
+                        player.secondary_position
+                      )
+                    : ""
+                }
+
+                ·
+
+                OVR
+                ${player.overall ?? "--"}
+
+              </div>
+
+
+              <div
+                style="
+                  margin-top: 5px;
+                  color: #9fb3c8;
+                "
+              >
+
+                ${escapeHTML(
+                  player.archetype ||
+                  ""
+                )}
+
+                ·
+
+                Age
+                ${player.age}
+
+              </div>
 
             </div>
 
-
-            <div
-              style="
-                margin-top: 5px;
-                color: #9fb3c8;
-              "
-            >
-
-              ${escapeHTML(
-                player.archetype
-              )}
-
-              ·
-
-              Age ${player.age}
-
-            </div>
-
-          </div>
-
-        `).join("");
+          `
+        ).join("");
 
     }
 
 
     /*
-      Render user profile.
+      --------------------------------------------------------
+      OWNED TEAM HTML
+      --------------------------------------------------------
+    */
+
+    let teamsHTML = "";
+
+
+    if (
+      !teams ||
+      teams.length === 0
+    ) {
+
+      teamsHTML = `
+        <p>
+          This user does not own a team yet.
+        </p>
+      `;
+
+    } else {
+
+      teamsHTML =
+        teams.map(
+          team => `
+
+            <div
+              class="team-card"
+              data-team-id="${team.id}"
+              style="
+                cursor: pointer;
+                margin-bottom: 15px;
+              "
+            >
+
+              <div
+                style="
+                  text-align: center;
+                  margin-bottom: 15px;
+                "
+              >
+
+                ${getTeamJerseyHTML(
+                  team,
+                  "medium"
+                )}
+
+              </div>
+
+
+              <div
+                style="
+                  font-size: 20px;
+                  font-weight: 800;
+                "
+              >
+
+                ${escapeHTML(
+                  team.name ||
+                  "Unknown Team"
+                )}
+
+              </div>
+
+
+              <div
+                class="team-info"
+                style="
+                  margin-top: 6px;
+                "
+              >
+
+                ${
+                  team.abbreviation
+                    ? escapeHTML(
+                        team.abbreviation
+                      )
+                    : "---"
+                }
+
+                ${
+                  team.city
+                    ? " · " +
+                      escapeHTML(
+                        team.city
+                      )
+                    : ""
+                }
+
+              </div>
+
+
+              <div
+                style="
+                  margin-top: 10px;
+                  color: #9fb3c8;
+                "
+              >
+                Click to view team
+              </div>
+
+            </div>
+
+          `
+        ).join("");
+
+    }
+
+
+    /*
+      --------------------------------------------------------
+      RENDER USER PROFILE
+      --------------------------------------------------------
     */
 
     userProfile.innerHTML = `
@@ -7615,47 +7777,20 @@ async function openUserProfile(userId) {
           type="button"
           class="secondary-button"
           id="backFromUserProfileButton"
-          style="margin-bottom: 20px;"
+          style="
+            margin-bottom: 20px;
+          "
         >
           ← Back to Players
         </button>
 
 
         <h1>
-          ${escapeHTML(username || "Unknown User")}
+          ${escapeHTML(
+            username ||
+            "Unknown User"
+          )}
         </h1>
-
-
-        ${
-          team
-            ? `
-              <p>
-
-                <strong>
-                  Team:
-                </strong>
-
-                ${escapeHTML(team.name)}
-
-                ${
-                  team.abbreviation
-                    ? `
-                      (${escapeHTML(
-                        team.abbreviation
-                      )})
-                    `
-                    : ""
-                }
-
-              </p>
-            `
-            : `
-              <p>
-                <strong>Team:</strong>
-                No team
-              </p>
-            `
-        }
 
 
         <hr
@@ -7668,12 +7803,43 @@ async function openUserProfile(userId) {
 
 
         <h2>
+          Owned Team
+        </h2>
+
+
+        <div
+          style="
+            margin-top: 15px;
+          "
+        >
+
+          ${teamsHTML}
+
+        </div>
+
+
+        <hr
+          style="
+            margin: 30px 0;
+            border: 0;
+            border-top: 1px solid #1b3550;
+          "
+        >
+
+
+        <h2>
           Owned Players
         </h2>
 
 
-        <div>
+        <div
+          style="
+            margin-top: 15px;
+          "
+        >
+
           ${playersHTML}
+
         </div>
 
 
@@ -7701,17 +7867,16 @@ async function openUserProfile(userId) {
 
 
     /*
-      Back to Players.
+      --------------------------------------------------------
+      BACK BUTTON
+      --------------------------------------------------------
     */
 
-    const backButton =
-      document.getElementById(
+    document
+      .getElementById(
         "backFromUserProfileButton"
-      );
-
-    if (backButton) {
-
-      backButton.addEventListener(
+      )
+      ?.addEventListener(
         "click",
         function() {
 
@@ -7720,31 +7885,62 @@ async function openUserProfile(userId) {
         }
       );
 
-    }
+
+    /*
+      --------------------------------------------------------
+      TEAM CLICKS
+      --------------------------------------------------------
+    */
+
+    userProfile
+      .querySelectorAll(
+        "[data-team-id]"
+      )
+      .forEach(
+        element => {
+
+          element.addEventListener(
+            "click",
+            function() {
+
+              openTeamProfile(
+                this.dataset.teamId
+              );
+
+            }
+          );
+
+        }
+      );
 
 
     /*
-      Make every owned player clickable.
+      --------------------------------------------------------
+      PLAYER CLICKS
+      --------------------------------------------------------
     */
 
     userProfile
       .querySelectorAll(
         "[data-player-id]"
       )
-      .forEach(element => {
+      .forEach(
+        element => {
 
-        element.addEventListener(
-          "click",
-          function() {
+          element.addEventListener(
+            "click",
+            function() {
 
-            openPlayerProfile(
-              this.dataset.playerId
-            );
+              openPlayerProfile(
+                this.dataset.playerId
+              );
 
-          }
-        );
+            }
+          );
 
-      });
+        }
+      );
+
 
   } catch (error) {
 
@@ -7752,6 +7948,7 @@ async function openUserProfile(userId) {
       "User profile error:",
       error
     );
+
 
     userProfile.innerHTML = `
 
