@@ -308,70 +308,78 @@ async function loadCurrentUser() {
 
   async function loadTeams() {
 
-    const container = document.getElementById("teams");
+  const container =
+    document.getElementById("teams");
 
-    try {
+  try {
 
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,player_attributes(*),rosters(team_id,teams(name,abbreviation))&order=overall.desc`,
-        {
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-          }
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
+      {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Unable to connect to Iceverse database.");
       }
+    );
 
-      const teams = await response.json();
+    if (!response.ok) {
+      throw new Error("Unable to connect to Iceverse database.");
+    }
 
-      if (teams.length === 0) {
-        container.innerHTML =
-          '<div class="loading">No teams currently exist.</div>';
-        return;
-      }
+    const teams = await response.json();
 
-      container.innerHTML = "";
+    if (teams.length === 0) {
 
-      teams.forEach(team => {
+      container.innerHTML =
+        '<div class="loading">No teams currently exist.</div>';
 
-        const card = document.createElement("div");
+      return;
+    }
 
-        card.className = "team-card";
+    container.innerHTML = "";
 
-        card.innerHTML = `
-          <div class="team-name">
-            ${escapeHTML(team.name)}
-          </div>
+    teams.forEach(team => {
 
-          <div class="team-info">
-            ${escapeHTML(team.city)}
-            · ${escapeHTML(team.abbreviation)}
-          </div>
+      const card =
+        document.createElement("div");
 
-          <div class="team-info">
-            Record:
-            ${team.wins}-${team.losses}-${team.overtime_losses}
-          </div>
-        `;
+      card.className = "team-card";
 
-        container.appendChild(card);
+      card.innerHTML = `
+        <div class="team-name">
+          ${escapeHTML(team.name)}
+        </div>
 
-      });
+        <div class="team-info">
+          ${escapeHTML(team.city)}
+          · ${escapeHTML(team.abbreviation)}
+        </div>
 
-    } catch (error) {
-
-      console.error(error);
-
-      container.innerHTML = `
-        <div class="error">
-          Unable to connect to the Iceverse database.
-          Check your Supabase URL and publishable key.
+        <div class="team-info">
+          Record:
+          ${team.wins}-${team.losses}-${team.overtime_losses}
         </div>
       `;
+
+      container.appendChild(card);
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="error">
+        Unable to connect to the Iceverse database.
+        Check your Supabase URL and publishable key.
+      </div>
+    `;
+
+  }
+
+}
 
     }
   }
@@ -438,7 +446,7 @@ async function loadPlayers() {
   try {
 
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,player_attributes(*),rosters(team_id,teams(name,abbreviation))&order=overall.desc`,
+      `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,player_attributes(*),rosters(team_id,teams(name,abbreviation))&order=overall.desc`,  
       {
         headers: {
           "apikey": SUPABASE_KEY,
