@@ -405,7 +405,13 @@
     .world-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}.world-nav button{padding:9px 12px}
     .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#86efac;margin-right:6px}.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.feature-card{background:#0d2035;border:1px solid #203c59;border-radius:14px;padding:18px}.feature-card h3{margin-bottom:8px}.mini-bar{height:8px;border-radius:99px;background:#071525;overflow:hidden;margin-top:7px}.mini-bar span{display:block;height:100%;background:linear-gradient(90deg,#2f80ed,#86efac)}
 
-  </style>
+  
+.lineup-roster{margin:20px 0;padding:16px;border:1px solid #1b3550;border-radius:14px;background:#081421}
+.roster-chip-grid,.lineup-box-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.roster-chip,.lineup-slot{min-height:76px;border:1px solid #294761;border-radius:12px;background:#0d1d2b;color:#fff;padding:10px;text-align:left;cursor:pointer}
+.roster-chip.selected{outline:2px solid #d6a84b}.lineup-slot.filled{border-color:#d6a84b;background:#11283a}
+.roster-chip span,.lineup-slot span,.lineup-slot small{display:block;color:#9db0c2;margin-top:4px}.usage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.usage-input{margin-top:6px}
+</style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -424,6 +430,7 @@
     <button onclick="showPlayersHub()">Players</button>
     <button id="teamNavButton" onclick="showMyTeamOrTeams()">Team</button>
     <button onclick="showWorldHub()">World</button>
+    <button id="notificationsNavButton" onclick="showNotifications()" style="display:none;">Notifications <span id="notificationBadge"></span></button>
     <button id="adminNavButton" onclick="showAdmin()" style="display:none;">Admin</button>
     <button id="loginButton" onclick="showLogin()">Log In</button>
     <button id="signupButton" onclick="showSignup()">Create Account</button>
@@ -1162,6 +1169,11 @@
 <section id="leagueHubSection" class="section" style="display:none;"><div id="leagueHubContent"></div></section>
 <section id="playersHubSection" class="section" style="display:none;"><div id="playersHubContent"></div></section>
 <section id="marketplaceSection" class="section" style="display:none;"><div id="marketplaceContent"></div></section>
+
+<section id="notificationsSection" class="section" style="display:none;"><div id="notificationsContent"></div></section>
+<section id="usernameLookupSection" class="section" style="display:none;"><div id="usernameLookupContent"></div></section>
+<section id="leadersSection" class="section" style="display:none;"><div id="leadersContent"></div></section>
+
 <section id="gameDetailSection" class="section" style="display:none;"><div id="gameDetailContent"></div></section>
 <section id="testSimSection" class="section" style="display:none;"><div id="testSimContent"></div></section>
 
@@ -7949,6 +7961,83 @@ async function saveTeamCustomization(teamId){
 }
 
 
+
+let lineupEditorState={teamId:null,players:[],lines:{},selected:null};
+function playerEligibleForSlot(p,slot){
+  if(slot==="G")return p.primary_position==="G";
+  if(p.primary_position==="G")return false;
+  if(slot==="D")return ["LD","RD"].includes(p.primary_position)||["LD","RD"].includes(p.secondary_position);
+  return ["C","LW","RW"].includes(p.primary_position)||["C","LW","RW"].includes(p.secondary_position);
+}
+function renderLineupEditor(){
+  const c=document.getElementById("teamManagement");
+  const st=lineupEditorState;
+  const groups=[
+    ["Forwards",[["F1","LW"],["F1C","C"],["F1R","RW"],["F2","LW"],["F2C","C"],["F2R","RW"],["F3","LW"],["F3C","C"],["F3R","RW"],["F4","LW"],["F4C","C"],["F4R","RW"]]],
+    ["Defense",[["D1L","D"],["D1R","D"],["D2L","D"],["D2R","D"],["D3L","D"],["D3R","D"]]],
+    ["Goalies",[["G1","G"],["G2","G"]]],
+    ["Power Play",[["PP1A","F"],["PP1B","F"],["PP1C","F"],["PP1D","F"],["PP1E","D"],["PP2A","F"],["PP2B","F"],["PP2C","F"],["PP2D","F"],["PP2E","D"]]],
+    ["Penalty Kill",[["PK1A","F"],["PK1B","F"],["PK1C","D"],["PK1D","D"],["PK2A","F"],["PK2B","F"],["PK2C","D"],["PK2D","D"]]],
+    ["Overtime 3v3",[["OT1A","F"],["OT1B","F"],["OT1D","D"]]]
+  ];
+  const box=(id,pos)=>{const pid=st.lines[id],p=st.players.find(x=>x.id===pid);return `<button class="lineup-slot ${pid?'filled':''}" onclick="placeSelectedPlayer('${id}','${pos}')"><small>${pos}</small><strong>${p?escapeHTML(p.first_name+' '+p.last_name):'Tap to place'}</strong>${p?`<span>${p.primary_position} · ${p.overall} OVR</span>`:''}</button>`};
+  const roster=st.players.map(p=>`<button class="roster-chip ${st.selected===p.id?'selected':''}" onclick="selectLineupPlayer('${p.id}')"><strong>${escapeHTML(p.first_name)} ${escapeHTML(p.last_name)}</strong><span>${p.primary_position} · ${p.overall}</span></button>`).join('');
+  c.innerHTML=`<div class="player-profile-card"><button class="secondary-button" onclick="openTeamProfile('${st.teamId}')">← Team</button><h2>Lineup & Usage</h2><p class="muted">Tap a player, then tap a lineup box. Goalies can only be placed in goalie boxes.</p>
+  <div class="lineup-roster"><h3>Roster</h3><div class="roster-chip-grid">${roster}</div></div>
+  ${groups.map(([name,slots])=>`<div class="management-section"><h3>${name}</h3><div class="lineup-box-grid">${slots.map(s=>box(s[0],s[1])).join('')}</div></div>`).join('')}
+  <div class="management-section"><h3>Usage</h3><p class="muted">Forward lines must total 100%. Defense pairs must total 100%. Goalies must total 100%. Special teams have no usage percentage.</p>
+  <div class="usage-grid">
+    ${["F1","F2","F3","F4"].map((x,i)=>`<label>Forward Line ${i+1}<input class="usage-input" data-group="F" data-key="${x}" type="number" min="0" max="100" value="${st.usage?.[x]??25}">%</label>`).join('')}
+    ${["D1","D2","D3"].map((x,i)=>`<label>Defense Pair ${i+1}<input class="usage-input" data-group="D" data-key="${x}" type="number" min="0" max="100" value="${st.usage?.[x]??(i<2?35:30)}">%</label>`).join('')}
+    <label>Starting Goalie<input class="usage-input" data-group="G" data-key="G1" type="number" min="0" max="100" value="${st.usage?.G1??70}">%</label>
+    <label>Backup Goalie<input class="usage-input" data-group="G" data-key="G2" type="number" min="0" max="100" value="${st.usage?.G2??30}">%</label>
+  </div><div id="usageTotals" class="muted" style="margin-top:10px"></div></div>
+  <div class="management-section"><h3>Tactics</h3><div class="app-grid">
+  <label>Offensive Tactic<select id="visualOffense"><option>Balanced</option><option>Possession</option><option>Crash the Net</option><option>Run and Gun</option></select></label>
+  <label>Defensive Tactic<select id="visualDefense"><option>Balanced</option><option>Protect the Slot</option><option>Pressure</option><option>Collapse</option></select></label>
+  <label>Forecheck<select id="visualForecheck"><option>1-2-2</option><option>2-1-2</option><option>1-3-1</option></select></label>
+  </div></div>
+  <button class="primary-button" onclick="saveVisualLineup()">Save Lineup & Tactics</button><div id="lineupSaveMsg" class="muted" style="margin-top:10px"></div></div>`;
+  document.querySelectorAll(".usage-input").forEach(x=>x.addEventListener("input",updateUsageTotals));updateUsageTotals();
+}
+function selectLineupPlayer(id){lineupEditorState.selected=id;renderLineupEditor();}
+function placeSelectedPlayer(slot,pos){
+  const p=lineupEditorState.players.find(x=>x.id===lineupEditorState.selected);
+  if(!p)return alert("Tap a player first.");
+  if(!playerEligibleForSlot(p,pos))return alert(pos==="G"?"Only goalies can play goalie.":"That player is not eligible for this slot.");
+  lineupEditorState.lines[slot]=p.id;renderLineupEditor();
+}
+function updateUsageTotals(){
+  const sums={F:0,D:0,G:0};document.querySelectorAll(".usage-input").forEach(x=>sums[x.dataset.group]+=Number(x.value||0));
+  const e=document.getElementById("usageTotals");if(e)e.innerHTML=`Forwards: <strong>${sums.F}%</strong> · Defense: <strong>${sums.D}%</strong> · Goalies: <strong>${sums.G}%</strong>`;
+}
+async function openVisualTeamManagement(teamId){
+  if(!currentUser)return showLogin();
+  showSection("teamManagementSection");const c=document.getElementById("teamManagement");c.innerHTML='<div class="loading">Loading lineup...</div>';
+  const [{data:team,error:te},{data:rr,error:re},{data:set}]=await Promise.all([
+    supabaseClient.from("teams").select("*").eq("id",teamId).single(),
+    supabaseClient.from("rosters").select("player_id,players(id,first_name,last_name,primary_position,secondary_position,overall)").eq("team_id",teamId),
+    supabaseClient.from("team_settings").select("*").eq("team_id",teamId).maybeSingle()
+  ]);
+  if(te||re){c.innerHTML=`<div class="error">${escapeHTML((te||re).message)}</div>`;return;}
+  if(team.owner_id!==currentUser.id){c.innerHTML='<div class="error">You do not own this team.</div>';return;}
+  lineupEditorState={teamId,players:(rr||[]).map(r=>r.players).filter(Boolean),lines:set?.lines||{},usage:set?.line_usage||{},selected:null};
+  renderLineupEditor();
+  const map={visualOffense:set?.offensive_tactic,visualDefense:set?.defensive_tactic,visualForecheck:set?.forecheck};
+  Object.entries(map).forEach(([id,v])=>{if(v&&document.getElementById(id))document.getElementById(id).value=v});
+}
+async function saveVisualLineup(){
+  const sums={F:0,D:0,G:0},usage={};document.querySelectorAll(".usage-input").forEach(x=>{usage[x.dataset.key]=Number(x.value||0);sums[x.dataset.group]+=Number(x.value||0)});
+  if(sums.F!==100||sums.D!==100||sums.G!==100)return alert(`Usage must total exactly 100%. Forwards ${sums.F}%, Defense ${sums.D}%, Goalies ${sums.G}%.`);
+  const g1=lineupEditorState.players.find(p=>p.id===lineupEditorState.lines.G1),g2=lineupEditorState.players.find(p=>p.id===lineupEditorState.lines.G2);
+  if((g1&&g1.primary_position!=="G")||(g2&&g2.primary_position!=="G"))return alert("Only goalies may occupy goalie slots.");
+  const payload={team_id:lineupEditorState.teamId,lines:lineupEditorState.lines,line_usage:usage,starting_goalie_id:g1?.id||null,backup_goalie_id:g2?.id||null,goalie_rotation:usage.G1||70,offensive_tactic:document.getElementById("visualOffense").value,defensive_tactic:document.getElementById("visualDefense").value,forecheck:document.getElementById("visualForecheck").value,updated_at:new Date().toISOString()};
+  const {error}=await supabaseClient.from("team_settings").upsert(payload,{onConflict:"team_id"});
+  const m=document.getElementById("lineupSaveMsg");if(error){m.textContent="Save failed: "+error.message;return;}m.textContent="Lineup saved.";
+}
+// Replace the legacy dropdown editor with the visual lineup editor.
+openTeamManagement=openVisualTeamManagement;
+
 async function openGameDetail(gameId){
   showSection("gameDetailSection");
   const c=document.getElementById("gameDetailContent");
@@ -8015,6 +8104,63 @@ async function retireOwnedPlayer(playerId,name){
   showMyProfile();
 }
 
+
+async function refreshNotificationBadge(){
+  if(!currentUser)return;
+  const {count}=await supabaseClient.from("notifications").select("id",{count:"exact",head:true}).eq("user_id",currentUser.id).eq("read",false);
+  const b=document.getElementById("notificationBadge");
+  if(b)b.textContent=count?`(${count})`:"";
+}
+async function showNotifications(){
+  if(!currentUser){showLogin();return;}
+  showSection("notificationsSection");
+  const c=document.getElementById("notificationsContent");
+  c.innerHTML='<div class="loading">Loading notifications...</div>';
+  const [{data:notes,error:nerr},{data:owned},{data:offers}]=await Promise.all([
+    supabaseClient.from("notifications").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(100),
+    supabaseClient.from("players").select("id,first_name,last_name").eq("created_by",currentUser.id),
+    supabaseClient.from("contract_offers").select("id,player_id,team_id,salary,seasons,projected_role,no_trade_clause,status,created_at").eq("status","active").order("created_at",{ascending:false})
+  ]);
+  if(nerr){c.innerHTML=`<div class="error">${escapeHTML(nerr.message)}</div>`;return;}
+  const ids=new Set((owned||[]).map(p=>p.id));
+  const myOffers=(offers||[]).filter(o=>ids.has(o.player_id));
+  const teamIds=[...new Set(myOffers.map(o=>o.team_id))];
+  const {data:teams}=teamIds.length?await supabaseClient.from("teams").select("id,city,name").in("id",teamIds):{data:[]};
+  const tm=Object.fromEntries((teams||[]).map(t=>[t.id,t]));
+  const pm=Object.fromEntries((owned||[]).map(p=>[p.id,p]));
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Notifications</h2><div class="muted">Player news, contracts, messages and Iceverse updates.</div></div><button class="secondary-button" onclick="markAllNotificationsRead()">Mark all read</button></div>
+  <div class="app-grid">
+    <div class="panel"><h3>Contract Offers</h3>${myOffers.length?`<div class="data-list">${myOffers.map(o=>`<div class="data-row"><span><strong>${escapeHTML(pm[o.player_id]?.first_name||'')} ${escapeHTML(pm[o.player_id]?.last_name||'')}</strong><br><span class="muted">${escapeHTML(tm[o.team_id]?.city||'')} ${escapeHTML(tm[o.team_id]?.name||'Team')} · ${fmtMoney(o.salary)} · ${o.seasons} yr</span></span><span><button class="primary-button" onclick="acceptContractOffer('${o.id}')">Accept</button> <button class="secondary-button" onclick="rejectContractOffer('${o.id}')">Reject</button></span></div>`).join('')}</div>`:'<div class="empty-state">No active contract offers.</div>'}</div>
+    <div class="panel"><h3>Inbox & Player News</h3>${(notes||[]).length?`<div class="data-list">${notes.map(n=>`<div class="data-row"><span><strong>${escapeHTML(n.title)}</strong><br><span class="muted">${escapeHTML(n.body)}</span><br><small>${new Date(n.created_at).toLocaleString()}</small></span>${n.read?'':'<span class="pill">NEW</span>'}</div>`).join('')}</div>`:'<div class="empty-state">No messages yet.</div>'}</div>
+  </div>`;
+}
+async function markAllNotificationsRead(){
+  await supabaseClient.from("notifications").update({read:true}).eq("user_id",currentUser.id).eq("read",false);
+  await showNotifications();refreshNotificationBadge();
+}
+async function showUsernameLookup(){
+  showSection("usernameLookupSection");
+  document.getElementById("usernameLookupContent").innerHTML=`<div class="form-card"><h2>Username Lookup</h2><p class="muted">Find an Iceverse manager by exact username.</p><div style="display:flex;gap:10px"><input id="usernameLookupInput" placeholder="Username"><button class="primary-button" onclick="lookupUsername()">Search</button></div><div id="usernameLookupResult" style="margin-top:18px"></div></div>`;
+}
+async function lookupUsername(){
+  const q=document.getElementById("usernameLookupInput").value.trim(),r=document.getElementById("usernameLookupResult");
+  if(!q)return;
+  const {data,error}=await supabaseClient.rpc("lookup_iceverse_username",{p_username:q});
+  if(error){r.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return;}
+  if(!data?.length){r.innerHTML='<div class="empty-state">No exact username match.</div>';return;}
+  const u=data[0];
+  r.innerHTML=`<div class="panel"><h3>${escapeHTML(u.username)}</h3><div class="muted">Manager Reputation ${u.manager_reputation||0}</div><div class="muted">${u.team_name?`Manages ${escapeHTML(u.team_city||'')} ${escapeHTML(u.team_name)}`:'No team currently owned'}</div></div>`;
+}
+async function showLeagueLeaders(){
+  showSection("leadersSection");
+  const c=document.getElementById("leadersContent");c.innerHTML='<div class="loading">Loading league leaders...</div>';
+  const {data,error}=await supabaseClient.rpc("get_league_leaders");
+  if(error){c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return;}
+  const rows=data||[];
+  const stat=(key,label)=>`<div class="panel"><h3>${label}</h3><div class="data-list">${rows.filter(x=>x.stat_key===key).slice(0,10).map((x,i)=>`<div class="data-row profile-link" onclick="openPlayerProfile('${x.player_id}')"><span>${i+1}. ${escapeHTML(x.player_name)}</span><strong>${x.stat_value}</strong></div>`).join('')||'<div class="empty-state">No stats yet.</div>'}</div></div>`;
+  c.innerHTML=`<div class="section-toolbar"><div><h2>League Leaders</h2><div class="muted">Current regular-season leaders.</div></div></div><div class="app-grid">${stat('points','Points')}${stat('goals','Goals')}${stat('assists','Assists')}${stat('saves','Goalie Saves')}</div>`;
+}
+
 async function showLeagueHub(){
   showSection("leagueHubSection");
   const c=document.getElementById("leagueHubContent");
@@ -8024,6 +8170,8 @@ async function showLeagueHub(){
   <div class="app-grid">
     <button class="panel profile-link" onclick="showStandings()"><h3>Standings</h3><p class="muted">Records, points and division races.</p></button>
     <button class="panel profile-link" onclick="showSchedule()"><h3>Daily Schedule</h3><p class="muted">Today's games and the upcoming calendar.</p></button>
+    <button class="panel profile-link" onclick="showLeagueLeaders()"><h3>League Leaders</h3><p class="muted">Goals, assists, points and goalie leaders.</p></button>
+    <button class="panel profile-link" onclick="showUsernameLookup()"><h3>Manager Lookup</h3><p class="muted">Search Iceverse usernames.</p></button>
     <button class="panel profile-link" onclick="showNews()"><h3>League News</h3><p class="muted">Luke Davenport and Iceverse Network stories.</p></button>
   </div>`;
 }
@@ -8100,9 +8248,16 @@ const TEAM_PURCHASE_COST = 3000;
 const PLAYER_CREATION_COST = 1000;
 const WIN_ICEPOINT_REWARD = 100;
 
-function updateAdminNavigation() {
-  const b = document.getElementById("adminNavButton");
-  if (b) b.style.display = currentUser && currentUser.id === ICEVERSE_ADMIN_ID ? "inline-block" : "none";
+async function updateAdminNavigation(){
+  const admin=document.getElementById("adminNavButton");
+  const notes=document.getElementById("notificationsNavButton");
+  if(notes)notes.style.display=currentUser?"inline-block":"none";
+  if(!admin){return;}
+  admin.style.display="none";
+  if(!currentUser)return;
+  const {data,error}=await supabaseClient.rpc("is_iceverse_admin");
+  if(!error && data===true)admin.style.display="inline-block";
+  refreshNotificationBadge();
 }
 
 async function showAdmin() {
