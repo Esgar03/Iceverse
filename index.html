@@ -1045,6 +1045,20 @@ player.created_by === currentUser.id
           <strong>Personality:</strong>
           ${escapeHTML(player.personality)}
         </p>
+        <p>
+  <strong>Owner:</strong>
+  ${
+    player.profiles?.username
+      ? `<a
+          href="#"
+          onclick="showUserProfile('${player.created_by}'); return false;"
+          style="color: #5da9ff; text-decoration: none;"
+        >
+          ${escapeHTML(player.profiles.username)}
+        </a>`
+      : "NPC"
+  }
+</p>
       </div>
 
       <h2>Attributes</h2>
