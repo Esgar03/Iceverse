@@ -3726,7 +3726,17 @@ async function openPlayerProfile(playerId) {
 
 async function openUserProfile(userId) {
 
-  showSection("userProfileSection");
+  hideAllMainSections();
+
+  const userProfileSection =
+    document.getElementById("userProfileSection");
+
+  userProfileSection.style.display =
+    "block";
+
+  userProfileSection.scrollIntoView({
+    behavior: "smooth"
+  });
 
   const userProfile =
     document.getElementById("userProfile");
