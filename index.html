@@ -2109,70 +2109,259 @@ function showHome() {
 
 function showLeague() {
 
-  const homeSection =
-    document.getElementById(
-      "homeSection"
-    );
+  showHome();
 
-  if (!homeSection) {
-    return;
-  }
-
-  hideAllMainSections();
-
-  homeSection.style.display =
-    "block";
-
-  homeSection.scrollIntoView({
-    behavior: "smooth"
-  });
-
-  loadTeams();
 }
 
 
 function showTeams() {
 
-  const homeSection =
-    document.getElementById(
-      "homeSection"
-    );
+  showHome();
 
-  if (!homeSection) {
-    return;
-  }
-
-  hideAllMainSections();
-
-  homeSection.style.display =
-    "block";
-
-  homeSection.scrollIntoView({
-    behavior: "smooth"
-  });
-
-  loadTeams();
 }
 
 
-/* =========================================================
-   LOAD TEAMS
-   ========================================================= */
+/*
+  ============================================================
+  TEAM SYSTEM
+  ============================================================
+
+  Teams are owned independently from players.
+
+  teams.owner_id
+    = current human team owner
+
+  players.created_by
+    = permanent player owner
+
+  A user may own only one team.
+  The database unique index also enforces this.
+*/
+
+
+/*
+  ------------------------------------------------------------
+  TEAM JERSEY
+  ------------------------------------------------------------
+*/
+
+function getTeamJerseyHTML(
+  team,
+  size = "large"
+) {
+
+  const primaryColor =
+    team.primary_color ||
+    "#1D4ED8";
+
+  const secondaryColor =
+    team.secondary_color ||
+    "#FFFFFF";
+
+  const tertiaryColor =
+    team.tertiary_color ||
+    "#111827";
+
+  let width = 150;
+  let height = 185;
+  let fontSize = 34;
+
+  if (size === "small") {
+    width = 90;
+    height = 110;
+    fontSize = 22;
+  }
+
+  if (size === "medium") {
+    width = 120;
+    height = 150;
+    fontSize = 28;
+  }
+
+  return `
+
+    <div
+      class="team-jersey"
+      style="
+        width: ${width}px;
+        height: ${height}px;
+        margin: 0 auto;
+        border-radius:
+          18px 18px 28px 28px;
+
+        background:
+          ${escapeHTML(primaryColor)};
+
+        border:
+          ${size === "small" ? 5 : 7}px
+          solid
+          ${escapeHTML(tertiaryColor)};
+
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        box-sizing: border-box;
+
+        color:
+          ${escapeHTML(secondaryColor)};
+
+        font-weight: 900;
+
+        font-size: ${fontSize}px;
+
+        overflow: hidden;
+
+        box-shadow:
+          0 8px 18px
+          rgba(0,0,0,0.35);
+      "
+    >
+
+      <!-- Neck -->
+      <div
+        style="
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+
+          width: 38%;
+          height: 15%;
+
+          background:
+            ${escapeHTML(tertiaryColor)};
+
+          border-radius:
+            0 0 18px 18px;
+        "
+      ></div>
+
+
+      <!-- Left sleeve -->
+      <div
+        style="
+          position: absolute;
+          top: 16%;
+          left: -8%;
+
+          width: 35%;
+          height: 48%;
+
+          background:
+            ${escapeHTML(secondaryColor)};
+
+          transform:
+            rotate(14deg);
+
+          opacity: 0.95;
+        "
+      ></div>
+
+
+      <!-- Right sleeve -->
+      <div
+        style="
+          position: absolute;
+          top: 16%;
+          right: -8%;
+
+          width: 35%;
+          height: 48%;
+
+          background:
+            ${escapeHTML(secondaryColor)};
+
+          transform:
+            rotate(-14deg);
+
+          opacity: 0.95;
+        "
+      ></div>
+
+
+      <!-- Chest stripe -->
+      <div
+        style="
+          position: absolute;
+          top: 43%;
+          left: 0;
+
+          width: 100%;
+          height: 11%;
+
+          background:
+            ${escapeHTML(secondaryColor)};
+        "
+      ></div>
+
+
+      <!-- Bottom stripe -->
+      <div
+        style="
+          position: absolute;
+          bottom: 0;
+          left: 0;
+
+          width: 100%;
+          height: 10%;
+
+          background:
+            ${escapeHTML(tertiaryColor)};
+        "
+      ></div>
+
+
+      <!-- Team abbreviation -->
+      <span
+        style="
+          position: relative;
+          z-index: 5;
+
+          text-shadow:
+            2px 2px 3px
+            ${escapeHTML(tertiaryColor)};
+        "
+      >
+        ${escapeHTML(
+          team.abbreviation ||
+          "IHL"
+        )}
+      </span>
+
+    </div>
+
+  `;
+}
+
+
+/*
+  ------------------------------------------------------------
+  LOAD TEAMS
+  ------------------------------------------------------------
+*/
 
 async function loadTeams() {
 
   const teamsContainer =
-    document.getElementById("teams");
+    document.getElementById(
+      "teams"
+    );
 
   if (!teamsContainer) {
+
     console.error(
       "Teams container was not found."
     );
+
     return;
   }
 
   teamsContainer.innerHTML =
     '<div class="loading">Loading Iceverse teams...</div>';
+
 
   try {
 
@@ -2181,12 +2370,15 @@ async function loadTeams() {
         `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id,primary_color,secondary_color,tertiary_color&order=name.asc`,
         {
           headers: {
-            "apikey": SUPABASE_KEY,
+            "apikey":
+              SUPABASE_KEY,
+
             "Authorization":
               `Bearer ${SUPABASE_KEY}`
           }
         }
       );
+
 
     if (!response.ok) {
 
@@ -2203,10 +2395,15 @@ async function loadTeams() {
       );
     }
 
+
     const teams =
       await response.json();
 
-    if (!teams || teams.length === 0) {
+
+    if (
+      !teams ||
+      teams.length === 0
+    ) {
 
       teamsContainer.innerHTML =
         '<div class="loading">No teams found.</div>';
@@ -2214,196 +2411,317 @@ async function loadTeams() {
       return;
     }
 
-    teamsContainer.innerHTML = "";
 
-    teams.forEach(team => {
+    teamsContainer.innerHTML =
+      "";
 
-      const primaryColor =
-        team.primary_color ||
-        "#1D4ED8";
 
-      const secondaryColor =
-        team.secondary_color ||
-        "#FFFFFF";
+    /*
+      Determine whether the current
+      user already owns a team.
+    */
 
-      const tertiaryColor =
-        team.tertiary_color ||
-        "#111827";
+    let ownedTeamId = null;
 
-      const card =
-        document.createElement("div");
 
-      card.className =
-        "team-card";
+    if (currentUser) {
 
-      card.style.cursor =
-        "pointer";
+      const {
+        data: ownedTeams,
+        error: ownedTeamError
+      } =
+        await supabaseClient
+          .from("teams")
+          .select("id")
+          .eq(
+            "owner_id",
+            currentUser.id
+          )
+          .limit(1);
 
-      card.style.borderColor =
-        primaryColor;
 
-      const ownerText =
-        team.owner_id
-          ? "Owned"
-          : "Unclaimed";
+      if (
+        ownedTeamError
+      ) {
 
-      const buttonHTML =
-        team.owner_id
-          ? ""
-          : `
+        console.error(
+          "Owned team lookup error:",
+          ownedTeamError
+        );
+
+      } else if (
+        ownedTeams &&
+        ownedTeams.length > 0
+      ) {
+
+        ownedTeamId =
+          ownedTeams[0].id;
+
+      }
+
+    }
+
+
+    teams.forEach(
+      team => {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+
+        card.className =
+          "team-card";
+
+
+        card.style.cursor =
+          "pointer";
+
+
+        card.style.borderColor =
+          team.primary_color ||
+          "#1D4ED8";
+
+
+        const isOwnedByCurrentUser =
+          currentUser &&
+          team.owner_id ===
+            currentUser.id;
+
+
+        const isOwned =
+          !!team.owner_id;
+
+
+        let statusText =
+          "Unclaimed";
+
+
+        if (isOwnedByCurrentUser) {
+
+          statusText =
+            "Your Team";
+
+        } else if (isOwned) {
+
+          statusText =
+            "Owned";
+
+        }
+
+
+        let actionHTML =
+          "";
+
+
+        if (!isOwned) {
+
+          actionHTML = `
+
             <button
               type="button"
-              class="secondary-button claim-team-button"
+              class="
+                secondary-button
+                claim-team-button
+              "
               style="
                 margin-top: 15px;
               "
             >
               Claim Team
             </button>
+
           `;
 
-      card.innerHTML = `
+        } else if (
+          isOwnedByCurrentUser
+        ) {
 
-        <div
-          class="team-jersey-preview"
-          style="
-            width: 90px;
-            height: 110px;
-            margin: 0 auto 15px;
-            border-radius: 12px 12px 18px 18px;
-            background: ${escapeHTML(primaryColor)};
-            border: 6px solid ${escapeHTML(tertiaryColor)};
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            color: ${escapeHTML(secondaryColor)};
-            font-weight: 900;
-            font-size: 22px;
-            overflow: hidden;
-          "
-        >
+          actionHTML = `
 
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 14px;
-              background: ${escapeHTML(secondaryColor)};
-            "
-          ></div>
+            <button
+              type="button"
+              class="
+                secondary-button
+                customize-team-button
+              "
+              style="
+                margin-top: 15px;
+              "
+            >
+              Customize Team
+            </button>
 
-          <div
-            style="
-              position: absolute;
-              bottom: 0;
-              left: 0;
-              width: 100%;
-              height: 14px;
-              background: ${escapeHTML(tertiaryColor)};
-            "
-          ></div>
-
-          <span
-            style="
-              position: relative;
-              z-index: 2;
-              text-shadow:
-                1px 1px 2px ${escapeHTML(tertiaryColor)};
-            "
-          >
-            ${escapeHTML(
-              team.abbreviation || "IHL"
-            )}
-          </span>
-
-        </div>
-
-
-        <h3>
-          ${escapeHTML(
-            team.name || "Unknown Team"
-          )}
-        </h3>
-
-        <p>
-          <strong>
-            ${escapeHTML(
-              team.abbreviation || "---"
-            )}
-          </strong>
-
-          ${
-            team.city
-              ? " · " +
-                escapeHTML(team.city)
-              : ""
-          }
-        </p>
-
-        <p>
-          <strong>Record:</strong>
-          ${team.wins ?? 0}-
-          ${team.losses ?? 0}-
-          ${team.overtime_losses ?? 0}
-        </p>
-
-        <p>
-          <strong>Status:</strong>
-          ${ownerText}
-        </p>
-
-        ${buttonHTML}
-
-      `;
-
-      card.addEventListener(
-        "click",
-        function(event) {
-
-          if (
-            event.target.closest(
-              ".claim-team-button"
-            )
-          ) {
-            return;
-          }
-
-          openTeamProfile(
-            team.id
-          );
+          `;
 
         }
-      );
 
-      const claimButton =
-        card.querySelector(
-          ".claim-team-button"
-        );
 
-      if (claimButton) {
+        card.innerHTML = `
 
-        claimButton.addEventListener(
+          ${getTeamJerseyHTML(
+            team,
+            "small"
+          )}
+
+
+          <h3>
+            ${escapeHTML(
+              team.name ||
+              "Unknown Team"
+            )}
+          </h3>
+
+
+          <p>
+
+            <strong>
+              ${escapeHTML(
+                team.abbreviation ||
+                "---"
+              )}
+            </strong>
+
+            ${
+              team.city
+                ? " · " +
+                  escapeHTML(
+                    team.city
+                  )
+                : ""
+            }
+
+          </p>
+
+
+          <p>
+
+            <strong>
+              Record:
+            </strong>
+
+            ${team.wins ?? 0}-
+            ${team.losses ?? 0}-
+            ${team.overtime_losses ?? 0}
+
+          </p>
+
+
+          <p>
+
+            <strong>
+              Status:
+            </strong>
+
+            ${statusText}
+
+          </p>
+
+
+          ${actionHTML}
+
+        `;
+
+
+        /*
+          Clicking the card opens
+          the team profile.
+        */
+
+        card.addEventListener(
           "click",
-          async function(event) {
+          function(event) {
 
-            event.stopPropagation();
+            if (
+              event.target.closest(
+                ".claim-team-button"
+              )
+            ) {
+              return;
+            }
 
-            await claimTeam(
+
+            if (
+              event.target.closest(
+                ".customize-team-button"
+              )
+            ) {
+              return;
+            }
+
+
+            openTeamProfile(
               team.id
             );
 
           }
         );
 
+
+        /*
+          Claim button.
+        */
+
+        const claimButton =
+          card.querySelector(
+            ".claim-team-button"
+          );
+
+
+        if (claimButton) {
+
+          claimButton.addEventListener(
+            "click",
+            async function(event) {
+
+              event.stopPropagation();
+
+              await claimTeam(
+                team.id
+              );
+
+            }
+          );
+
+        }
+
+
+        /*
+          Customize button.
+        */
+
+        const customizeButton =
+          card.querySelector(
+            ".customize-team-button"
+          );
+
+
+        if (customizeButton) {
+
+          customizeButton.addEventListener(
+            "click",
+            function(event) {
+
+              event.stopPropagation();
+
+              openTeamCustomize(
+                team.id
+              );
+
+            }
+          );
+
+        }
+
+
+        teamsContainer.appendChild(
+          card
+        );
+
       }
+    );
 
-      teamsContainer.appendChild(card);
-
-    });
 
   } catch (error) {
 
@@ -2412,14 +2730,1727 @@ async function loadTeams() {
       error
     );
 
+
     teamsContainer.innerHTML = `
+
       <div class="error">
-        Unable to load Iceverse teams.<br>
+
+        Unable to load Iceverse teams.
+
+        <br>
+
         ${escapeHTML(
           error.message ||
           "Unknown error"
         )}
+
       </div>
+
+    `;
+
+  }
+
+}
+
+
+/*
+  ------------------------------------------------------------
+  CLAIM TEAM
+  ------------------------------------------------------------
+*/
+
+async function claimTeam(
+  teamId
+) {
+
+  if (!currentUser) {
+
+    alert(
+      "You must be logged in to claim a team."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    First check whether the user
+    already owns a team.
+  */
+
+  const {
+    data: existingTeams,
+    error: existingTeamError
+  } =
+    await supabaseClient
+      .from("teams")
+      .select(
+        "id,name"
+      )
+      .eq(
+        "owner_id",
+        currentUser.id
+      )
+      .limit(1);
+
+
+  if (existingTeamError) {
+
+    console.error(
+      "Existing team check error:",
+      existingTeamError
+    );
+
+    alert(
+      "Unable to check your current team."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    existingTeams &&
+    existingTeams.length > 0
+  ) {
+
+    alert(
+      `You already own ${existingTeams[0].name}. You can only own one team.`
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Confirm the claim.
+  */
+
+  const confirmed =
+    confirm(
+      "Claim this team? You will become its owner."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    /*
+      The owner_id condition is important.
+
+      It means we only update the team
+      if it is still unclaimed.
+    */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("teams")
+        .update({
+          owner_id:
+            currentUser.id
+        })
+        .eq(
+          "id",
+          teamId
+        )
+        .is(
+          "owner_id",
+          null
+        )
+        .select()
+        .single();
+
+
+    if (error) {
+
+      console.error(
+        "Claim team error:",
+        error
+      );
+
+
+      /*
+        PostgreSQL's unique index
+        also protects the one-team rule.
+      */
+
+      if (
+        error.code ===
+        "23505"
+      ) {
+
+        alert(
+          "You can only own one team."
+        );
+
+      } else {
+
+        alert(
+          "Unable to claim this team: " +
+          error.message
+        );
+
+      }
+
+      return;
+
+    }
+
+
+    if (!data) {
+
+      alert(
+        "This team has already been claimed."
+      );
+
+      await loadTeams();
+
+      return;
+
+    }
+
+
+    alert(
+      `${data.name} is now your team!`
+    );
+
+
+    await loadTeams();
+
+
+    openTeamProfile(
+      data.id
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Claim team error:",
+      error
+    );
+
+
+    alert(
+      "Something went wrong while claiming the team."
+    );
+
+  }
+
+}
+
+
+/*
+  ------------------------------------------------------------
+  TEAM PROFILE
+  ------------------------------------------------------------
+*/
+
+async function openTeamProfile(
+  teamId
+) {
+
+  hideAllMainSections();
+
+
+  const teamProfileSection =
+    document.getElementById(
+      "teamProfileSection"
+    );
+
+
+  if (!teamProfileSection) {
+
+    console.error(
+      "Team profile section was not found."
+    );
+
+    return;
+
+  }
+
+
+  teamProfileSection.style.display =
+    "block";
+
+
+  teamProfileSection.scrollIntoView({
+    behavior: "smooth"
+  });
+
+
+  const teamProfile =
+    document.getElementById(
+      "teamProfile"
+    );
+
+
+  teamProfile.innerHTML =
+    '<div class="loading">Loading team...</div>';
+
+
+  try {
+
+    /*
+      Load team.
+    */
+
+    const {
+      data: team,
+      error: teamError
+    } =
+      await supabaseClient
+        .from("teams")
+        .select("*")
+        .eq(
+          "id",
+          teamId
+        )
+        .single();
+
+
+    if (teamError) {
+      throw teamError;
+    }
+
+
+    /*
+      Load owner username.
+    */
+
+    let ownerUsername =
+      null;
+
+
+    if (team.owner_id) {
+
+      const {
+        data: username,
+        error: usernameError
+      } =
+        await supabaseClient.rpc(
+          "get_public_username",
+          {
+            target_user_id:
+              team.owner_id
+          }
+        );
+
+
+      if (usernameError) {
+
+        console.error(
+          "Team owner username error:",
+          usernameError
+        );
+
+      } else {
+
+        ownerUsername =
+          username;
+
+      }
+
+    }
+
+
+    /*
+      Load roster.
+    */
+
+    const {
+      data: rosterRows,
+      error: rosterError
+    } =
+      await supabaseClient
+        .from("rosters")
+        .select(`
+          player_id,
+          players (
+            id,
+            first_name,
+            last_name,
+            age,
+            nationality,
+            primary_position,
+            secondary_position,
+            overall,
+            archetype,
+            jersey_number
+          )
+        `)
+        .eq(
+          "team_id",
+          teamId
+        );
+
+
+    if (rosterError) {
+
+      console.error(
+        "Team roster error:",
+        rosterError
+      );
+
+    }
+
+
+    const roster =
+      rosterRows || [];
+
+
+    /*
+      Determine ownership.
+    */
+
+    const isMyTeam =
+      currentUser &&
+      team.owner_id ===
+        currentUser.id;
+
+
+    /*
+      Owner display.
+    */
+
+    const ownerHTML =
+      team.owner_id &&
+      ownerUsername
+        ? `
+
+          <p>
+
+            <strong>
+              Owner:
+            </strong>
+
+            <a
+              href="#"
+              class="team-owner-link"
+              data-user-id="${team.owner_id}"
+            >
+              ${escapeHTML(
+                ownerUsername
+              )}
+            </a>
+
+          </p>
+
+        `
+        : `
+
+          <p>
+
+            <strong>
+              Owner:
+            </strong>
+
+            Unclaimed
+
+          </p>
+
+        `;
+
+
+    /*
+      Team action.
+    */
+
+    let actionHTML =
+      "";
+
+
+    if (isMyTeam) {
+
+      actionHTML = `
+
+        <button
+          type="button"
+          class="
+            secondary-button
+            team-customize-profile-button
+          "
+          style="
+            margin-right: 10px;
+          "
+        >
+          Customize Team
+        </button>
+
+      `;
+
+    } else if (
+      !team.owner_id
+    ) {
+
+      actionHTML = `
+
+        <button
+          type="button"
+          class="
+            secondary-button
+            team-claim-profile-button
+          "
+        >
+          Claim Team
+        </button>
+
+      `;
+
+    }
+
+
+    /*
+      Roster HTML.
+    */
+
+    let rosterHTML =
+      "";
+
+
+    if (
+      roster.length === 0
+    ) {
+
+      rosterHTML = `
+
+        <div class="loading">
+
+          This team currently has no players.
+
+        </div>
+
+      `;
+
+    } else {
+
+      rosterHTML = `
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns:
+              repeat(
+                auto-fit,
+                minmax(220px, 1fr)
+              );
+            gap: 15px;
+            margin-top: 20px;
+          "
+        >
+
+          ${roster.map(
+            row => {
+
+              const player =
+                row.players;
+
+
+              if (!player) {
+                return "";
+              }
+
+
+              return `
+
+                <div
+                  class="team-card"
+                  data-player-id="${player.id}"
+                  style="
+                    cursor: pointer;
+                  "
+                >
+
+                  <div
+                    style="
+                      font-size: 18px;
+                      font-weight: 800;
+                    "
+                  >
+
+                    ${getFlag(
+                      player.nationality
+                    )}
+
+                    ${escapeHTML(
+                      player.first_name
+                    )}
+
+                    ${escapeHTML(
+                      player.last_name
+                    )}
+
+                  </div>
+
+
+                  <div
+                    class="team-info"
+                    style="
+                      margin-top: 8px;
+                    "
+                  >
+
+                    ${escapeHTML(
+                      player.primary_position
+                    )}
+
+                    ${
+                      player.secondary_position
+                        ? " / " +
+                          escapeHTML(
+                            player.secondary_position
+                          )
+                        : ""
+                    }
+
+                  </div>
+
+
+                  <div
+                    class="team-info"
+                    style="
+                      margin-top: 5px;
+                    "
+                  >
+
+                    Overall
+                    ${player.overall ?? "--"}
+
+                  </div>
+
+
+                  <div
+                    class="team-info"
+                    style="
+                      margin-top: 5px;
+                    "
+                  >
+
+                    ${escapeHTML(
+                      player.archetype ||
+                      ""
+                    )}
+
+                  </div>
+
+
+                  ${
+                    player.jersey_number
+                      ? `
+                        <div
+                          class="team-info"
+                          style="
+                            margin-top: 5px;
+                          "
+                        >
+                          #${player.jersey_number}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              `;
+
+            }
+          ).join("")}
+
+        </div>
+
+      `;
+
+    }
+
+
+    /*
+      Build complete team page.
+    */
+
+    teamProfile.innerHTML = `
+
+      <div class="player-profile-card">
+
+        <button
+          type="button"
+          class="secondary-button"
+          id="backToTeamsButton"
+          style="
+            margin-bottom: 25px;
+          "
+        >
+          ← Back to Teams
+        </button>
+
+
+        <div
+          style="
+            text-align: center;
+            margin-bottom: 30px;
+          "
+        >
+
+          ${getTeamJerseyHTML(
+            team,
+            "large"
+          )}
+
+
+          <h2
+            style="
+              margin-top: 20px;
+            "
+          >
+
+            ${escapeHTML(
+              team.name ||
+              "Unknown Team"
+            )}
+
+          </h2>
+
+
+          <p
+            style="
+              font-size: 18px;
+            "
+          >
+
+            <strong>
+              ${escapeHTML(
+                team.abbreviation ||
+                "---"
+              )}
+            </strong>
+
+            ${
+              team.city
+                ? " · " +
+                  escapeHTML(
+                    team.city
+                  )
+                : ""
+            }
+
+          </p>
+
+        </div>
+
+
+        <div
+          style="
+            margin-bottom: 30px;
+          "
+        >
+
+          ${ownerHTML}
+
+
+          <p>
+
+            <strong>
+              Record:
+            </strong>
+
+            ${team.wins ?? 0}-
+            ${team.losses ?? 0}-
+            ${team.overtime_losses ?? 0}
+
+          </p>
+
+
+          <p>
+
+            <strong>
+              Money:
+            </strong>
+
+            $
+            ${Number(
+              team.money ?? 0
+            ).toLocaleString()}
+
+          </p>
+
+        </div>
+
+
+        <div
+          style="
+            margin-bottom: 25px;
+          "
+        >
+
+          ${actionHTML}
+
+        </div>
+
+
+        <div
+          style="
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top:
+              1px solid #1b3550;
+          "
+        >
+
+          <h3>
+            Roster
+          </h3>
+
+          ${rosterHTML}
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    /*
+      Back button.
+    */
+
+    const backButton =
+      document.getElementById(
+        "backToTeamsButton"
+      );
+
+
+    if (backButton) {
+
+      backButton.addEventListener(
+        "click",
+        function() {
+
+          showTeams();
+
+        }
+      );
+
+    }
+
+
+    /*
+      Owner profile link.
+    */
+
+    const ownerLink =
+      teamProfile.querySelector(
+        ".team-owner-link"
+      );
+
+
+    if (ownerLink) {
+
+      ownerLink.addEventListener(
+        "click",
+        function(event) {
+
+          event.preventDefault();
+
+
+          const userId =
+            this.dataset.userId;
+
+
+          openUserProfile(
+            userId
+          );
+
+        }
+      );
+
+    }
+
+
+    /*
+      Customize button.
+    */
+
+    const customizeButton =
+      teamProfile.querySelector(
+        ".team-customize-profile-button"
+      );
+
+
+    if (customizeButton) {
+
+      customizeButton.addEventListener(
+        "click",
+        function() {
+
+          openTeamCustomize(
+            team.id
+          );
+
+        }
+      );
+
+    }
+
+
+    /*
+      Claim button.
+    */
+
+    const claimButton =
+      teamProfile.querySelector(
+        ".team-claim-profile-button"
+      );
+
+
+    if (claimButton) {
+
+      claimButton.addEventListener(
+        "click",
+        async function() {
+
+          await claimTeam(
+            team.id
+          );
+
+        }
+      );
+
+    }
+
+
+    /*
+      Player cards open player profiles.
+    */
+
+    const playerCards =
+      teamProfile.querySelectorAll(
+        "[data-player-id]"
+      );
+
+
+    playerCards.forEach(
+      card => {
+
+        card.addEventListener(
+          "click",
+          function() {
+
+            openPlayerProfile(
+              this.dataset.playerId
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Team profile error:",
+      error
+    );
+
+
+    teamProfile.innerHTML = `
+
+      <div class="error">
+
+        <p>
+          Unable to load team profile.
+        </p>
+
+        <p>
+          ${escapeHTML(
+            error.message ||
+            "Unknown error"
+          )}
+        </p>
+
+
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="showTeams()"
+        >
+          ← Back to Teams
+        </button>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/*
+  ------------------------------------------------------------
+  TEAM CUSTOMIZATION
+  ------------------------------------------------------------
+*/
+
+async function openTeamCustomize(
+  teamId
+) {
+
+  if (!currentUser) {
+
+    alert(
+      "You must be logged in to customize a team."
+    );
+
+    return;
+
+  }
+
+
+  hideAllMainSections();
+
+
+  const section =
+    document.getElementById(
+      "teamCustomizeSection"
+    );
+
+
+  if (!section) {
+
+    console.error(
+      "Team customization section was not found."
+    );
+
+    return;
+
+  }
+
+
+  section.style.display =
+    "block";
+
+
+  section.scrollIntoView({
+    behavior: "smooth"
+  });
+
+
+  const container =
+    document.getElementById(
+      "teamCustomize"
+    );
+
+
+  container.innerHTML =
+    '<div class="loading">Loading team customization...</div>';
+
+
+  try {
+
+    /*
+      Load the team and verify ownership.
+    */
+
+    const {
+      data: team,
+      error
+    } =
+      await supabaseClient
+        .from("teams")
+        .select("*")
+        .eq(
+          "id",
+          teamId
+        )
+        .single();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (
+      team.owner_id !==
+      currentUser.id
+    ) {
+
+      container.innerHTML = `
+
+        <div class="error">
+
+          You do not own this team.
+
+          <br><br>
+
+          <button
+            type="button"
+            class="secondary-button"
+            id="backUnauthorizedTeamButton"
+          >
+            ← Back to Team
+          </button>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById(
+          "backUnauthorizedTeamButton"
+        )
+        ?.addEventListener(
+          "click",
+          function() {
+
+            openTeamProfile(
+              teamId
+            );
+
+          }
+        );
+
+
+      return;
+
+    }
+
+
+    /*
+      Current colors.
+    */
+
+    const primaryColor =
+      team.primary_color ||
+      "#1D4ED8";
+
+    const secondaryColor =
+      team.secondary_color ||
+      "#FFFFFF";
+
+    const tertiaryColor =
+      team.tertiary_color ||
+      "#111827";
+
+
+    container.innerHTML = `
+
+      <div class="player-profile-card">
+
+        <button
+          type="button"
+          class="secondary-button"
+          id="backToTeamFromCustomize"
+          style="
+            margin-bottom: 25px;
+          "
+        >
+          ← Back to Team
+        </button>
+
+
+        <h2>
+          Customize ${escapeHTML(
+            team.name
+          )}
+        </h2>
+
+
+        <p>
+          Customize your team's identity.
+        </p>
+
+
+        <div
+          style="
+            margin: 30px 0;
+            text-align: center;
+          "
+        >
+
+          <div
+            id="customJerseyPreview"
+          >
+
+            ${getTeamJerseyHTML(
+              team,
+              "large"
+            )}
+
+          </div>
+
+        </div>
+
+
+        <form
+          id="teamCustomizeForm"
+        >
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns:
+                repeat(
+                  auto-fit,
+                  minmax(250px, 1fr)
+                );
+              gap: 20px;
+            "
+          >
+
+            <div>
+
+              <label
+                for="teamNameInput"
+              >
+                Team Name
+              </label>
+
+              <input
+                id="teamNameInput"
+                type="text"
+                value="${escapeHTML(
+                  team.name || ""
+                )}"
+                maxlength="40"
+                required
+              />
+
+            </div>
+
+
+            <div>
+
+              <label
+                for="teamAbbreviationInput"
+              >
+                Abbreviation
+              </label>
+
+              <input
+                id="teamAbbreviationInput"
+                type="text"
+                value="${escapeHTML(
+                  team.abbreviation ||
+                  ""
+                )}"
+                maxlength="5"
+                required
+              />
+
+            </div>
+
+
+            <div>
+
+              <label
+                for="teamCityInput"
+              >
+                City
+              </label>
+
+              <input
+                id="teamCityInput"
+                type="text"
+                value="${escapeHTML(
+                  team.city ||
+                  ""
+                )}"
+                maxlength="40"
+              />
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              margin-top: 30px;
+            "
+          >
+
+            <h3>
+              Team Colors
+            </h3>
+
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns:
+                  repeat(
+                    auto-fit,
+                    minmax(180px, 1fr)
+                  );
+                gap: 20px;
+                margin-top: 15px;
+              "
+            >
+
+              <div>
+
+                <label
+                  for="teamPrimaryColor"
+                >
+                  Primary Color
+                </label>
+
+                <input
+                  id="teamPrimaryColor"
+                  type="color"
+                  value="${escapeHTML(
+                    primaryColor
+                  )}"
+                  style="
+                    width: 100%;
+                    height: 55px;
+                    cursor: pointer;
+                  "
+                />
+
+              </div>
+
+
+              <div>
+
+                <label
+                  for="teamSecondaryColor"
+                >
+                  Secondary Color
+                </label>
+
+                <input
+                  id="teamSecondaryColor"
+                  type="color"
+                  value="${escapeHTML(
+                    secondaryColor
+                  )}"
+                  style="
+                    width: 100%;
+                    height: 55px;
+                    cursor: pointer;
+                  "
+                />
+
+              </div>
+
+
+              <div>
+
+                <label
+                  for="teamTertiaryColor"
+                >
+                  Tertiary Color
+                </label>
+
+                <input
+                  id="teamTertiaryColor"
+                  type="color"
+                  value="${escapeHTML(
+                    tertiaryColor
+                  )}"
+                  style="
+                    width: 100%;
+                    height: 55px;
+                    cursor: pointer;
+                  "
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="teamCustomizeMessage"
+            style="
+              margin-top: 20px;
+              min-height: 24px;
+            "
+          ></div>
+
+
+          <button
+            type="submit"
+            class="secondary-button"
+            style="
+              margin-top: 20px;
+            "
+          >
+            Save Team
+          </button>
+
+
+        </form>
+
+      </div>
+
+    `;
+
+
+    /*
+      Back button.
+    */
+
+    document
+      .getElementById(
+        "backToTeamFromCustomize"
+      )
+      ?.addEventListener(
+        "click",
+        function() {
+
+          openTeamProfile(
+            teamId
+          );
+
+        }
+      );
+
+
+    /*
+      Live jersey preview.
+    */
+
+    const updatePreview =
+      function() {
+
+        const updatedTeam = {
+
+          ...team,
+
+          name:
+            document
+              .getElementById(
+                "teamNameInput"
+              )
+              ?.value ||
+            team.name,
+
+          abbreviation:
+            document
+              .getElementById(
+                "teamAbbreviationInput"
+              )
+              ?.value ||
+            team.abbreviation,
+
+          primary_color:
+            document
+              .getElementById(
+                "teamPrimaryColor"
+              )
+              ?.value ||
+            primaryColor,
+
+          secondary_color:
+            document
+              .getElementById(
+                "teamSecondaryColor"
+              )
+              ?.value ||
+            secondaryColor,
+
+          tertiary_color:
+            document
+              .getElementById(
+                "teamTertiaryColor"
+              )
+              ?.value ||
+            tertiaryColor
+
+        };
+
+
+        const preview =
+          document.getElementById(
+            "customJerseyPreview"
+          );
+
+
+        if (preview) {
+
+          preview.innerHTML =
+            getTeamJerseyHTML(
+              updatedTeam,
+              "large"
+            );
+
+        }
+
+      };
+
+
+    [
+      "teamNameInput",
+      "teamAbbreviationInput",
+      "teamPrimaryColor",
+      "teamSecondaryColor",
+      "teamTertiaryColor"
+    ].forEach(
+      id => {
+
+        document
+          .getElementById(id)
+          ?.addEventListener(
+            "input",
+            updatePreview
+          );
+
+      }
+    );
+
+
+    /*
+      Save team.
+    */
+
+    const form =
+      document.getElementById(
+        "teamCustomizeForm"
+      );
+
+
+    form.addEventListener(
+      "submit",
+      async function(event) {
+
+        event.preventDefault();
+
+
+        const message =
+          document.getElementById(
+            "teamCustomizeMessage"
+          );
+
+
+        const name =
+          document
+            .getElementById(
+              "teamNameInput"
+            )
+            .value
+            .trim();
+
+
+        const abbreviation =
+          document
+            .getElementById(
+              "teamAbbreviationInput"
+            )
+            .value
+            .trim()
+            .toUpperCase();
+
+
+        const city =
+          document
+            .getElementById(
+              "teamCityInput"
+            )
+            .value
+            .trim();
+
+
+        const primary_color =
+          document
+            .getElementById(
+              "teamPrimaryColor"
+            )
+            .value;
+
+
+        const secondary_color =
+          document
+            .getElementById(
+              "teamSecondaryColor"
+            )
+            .value;
+
+
+        const tertiary_color =
+          document
+            .getElementById(
+              "teamTertiaryColor"
+            )
+            .value;
+
+
+        if (!name) {
+
+          message.textContent =
+            "Team name is required.";
+
+          return;
+
+        }
+
+
+        if (!abbreviation) {
+
+          message.textContent =
+            "Team abbreviation is required.";
+
+          return;
+
+        }
+
+
+        if (
+          abbreviation.length >
+          5
+        ) {
+
+          message.textContent =
+            "Abbreviation must be 5 characters or fewer.";
+
+          return;
+
+        }
+
+
+        message.textContent =
+          "Saving team...";
+
+
+        try {
+
+          /*
+            owner_id is included in
+            the filter AND checked
+            before the update.
+
+            This prevents another user
+            from editing the team.
+          */
+
+          const {
+            data: updatedTeam,
+            error: updateError
+          } =
+            await supabaseClient
+              .from("teams")
+              .update({
+
+                name,
+
+                abbreviation,
+
+                city:
+                  city || null,
+
+                primary_color,
+
+                secondary_color,
+
+                tertiary_color
+
+              })
+              .eq(
+                "id",
+                teamId
+              )
+              .eq(
+                "owner_id",
+                currentUser.id
+              )
+              .select()
+              .single();
+
+
+          if (updateError) {
+
+            throw updateError;
+
+          }
+
+
+          message.textContent =
+            "Team saved!";
+
+
+          /*
+            Open the updated team page.
+          */
+
+          setTimeout(
+            function() {
+
+              openTeamProfile(
+                updatedTeam.id
+              );
+
+            },
+            400
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Team save error:",
+            error
+          );
+
+
+          message.textContent =
+            "Unable to save team: " +
+            error.message;
+
+        }
+
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Team customization error:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="error">
+
+        Unable to load team customization.
+
+        <br><br>
+
+        ${escapeHTML(
+          error.message ||
+          "Unknown error"
+        )}
+
+        <br><br>
+
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="showTeams()"
+        >
+          ← Back to Teams
+        </button>
+
+      </div>
+
     `;
 
   }
