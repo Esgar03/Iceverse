@@ -1243,27 +1243,27 @@ const ATTRIBUTE_LABELS = {
    ========================================================= */
 
 const ARCHETYPES = {
-
-  "Sniper": {
+  sniper: {
+    displayName: "Sniper",
     positions: ["C", "LW", "RW"],
     preferred: [
       "wrist_shot",
       "shot_accuracy",
       "shot_power",
       "offensive_positioning",
-      "puck_control",
-      "tipping"
+      "shooting"
     ],
     weaker: [
-      "defensive_iq",
-      "defensive_positioning",
-      "shot_blocking"
+      "shot_blocking",
+      "hitting",
+      "defensive_positioning"
     ],
     description:
-      "A scoring-focused forward built around shooting, finishing and attacking space."
+      "A dangerous scorer who excels at creating and finishing scoring chances."
   },
 
-  "Playmaker": {
+  playmaker: {
+    displayName: "Playmaker",
     positions: ["C", "LW", "RW"],
     preferred: [
       "passing",
@@ -1274,47 +1274,51 @@ const ARCHETYPES = {
       "offensive_iq"
     ],
     weaker: [
-      "shot_power",
-      "hitting"
+      "shot_blocking",
+      "hitting",
+      "shot_power"
     ],
     description:
-      "A creative forward who generates offense through passing, vision and puck control."
+      "A creative offensive player who creates chances through passing and puck control."
   },
 
-  "Power Forward": {
+  power_forward: {
+    displayName: "Power Forward",
     positions: ["C", "LW", "RW"],
     preferred: [
       "strength",
       "shot_power",
       "puck_protection",
-      "tipping",
       "hitting",
-      "wrist_shot"
+      "tipping",
+      "offensive_positioning"
     ],
     weaker: [
       "agility",
       "acceleration"
     ],
     description:
-      "A strong net-front forward who uses size, strength, physical play and tipping to create offense."
+      "A strong net-front presence who uses size, strength and physicality to create offense."
   },
 
-  "Two-Way Forward": {
+  two_way_forward: {
+    displayName: "Two-Way Forward",
     positions: ["C", "LW", "RW"],
     preferred: [
       "defensive_iq",
       "defensive_positioning",
+      "offensive_iq",
       "passing",
       "endurance",
-      "hockey_iq",
-      "offensive_iq"
+      "hockey_iq"
     ],
     weaker: [],
     description:
-      "A balanced forward who contributes at both ends of the ice."
+      "A balanced forward who contributes effectively at both ends of the ice."
   },
 
-  "Dangler": {
+  dangler: {
+    displayName: "Dangler",
     positions: ["C", "LW", "RW"],
     preferred: [
       "deking",
@@ -1332,7 +1336,8 @@ const ARCHETYPES = {
       "A highly skilled puck carrier who beats defenders with speed, agility and creativity."
   },
 
-  "Enforcer": {
+  enforcer: {
+    displayName: "Enforcer",
     positions: ["C", "LW", "RW"],
     preferred: [
       "strength",
@@ -1344,32 +1349,35 @@ const ARCHETYPES = {
     weaker: [
       "deking",
       "passing",
-      "vision",
+      "agility",
       "shot_accuracy"
     ],
     description:
-      "A physical forward built around strength, durability and intimidation."
+      "A physical forward who brings toughness, intimidation and physical play."
   },
 
-  "Offensive Defenseman": {
+  offensive_defenseman: {
+    displayName: "Offensive Defenseman",
     positions: ["LD", "RD"],
     preferred: [
       "wrist_shot",
       "slap_shot",
+      "shot_power",
       "passing",
       "puck_control",
       "offensive_iq",
-      "speed"
+      "vision"
     ],
     weaker: [
       "hitting",
-      "defensive_positioning"
+      "shot_blocking"
     ],
     description:
-      "A defenseman who drives offense through puck movement, shooting and transition."
+      "A defenseman who contributes heavily to puck movement and offensive production."
   },
 
-  "Stay-at-Home Defenseman": {
+  stay_at_home_defenseman: {
+    displayName: "Stay-at-Home Defenseman",
     positions: ["LD", "RD"],
     preferred: [
       "defensive_iq",
@@ -1381,32 +1389,35 @@ const ARCHETYPES = {
     ],
     weaker: [
       "deking",
-      "shot_power"
+      "shot_power",
+      "offensive_iq"
     ],
     description:
-      "A defensive specialist focused on preventing chances and protecting the net."
+      "A defensive specialist focused on shutting down opposing attacks."
   },
 
-  "Two-Way Defenseman": {
+  two_way_defenseman: {
+    displayName: "Two-Way Defenseman",
     positions: ["LD", "RD"],
     preferred: [
       "defensive_iq",
+      "defensive_positioning",
       "passing",
       "puck_control",
-      "speed",
       "hockey_iq",
-      "defensive_positioning"
+      "endurance"
     ],
     weaker: [],
     description:
-      "A balanced defenseman capable of contributing offensively and defensively."
+      "A balanced defenseman who contributes in every area of the game."
   },
 
-  "Physical Defenseman": {
+  physical_defenseman: {
+    displayName: "Physical Defenseman",
     positions: ["LD", "RD"],
     preferred: [
-      "strength",
       "hitting",
+      "strength",
       "durability",
       "balance",
       "defensive_positioning",
@@ -1415,20 +1426,21 @@ const ARCHETYPES = {
     weaker: [
       "agility",
       "deking",
-      "vision"
+      "shot_accuracy"
     ],
     description:
-      "A physical defender who uses size, strength and contact to shut down opponents."
+      "A physical defender who uses strength and toughness to control the defensive zone."
   },
 
-  "Puck-Moving Defenseman": {
+  puck_moving_defenseman: {
+    displayName: "Puck-Moving Defenseman",
     positions: ["LD", "RD"],
     preferred: [
       "passing",
       "puck_control",
       "speed",
-      "acceleration",
       "agility",
+      "acceleration",
       "vision"
     ],
     weaker: [
@@ -1436,65 +1448,76 @@ const ARCHETYPES = {
       "shot_blocking"
     ],
     description:
-      "A mobile defenseman who starts the transition game and moves the puck efficiently."
+      "A mobile defenseman who excels at moving the puck and starting the transition game."
   },
 
-  "Butterfly": {
+  butterfly: {
+    displayName: "Butterfly",
     positions: ["G"],
     preferred: [
-      "goalie_positioning",
+      "positioning",
       "rebound_control",
       "glove",
-      "blocker"
+      "blocker",
+      "goalie_iq"
     ],
     weaker: [
       "puck_handling"
     ],
     description:
-      "A structured goalie who relies on positioning and controlled saves."
+      "A technically sound goalie who relies on positioning and controlled saves."
   },
 
-  "Athletic": {
+  athletic: {
+    displayName: "Athletic",
     positions: ["G"],
     preferred: [
       "reflexes",
       "athleticism",
-      "rebound_control",
+      "recovery",
+      "agility",
       "goalie_iq"
     ],
-    weaker: [],
+    weaker: [
+      "puck_handling"
+    ],
     description:
-      "A reactive goalie who relies on athleticism and recovery ability."
+      "An explosive goalie who relies on athleticism, reflexes and recovery."
   },
 
-  "Positioning": {
+  positioning: {
+    displayName: "Positioning",
     positions: ["G"],
     preferred: [
-      "goalie_positioning",
+      "positioning",
       "goalie_iq",
       "rebound_control",
-      "discipline"
+      "composure"
     ],
-    weaker: [],
+    weaker: [
+      "puck_handling",
+      "athleticism"
+    ],
     description:
-      "A technically sound goalie who minimizes mistakes through positioning and awareness."
+      "A calm goalie who relies on positioning, anticipation and consistency."
   },
 
-  "Aggressive": {
+  aggressive: {
+    displayName: "Aggressive",
     positions: ["G"],
     preferred: [
       "puck_handling",
       "athleticism",
-      "reflexes",
+      "positioning",
+      "recovery",
       "goalie_iq"
     ],
     weaker: [
-      "discipline"
+      "rebound_control"
     ],
     description:
       "An aggressive goalie who challenges shooters and actively handles the puck."
   }
-
 };
 
 
