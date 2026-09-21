@@ -371,525 +371,728 @@
    * ============================================
    * SUPABASE CONNECTION
    * ============================================
-   *
-   * Replace the two values below with the
-   * Project URL and Publishable/Anon Key
-   * from your Supabase project.
    */
 
-  const SUPABASE_URL = "https://lmafzfqsnzvwckpjjuwe.supabase.co";
+  const SUPABASE_URL =
+    "https://lmafzfqsnzvwckpjjuwe.supabase.co";
 
-const SUPABASE_KEY = "sb_publishable_2raUKflPiqDcX_Pn-EfN_Q_u2MvT4AO";
+  const SUPABASE_KEY =
+    "sb_publishable_2raUKflPiqDcX_Pn-EfN_Q_u2MvT4AO";
 
-const { createClient } = supabase;
+  const { createClient } = supabase;
 
-const supabaseClient = createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-let currentUser = null;
+  const supabaseClient = createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  let currentUser = null;
 
 
-async function loadCurrentUser() {
+  /*
+   * ============================================
+   * CURRENT USER
+   * ============================================
+   */
 
-  const {
-    data: { user },
-    error
-  } = await supabaseClient.auth.getUser();
+  async function loadCurrentUser() {
 
-  if (error) {
-
-    console.error(
-      "Unable to get current user:",
+    const {
+      data: { user },
       error
-    );
+    } = await supabaseClient.auth.getUser();
 
-    currentUser = null;
-    return;
+    if (error) {
+
+      console.error(
+        "Unable to get current user:",
+        error
+      );
+
+      currentUser = null;
+      return;
+    }
+
+    currentUser = user;
   }
 
-  currentUser = user;
-}
+
+  /*
+   * ============================================
+   * AUTH NAVIGATION
+   * ============================================
+   */
+
   function updateAuthNavigation() {
 
-  const loginButton =
-    document.getElementById("loginButton");
+    const loginButton =
+      document.getElementById("loginButton");
 
-  const signupButton =
-    document.getElementById("signupButton");
+    const signupButton =
+      document.getElementById("signupButton");
 
-  const logoutButton =
-    document.getElementById("logoutButton");
+    const logoutButton =
+      document.getElementById("logoutButton");
 
-  if (!loginButton || !signupButton || !logoutButton) {
-    return;
+    if (!loginButton || !signupButton || !logoutButton) {
+      return;
+    }
+
+    if (currentUser) {
+
+      loginButton.style.display = "none";
+      signupButton.style.display = "none";
+      logoutButton.style.display = "inline-block";
+
+    } else {
+
+      loginButton.style.display = "inline-block";
+      signupButton.style.display = "inline-block";
+      logoutButton.style.display = "none";
+
+    }
   }
 
-  if (currentUser) {
 
-    loginButton.style.display = "none";
-    signupButton.style.display = "none";
-    logoutButton.style.display = "inline-block";
+  /*
+   * ============================================
+   * LOG OUT
+   * ============================================
+   */
 
-  } else {
+  async function logoutUser() {
 
-    loginButton.style.display = "inline-block";
-    signupButton.style.display = "inline-block";
-    logoutButton.style.display = "none";
+    const { error } =
+      await supabaseClient.auth.signOut();
 
-  }
-}
+    if (error) {
 
+      console.error(
+        "Unable to log out:",
+        error
+      );
 
-async function logoutUser() {
+      return;
+    }
 
-  const { error } =
-    await supabaseClient.auth.signOut();
+    currentUser = null;
 
-  if (error) {
+    updateAuthNavigation();
 
-    console.error(
-      "Unable to log out:",
-      error
-    );
-
-    return;
+    showHome();
   }
 
-  currentUser = null;
 
-  updateAuthNavigation();
+  /*
+   * ============================================
+   * AUTH PAGE
+   * ============================================
+   */
 
-  showHome();
-}
   function showSignup() {
 
-  document.querySelector(".hero").style.display = "none";
-  document.querySelector(".section").style.display = "none";
-  document.getElementById("playersSection").style.display = "none";
-  document.getElementById("playerProfileSection").style.display = "none";
+    document.querySelector(".hero").style.display = "none";
 
-  const authSection =
-    document.getElementById("authSection");
+    document.getElementById("authSection").style.display = "block";
 
-  authSection.style.display = "block";
+    document.querySelector(".section").style.display = "none";
 
-  document.getElementById("authTitle").textContent =
-    "Create Account";
+    document.getElementById("playersSection").style.display = "none";
 
-  document.getElementById("authButton").textContent =
-    "Create Account";
-
-  document.getElementById("authButton").onclick =
-    createAccount;
-
-  document.getElementById("authMessage").textContent = "";
-
-  authSection.scrollIntoView({
-    behavior: "smooth"
-  });
-}
+    document.getElementById("playerProfileSection").style.display = "none";
 
 
-function showLogin() {
+    document.getElementById("authTitle").textContent =
+      "Create Account";
 
-  document.querySelector(".hero").style.display = "none";
-  document.querySelector(".section").style.display = "none";
-  document.getElementById("playersSection").style.display = "none";
-  document.getElementById("playerProfileSection").style.display = "none";
+    document.getElementById("authButton").textContent =
+      "Create Account";
 
-  const authSection =
-    document.getElementById("authSection");
+    document.getElementById("authButton").onclick =
+      createAccount;
 
-  authSection.style.display = "block";
+    document.getElementById("authUsername").style.display =
+      "block";
 
-  document.getElementById("authTitle").textContent =
-    "Log In";
-
-  document.getElementById("authButton").textContent =
-    "Log In";
-
-  document.getElementById("authButton").onclick =
-    loginUser;
-
-  document.getElementById("authMessage").textContent = "";
-
-  authSection.scrollIntoView({
-    behavior: "smooth"
-  });
-}
+    document.getElementById("authMessage").textContent = "";
 
 
-aasync function createAccount() {
-  const username =
-    document.getElementById("authUsername").value.trim();
+    document.getElementById("authUsername").value = "";
+    document.getElementById("authEmail").value = "";
+    document.getElementById("authPassword").value = "";
 
-  const email =
-    document.getElementById("authEmail").value.trim();
 
-  const password =
-    document.getElementById("authPassword").value;
-
-  const message =
-    document.getElementById("authMessage");
-
-  if (!username || !email || !password) {
-    message.textContent =
-      "Please enter a username, email, and password.";
-    return;
-  }
-
-  message.textContent =
-    "Creating account...";
-
-  const {
-    data,
-    error
-  } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password
-  });
-
-  if (error) {
-    console.error(error);
-    message.textContent = error.message;
-    return;
-  }
-
-  if (!data.user) {
-    message.textContent =
-      "Account could not be created.";
-    return;
-  }
-
-  currentUser = data.user;
-
-  const {
-    error: profileError
-  } = await supabaseClient
-    .from("profiles")
-    .upsert({
-      id: data.user.id,
-      username: username
+    document.getElementById("authSection").scrollIntoView({
+      behavior: "smooth"
     });
-
-  if (profileError) {
-    console.error("Profile error:", profileError);
-
-    message.textContent =
-      "Account created, but username could not be saved.";
-
-    return;
   }
 
-  updateAuthNavigation();
 
-  message.textContent =
-    "Account created successfully!";
+  function showLogin() {
 
-  showHome();
-}
+    document.querySelector(".hero").style.display = "none";
+
+    document.getElementById("authSection").style.display = "block";
+
+    document.querySelector(".section").style.display = "none";
+
+    document.getElementById("playersSection").style.display = "none";
+
+    document.getElementById("playerProfileSection").style.display = "none";
 
 
-async function loginUser() {
+    document.getElementById("authTitle").textContent =
+      "Log In";
 
-  const email =
-    document.getElementById("authEmail").value.trim();
+    document.getElementById("authButton").textContent =
+      "Log In";
 
-  const password =
-    document.getElementById("authPassword").value;
+    document.getElementById("authButton").onclick =
+      loginUser;
 
-  const message =
-    document.getElementById("authMessage");
+    document.getElementById("authUsername").style.display =
+      "none";
 
-  if (!email || !password) {
+    document.getElementById("authMessage").textContent = "";
 
-    message.textContent =
-      "Please enter an email and password.";
 
-    return;
+    document.getElementById("authEmail").value = "";
+    document.getElementById("authPassword").value = "";
+
+
+    document.getElementById("authSection").scrollIntoView({
+      behavior: "smooth"
+    });
   }
 
-  message.textContent =
-    "Logging in...";
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth.signInWithPassword({
+  /*
+   * ============================================
+   * CREATE ACCOUNT
+   * ============================================
+   */
+
+  async function createAccount() {
+
+    const username =
+      document.getElementById("authUsername").value.trim();
+
+    const email =
+      document.getElementById("authEmail").value.trim();
+
+    const password =
+      document.getElementById("authPassword").value;
+
+    const message =
+      document.getElementById("authMessage");
+
+
+    if (!username || !email || !password) {
+
+      message.textContent =
+        "Please enter a username, email, and password.";
+
+      return;
+    }
+
+
+    message.textContent =
+      "Creating account...";
+
+
+    const {
+      data,
+      error
+    } = await supabaseClient.auth.signUp({
       email: email,
       password: password
     });
 
-  if (error) {
 
-    console.error(error);
+    if (error) {
+
+      console.error(error);
+
+      message.textContent =
+        error.message;
+
+      return;
+    }
+
+
+    if (!data.user) {
+
+      message.textContent =
+        "Account could not be created.";
+
+      return;
+    }
+
+
+    currentUser = data.user;
+
+
+    /*
+     * Save username to profiles
+     */
+
+    const {
+      error: profileError
+    } = await supabaseClient
+      .from("profiles")
+      .upsert({
+        id: data.user.id,
+        username: username
+      });
+
+
+    if (profileError) {
+
+      console.error(
+        "Profile error:",
+        profileError
+      );
+
+      message.textContent =
+        "Account created, but username could not be saved.";
+
+      return;
+    }
+
+
+    updateAuthNavigation();
+
 
     message.textContent =
-      error.message;
+      "Account created successfully!";
 
-    return;
+
+    showHome();
   }
 
-  currentUser = data.user;
 
-  updateAuthNavigation();
+  /*
+   * ============================================
+   * LOG IN
+   * ============================================
+   */
 
-  message.textContent =
-    "Logged in successfully!";
+  async function loginUser() {
 
-  showHome();
-  
-}
+    const email =
+      document.getElementById("authEmail").value.trim();
 
-/*
- * ============================================
- * LOAD TEAMS
+    const password =
+      document.getElementById("authPassword").value;
+
+    const message =
+      document.getElementById("authMessage");
+
+
+    if (!email || !password) {
+
+      message.textContent =
+        "Please enter an email and password.";
+
+      return;
+    }
+
+
+    message.textContent =
+      "Logging in...";
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+
+    if (error) {
+
+      console.error(error);
+
+      message.textContent =
+        error.message;
+
+      return;
+    }
+
+
+    currentUser = data.user;
+
+
+    updateAuthNavigation();
+
+
+    message.textContent =
+      "Logged in successfully!";
+
+
+    showHome();
+  }
+
+
+  /*
+   * ============================================
+   * LOAD TEAMS
    * ============================================
    */
 
   async function loadTeams() {
-  const container = document.getElementById("teams");
 
-  try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
-      {
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
+    const container =
+      document.getElementById("teams");
+
+
+    try {
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
         }
+      );
+
+
+      const responseText =
+        await response.text();
+
+
+      if (!response.ok) {
+
+        console.error(
+          "Supabase teams error:",
+          response.status,
+          responseText
+        );
+
+
+        container.innerHTML = `
+          <div class="error">
+            Supabase error ${response.status}:<br>
+            ${escapeHTML(responseText)}
+          </div>
+        `;
+
+        return;
       }
-    );
 
-    const responseText = await response.text();
 
-    if (!response.ok) {
-      console.error("Supabase teams error:", response.status, responseText);
+      const teams =
+        JSON.parse(responseText);
+
+
+      if (teams.length === 0) {
+
+        container.innerHTML =
+          '<div class="loading">No teams currently exist.</div>';
+
+        return;
+      }
+
+
+      container.innerHTML = "";
+
+
+      teams.forEach(team => {
+
+        const card =
+          document.createElement("div");
+
+
+        card.className =
+          "team-card";
+
+
+        card.innerHTML = `
+          <div class="team-name">
+            ${escapeHTML(team.name)}
+          </div>
+
+          <div class="team-info">
+            ${escapeHTML(team.city)}
+            · ${escapeHTML(team.abbreviation)}
+          </div>
+
+          <div class="team-info">
+            Record:
+            ${team.wins}-${team.losses}-${team.overtime_losses}
+          </div>
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "Unable to load teams:",
+        error
+      );
+
 
       container.innerHTML = `
         <div class="error">
-          Supabase error ${response.status}:<br>
-          ${escapeHTML(responseText)}
+          JavaScript error while loading teams:<br>
+          ${escapeHTML(error.message)}
         </div>
       `;
-
-      return;
     }
-
-    const teams = JSON.parse(responseText);
-
-    if (teams.length === 0) {
-      container.innerHTML =
-        '<div class="loading">No teams currently exist.</div>';
-      return;
-    }
-
-    container.innerHTML = "";
-
-    teams.forEach(team => {
-      const card = document.createElement("div");
-
-      card.className = "team-card";
-
-      card.innerHTML = `
-        <div class="team-name">
-          ${escapeHTML(team.name)}
-        </div>
-
-        <div class="team-info">
-          ${escapeHTML(team.city)}
-          · ${escapeHTML(team.abbreviation)}
-        </div>
-
-        <div class="team-info">
-          Record:
-          ${team.wins}-${team.losses}-${team.overtime_losses}
-        </div>
-      `;
-
-      container.appendChild(card);
-    });
-
-  } catch (error) {
-
-    console.error("Unable to load teams:", error);
-
-    container.innerHTML = `
-      <div class="error">
-        JavaScript error while loading teams:<br>
-        ${escapeHTML(error.message)}
-      </div>
-    `;
   }
-}
 
 
   /*
    * ============================================
    * BASIC NAVIGATION
    * ============================================
-   *
-   * These will become real pages later.
    */
 
   function showHome() {
 
-  document.querySelector(".hero").style.display = "block";
+    document.querySelector(".hero").style.display =
+      "block";
 
-  document.querySelector(".section").style.display = "block";
+    document.getElementById("authSection").style.display =
+      "none";
 
-  document.getElementById("playersSection").style.display = "none";
+    document.getElementById("playersSection").style.display =
+      "none";
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+    document.getElementById("playerProfileSection").style.display =
+      "none";
 
-}
-   
+    document.querySelector(".hero").nextElementSibling.style.display =
+      "block";
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
 
   function showLeague() {
-    document.querySelector(".section").scrollIntoView({
+
+    document.querySelector(".hero").nextElementSibling.scrollIntoView({
       behavior: "smooth"
     });
   }
+
 
   function showTeams() {
-    document.querySelector(".section").scrollIntoView({
+
+    document.querySelector(".hero").nextElementSibling.scrollIntoView({
       behavior: "smooth"
     });
   }
 
-  async function showPlayers() {
-  document.querySelector(".hero").style.display = "none";
-  document.querySelector(".section").style.display = "none";
-
-  document.getElementById("playerProfileSection").style.display = "none";
-
-  const playersSection = document.getElementById("playersSection");
-  playersSection.style.display = "block";
-
-  playersSection.scrollIntoView({
-    behavior: "smooth"
-  });
-
-  await loadPlayers();
-}
-async function loadPlayers() {
-
-  const container = document.getElementById("players");
-
-  container.innerHTML =
-    '<div class="loading">Loading Iceverse players...</div>';
-
-  try {
-
-    const response = await fetch(
-  `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,player_attributes(*),rosters(team_id,teams(name,abbreviation))&order=overall.desc`,
-  {
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": `Bearer ${SUPABASE_KEY}`
-    }
-  }
-);
-
-    if (!response.ok) {
-      throw new Error("Unable to load players.");
-    }
-
-    const players = await response.json();
-
-    window.iceversePlayers = players;
-
-    displayPlayers(players);
-
-  } catch (error) {
-
-    console.error(error);
-
-    container.innerHTML = `
-      <div class="error">
-        Unable to load Iceverse players.
-      </div>
-    `;
-
-  }
-}
-function displayPlayers(players) {
-
-  const container = document.getElementById("players");
-
-  if (players.length === 0) {
-
-    container.innerHTML =
-      '<div class="loading">No players found.</div>';
-
-    return;
-  }
-
-  container.innerHTML = "";
-
-  players.forEach(player => {
-
-    const card = document.createElement("div");
-
-    card.className = "team-card";
-
-    card.innerHTML = `
-      <div
-  class="team-name"
-  style="cursor: pointer;"
-  onclick="openPlayerProfile('${player.id}')"
->
-  ${escapeHTML(player.first_name)}
-  ${escapeHTML(player.last_name)}
-</div>
-
-      <div class="team-info">
-        ${escapeHTML(player.primary_position)}
-        · Age ${player.age}
-        · Overall ${player.overall}
-      </div>
-
-      <div class="team-info">
-        ${escapeHTML(player.archetype)}
-        · ${escapeHTML(player.personality)}
-      </div>
-    `;
-
-    container.appendChild(card);
-
-  });
-}function filterPlayers() {
-
-  const search =
-    document.getElementById("playerSearch")
-      .value
-      .toLowerCase();
-
-  const players =
-    window.iceversePlayers || [];
-
-  const filtered =
-    players.filter(player => {
-
-      const fullName =
-        `${player.first_name} ${player.last_name}`
-          .toLowerCase();
-
-      return fullName.includes(search);
-
-    });
-
-  displayPlayers(filtered);
-}
 
   /*
-   * Prevent database text from being interpreted
-   * as HTML.
+   * ============================================
+   * PLAYERS PAGE
+   * ============================================
+   */
+
+  async function showPlayers() {
+
+    document.querySelector(".hero").style.display =
+      "none";
+
+    document.getElementById("authSection").style.display =
+      "none";
+
+    document.querySelector(".hero").nextElementSibling.style.display =
+      "none";
+
+    document.getElementById("playerProfileSection").style.display =
+      "none";
+
+
+    const playersSection =
+      document.getElementById("playersSection");
+
+
+    playersSection.style.display =
+      "block";
+
+
+    playersSection.scrollIntoView({
+      behavior: "smooth"
+    });
+
+
+    await loadPlayers();
+  }
+
+
+  async function loadPlayers() {
+
+    const container =
+      document.getElementById("players");
+
+
+    container.innerHTML =
+      '<div class="loading">Loading Iceverse players...</div>';
+
+
+    try {
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,profiles(username),player_attributes(*),rosters(team_id,jersey_number,teams(name,abbreviation))&order=overall.desc`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+
+      if (!response.ok) {
+
+        const errorText =
+          await response.text();
+
+        console.error(
+          "Supabase players error:",
+          response.status,
+          errorText
+        );
+
+        throw new Error(
+          `Supabase error ${response.status}`
+        );
+      }
+
+
+      const players =
+        await response.json();
+
+
+      window.iceversePlayers =
+        players;
+
+
+      displayPlayers(players);
+
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      container.innerHTML = `
+        <div class="error">
+          Unable to load Iceverse players.<br>
+          ${escapeHTML(error.message)}
+        </div>
+      `;
+    }
+  }
+
+
+  function displayPlayers(players) {
+
+    const container =
+      document.getElementById("players");
+
+
+    if (players.length === 0) {
+
+      container.innerHTML =
+        '<div class="loading">No players found.</div>';
+
+      return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    players.forEach(player => {
+
+      const card =
+        document.createElement("div");
+
+
+      card.className =
+        "team-card";
+
+
+      card.innerHTML = `
+        <div
+          class="team-name"
+          style="cursor: pointer;"
+          onclick="openPlayerProfile('${player.id}')"
+        >
+          ${escapeHTML(player.first_name)}
+          ${escapeHTML(player.last_name)}
+        </div>
+
+        <div class="team-info">
+          ${escapeHTML(player.primary_position)}
+          · Age ${player.age}
+          · Overall ${player.overall}
+        </div>
+
+        <div class="team-info">
+          ${escapeHTML(player.archetype)}
+          · ${escapeHTML(player.personality)}
+        </div>
+      `;
+
+
+      container.appendChild(card);
+
+    });
+  }
+
+
+  function filterPlayers() {
+
+    const search =
+      document.getElementById("playerSearch")
+        .value
+        .toLowerCase();
+
+
+    const players =
+      window.iceversePlayers || [];
+
+
+    const filtered =
+      players.filter(player => {
+
+        const fullName =
+          `${player.first_name} ${player.last_name}`
+            .toLowerCase();
+
+
+        return fullName.includes(search);
+
+      });
+
+
+    displayPlayers(filtered);
+  }
+
+
+  /*
+   * ============================================
+   * ESCAPE HTML
+   * ============================================
    */
 
   function escapeHTML(value) {
@@ -900,420 +1103,668 @@ function displayPlayers(players) {
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
-
   }
 
 
   /*
-   * Start Iceverse
+   * ============================================
+   * PLAYER PROFILE
+   * ============================================
    */
 
-  loadCurrentUser().then(() => {
-  updateAuthNavigation();
-});
+  function openPlayerProfile(playerId) {
 
-loadTeams();
-  
-function openPlayerProfile(playerId) {
-  const players = window.iceversePlayers || [];
-  const player = players.find(
-    p => p.id === playerId
-  );
-
-  if (!player) {
-    return;
-  }
-
-  document.querySelector(".hero").style.display = "none";
-  document.getElementById("playersSection").style.display = "none";
-  document.getElementById("playerProfileSection").style.display = "block";
-
-  const profileSection =
-    document.getElementById("playerProfileSection");
-
-  const profile =
-    document.getElementById("playerProfile");
-
-  const roster = player.rosters?.[0];
-  const team = roster?.teams;
-
-  const teamName = team?.name ?? "Free Agent";
-  const teamAbbreviation = team?.abbreviation ?? "";
-
-  profile.innerHTML = `
-    <div style="max-width: 900px; margin: 0 auto;">
-
-      <div style="
-        background: linear-gradient(135deg, #102a43, #071525);
-        border: 1px solid #294766;
-        border-radius: 18px;
-        padding: 30px;
-        margin-bottom: 30px;
-      ">
-
-        <div style="
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 20px;
-          flex-wrap: wrap;
-        ">
-
-          <div>
-            <h1 style="
-              margin: 0 0 10px 0;
-              font-size: 36px;
-            ">
-              ${escapeHTML(player.first_name)}
-              ${escapeHTML(player.last_name)}
-            </h1>
-
-            <div style="
-              color: #9fb3c8;
-              font-size: 18px;
-            ">
-              ${escapeHTML(player.primary_position)}
-              • Age ${player.age}
-              • Overall ${player.overall}
-            </div>
-          </div>
-
-          <div style="
-            font-size: 48px;
-            font-weight: bold;
-            color: #ffffff;
-          ">
-            ${roster?.jersey_number
-              ? "#" + roster.jersey_number
-              : "—"}
-          </div>
-
-        </div>
-
-        <div class="team-info" style="margin-top: 25px;">
-          <strong>Team:</strong>
-          ${escapeHTML(teamName)}
-          ${teamAbbreviation
-            ? ` (${escapeHTML(teamAbbreviation)})`
-            : ""}
-        </div>
-
-        <div class="team-info" style="margin-top: 10px;">
-          <strong>Jersey Number:</strong>
-          ${roster?.jersey_number
-            ? "#" + roster.jersey_number
-            : "Not assigned"}
-        </div>
-
-        ${
-       !roster &&
-currentUser &&
-player.created_by === currentUser.id
-            ? `
-              <button
-                onclick="startPlayerSigning('${player.id}')"
-                style="
-                  margin-top: 25px;
-                  padding: 14px 24px;
-                  border: none;
-                  border-radius: 10px;
-                  background: #2f80ed;
-                  color: white;
-                  font-size: 16px;
-                  font-weight: bold;
-                  cursor: pointer;
-                "
-              >
-                Sign Player
-              </button>
-            `
-            : ""
-        }
-
-      </div>
-
-      <h2>Player Bio</h2>
-
-      <div style="
-        background: #102a43;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 30px;
-      ">
-        <p>
-          <strong>Position:</strong>
-          ${escapeHTML(player.primary_position)}
-        </p>
-
-        <p>
-          <strong>Age:</strong>
-          ${player.age}
-        </p>
-
-        <p>
-          <strong>Overall:</strong>
-          ${player.overall}
-        </p>
-
-        <p>
-          <strong>Archetype:</strong>
-          ${escapeHTML(player.archetype)}
-        </p>
-
-        <p>
-          <strong>Personality:</strong>
-          ${escapeHTML(player.personality)}
-        </p>
-        <p>
-  <strong>Owner:</strong>
-  ${
-    player.profiles?.username
-      ? `<a
-          href="#"
-          onclick="showUserProfile('${player.created_by}'); return false;"
-          style="color: #5da9ff; text-decoration: none;"
-        >
-          ${escapeHTML(player.profiles.username)}
-        </a>`
-      : "NPC"
-  }
-</p>
-      </div>
-
-      <h2>Attributes</h2>
-
-      <div style="
-        background: #102a43;
-        border-radius: 12px;
-        padding: 20px;
-      ">
-
-        <h3>SKATING</h3>
-        <p>
-          Speed:
-          ${player.player_attributes?.[0]?.speed ?? "—"}
-        </p>
-
-        <p>
-          Acceleration:
-          ${player.player_attributes?.[0]?.acceleration ?? "—"}
-        </p>
-
-        <p>
-          Agility:
-          ${player.player_attributes?.[0]?.agility ?? "—"}
-        </p>
-
-        <h3>OFFENSE</h3>
-        <p>
-          Shooting:
-          ${player.player_attributes?.[0]?.shooting ?? "—"}
-        </p>
-
-        <p>
-          Passing:
-          ${player.player_attributes?.[0]?.passing ?? "—"}
-        </p>
-
-        <p>
-          Puck Control:
-          ${player.player_attributes?.[0]?.puck_control ?? "—"}
-        </p>
-
-      </div>
-
-    </div>
-  `;
-
-  profileSection.scrollIntoView({ behavior: "smooth" });
-}
+    const players =
+      window.iceversePlayers || [];
 
 
-async function startPlayerSigning(playerId) {
-  const players = window.iceversePlayers || [];
+    const player =
+      players.find(
+        p => p.id === playerId
+      );
 
-  const player = players.find(
-    p => p.id === playerId
-  );
 
-  if (!player) {
-    return;
-  }
-
-  const profile =
-    document.getElementById("playerProfile");
-
-  profile.innerHTML = `
-    <div style="
-      max-width: 900px;
-      margin: 0 auto;
-    ">
-
-      <div style="
-        background: linear-gradient(135deg, #102a43, #071525);
-        padding: 30px;
-        border-radius: 18px;
-        border: 1px solid #244a6b;
-        margin-bottom: 30px;
-      ">
-
-        <h1 style="
-          margin: 0 0 10px 0;
-          font-size: 36px;
-        ">
-          Sign ${escapeHTML(player.first_name)}
-          ${escapeHTML(player.last_name)}
-        </h1>
-
-        <div style="
-          color: #9fc5e8;
-          font-size: 18px;
-        ">
-          Choose a team
-        </div>
-
-      </div>
-
-      <h2>Available Teams</h2>
-
-      <div id="signingTeams">
-        <div class="loading">
-          Loading teams...
-        </div>
-      </div>
-
-    </div>
-  `;
-
-  try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,owner_id,money&order=name.asc`,
-      {
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Unable to load teams.");
-    }
-
-    const teams = await response.json();
-
-    const container =
-      document.getElementById("signingTeams");
-
-    container.innerHTML = "";
-
-    if (teams.length === 0) {
-      container.innerHTML = `
-        <div class="loading">
-          No teams are currently available.
-        </div>
-      `;
+    if (!player) {
       return;
     }
 
-    teams.forEach(team => {
 
-      const card =
-        document.createElement("div");
+    document.querySelector(".hero").style.display =
+      "none";
 
-      card.style.cssText = `
-        background: #102a43;
-        border: 1px solid #244a6b;
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 15px;
-      `;
+    document.getElementById("authSection").style.display =
+      "none";
 
-      const isUnowned =
-        team.owner_id === null;
+    document.getElementById("playersSection").style.display =
+      "none";
 
-      card.innerHTML = `
+    document.getElementById("playerProfileSection").style.display =
+      "block";
+
+
+    const profileSection =
+      document.getElementById("playerProfileSection");
+
+
+    const profile =
+      document.getElementById("playerProfile");
+
+
+    const roster =
+      player.rosters?.[0];
+
+
+    const team =
+      roster?.teams;
+
+
+    const teamName =
+      team?.name ?? "Free Agent";
+
+
+    const teamAbbreviation =
+      team?.abbreviation ?? "";
+
+
+    const ownerName =
+      player.profiles?.username;
+
+
+    profile.innerHTML = `
+      <div style="max-width: 900px; margin: 0 auto;">
+
         <div style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 20px;
-          flex-wrap: wrap;
+          background: linear-gradient(135deg, #102a43, #071525);
+          border: 1px solid #294766;
+          border-radius: 18px;
+          padding: 30px;
+          margin-bottom: 30px;
         ">
 
-          <div>
-            <h3 style="
-              margin: 0 0 6px 0;
-            ">
-              ${escapeHTML(team.name)}
-            </h3>
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+          ">
 
-            <div style="
-              color: #9fc5e8;
-            ">
-              ${escapeHTML(team.city)}
-              · ${escapeHTML(team.abbreviation)}
+            <div>
+
+              <h1 style="
+                margin: 0 0 10px 0;
+                font-size: 36px;
+              ">
+                ${escapeHTML(player.first_name)}
+                ${escapeHTML(player.last_name)}
+              </h1>
+
+              <div style="
+                color: #9fb3c8;
+                font-size: 18px;
+              ">
+                ${escapeHTML(player.primary_position)}
+                • Age ${player.age}
+                • Overall ${player.overall}
+              </div>
+
             </div>
 
             <div style="
-              margin-top: 8px;
-              color: ${isUnowned ? "#7dd3fc" : "#9fb3c8"};
+              font-size: 48px;
               font-weight: bold;
+              color: #ffffff;
             ">
-              ${
-                isUnowned
-                  ? "Unowned — Automatic Contract"
-                  : "Owner Required — Contract Offer"
-              }
+              ${roster?.jersey_number
+                ? "#" + roster.jersey_number
+                : "—"}
             </div>
+
           </div>
 
-          <button
-            type="button"
-            onclick="chooseSigningTeam(
-              '${player.id}',
-              '${team.id}'
-            )"
-            style="
-              padding: 12px 20px;
-              border: none;
-              border-radius: 8px;
-              background: #2f80ed;
-              color: white;
-              font-weight: bold;
-              cursor: pointer;
-            "
-          >
-            Choose Team
-          </button>
+
+          <div class="team-info" style="margin-top: 25px;">
+
+            <strong>Team:</strong>
+
+            ${escapeHTML(teamName)}
+
+            ${teamAbbreviation
+              ? ` (${escapeHTML(teamAbbreviation)})`
+              : ""}
+
+          </div>
+
+
+          <div class="team-info" style="margin-top: 10px;">
+
+            <strong>Jersey Number:</strong>
+
+            ${roster?.jersey_number
+              ? "#" + roster.jersey_number
+              : "Not assigned"}
+
+          </div>
+
+
+          ${
+            !roster &&
+            currentUser
+              ? `
+                <button
+                  onclick="startPlayerSigning('${player.id}')"
+                  style="
+                    margin-top: 25px;
+                    padding: 14px 24px;
+                    border: none;
+                    border-radius: 10px;
+                    background: #2f80ed;
+                    color: white;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                  "
+                >
+                  Sign Player
+                </button>
+              `
+              : ""
+          }
 
         </div>
-      `;
 
-      container.appendChild(card);
-    });
 
-  } catch (error) {
+        <h2>Player Bio</h2>
 
-    console.error(error);
 
-    document.getElementById("signingTeams").innerHTML = `
-      <div class="error">
-        Unable to load available teams.
+        <div style="
+          background: #102a43;
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 30px;
+        ">
+
+          <p>
+            <strong>Position:</strong>
+            ${escapeHTML(player.primary_position)}
+          </p>
+
+          <p>
+            <strong>Age:</strong>
+            ${player.age}
+          </p>
+
+          <p>
+            <strong>Overall:</strong>
+            ${player.overall}
+          </p>
+
+          <p>
+            <strong>Archetype:</strong>
+            ${escapeHTML(player.archetype)}
+          </p>
+
+          <p>
+            <strong>Personality:</strong>
+            ${escapeHTML(player.personality)}
+          </p>
+
+          <p>
+            <strong>Owner:</strong>
+
+            ${
+              ownerName
+                ? `<a
+                    href="#"
+                    onclick="showUserProfile('${player.created_by}'); return false;"
+                    style="
+                      color: #5da9ff;
+                      text-decoration: none;
+                    "
+                  >
+                    ${escapeHTML(ownerName)}
+                  </a>`
+                : "NPC"
+            }
+
+          </p>
+
+        </div>
+
+
+        <h2>Attributes</h2>
+
+
+        <div style="
+          background: #102a43;
+          border-radius: 12px;
+          padding: 20px;
+        ">
+
+          <h3>SKATING</h3>
+
+          <p>
+            Speed:
+            ${player.player_attributes?.[0]?.speed ?? "—"}
+          </p>
+
+          <p>
+            Acceleration:
+            ${player.player_attributes?.[0]?.acceleration ?? "—"}
+          </p>
+
+          <p>
+            Agility:
+            ${player.player_attributes?.[0]?.agility ?? "—"}
+          </p>
+
+
+          <h3>OFFENSE</h3>
+
+          <p>
+            Shooting:
+            ${player.player_attributes?.[0]?.shooting ?? "—"}
+          </p>
+
+          <p>
+            Passing:
+            ${player.player_attributes?.[0]?.passing ?? "—"}
+          </p>
+
+          <p>
+            Puck Control:
+            ${player.player_attributes?.[0]?.puck_control ?? "—"}
+          </p>
+
+        </div>
+
       </div>
     `;
+
+
+    profileSection.scrollIntoView({
+      behavior: "smooth"
+    });
   }
-}
 
 
-function chooseSigningTeam(playerId, teamId) {
+  /*
+   * ============================================
+   * USER PROFILE
+   * ============================================
+   */
 
-  alert(
-    "Team selected. The contract offer and jersey number selection will be added next."
-  );
-}
-  
+  async function showUserProfile(userId) {
+
+    if (!userId) {
+      return;
+    }
+
+
+    const profileSection =
+      document.getElementById("playerProfileSection");
+
+
+    const profile =
+      document.getElementById("playerProfile");
+
+
+    document.querySelector(".hero").style.display =
+      "none";
+
+    document.getElementById("authSection").style.display =
+      "none";
+
+    document.getElementById("playersSection").style.display =
+      "none";
+
+    profileSection.style.display =
+      "block";
+
+
+    profile.innerHTML = `
+      <div style="
+        max-width: 900px;
+        margin: 0 auto;
+      ">
+
+        <div style="
+          background: linear-gradient(135deg, #102a43, #071525);
+          border: 1px solid #294766;
+          border-radius: 18px;
+          padding: 30px;
+        ">
+
+          <h1>
+            User Profile
+          </h1>
+
+          <div
+            id="userProfileContent"
+            class="loading"
+            style="margin-top: 20px;"
+          >
+            Loading user...
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+
+    try {
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=id,username`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `Supabase error ${response.status}`
+        );
+      }
+
+
+      const profiles =
+        await response.json();
+
+
+      const userProfileContent =
+        document.getElementById("userProfileContent");
+
+
+      if (!profiles.length) {
+
+        userProfileContent.innerHTML =
+          "User profile not found.";
+
+        return;
+      }
+
+
+      const user =
+        profiles[0];
+
+
+      userProfileContent.innerHTML = `
+        <p style="font-size: 22px;">
+          <strong>
+            ${escapeHTML(user.username || "Unknown User")}
+          </strong>
+        </p>
+      `;
+
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      document.getElementById("userProfileContent").innerHTML = `
+        <div class="error">
+          Unable to load user profile.
+        </div>
+      `;
+    }
+
+
+    profileSection.scrollIntoView({
+      behavior: "smooth"
+    });
+  }
+
+
+  /*
+   * ============================================
+   * PLAYER SIGNING
+   * ============================================
+   */
+
+  async function startPlayerSigning(playerId) {
+
+    const players =
+      window.iceversePlayers || [];
+
+
+    const player =
+      players.find(
+        p => p.id === playerId
+      );
+
+
+    if (!player) {
+      return;
+    }
+
+
+    const profile =
+      document.getElementById("playerProfile");
+
+
+    profile.innerHTML = `
+      <div style="
+        max-width: 900px;
+        margin: 0 auto;
+      ">
+
+        <div style="
+          background: linear-gradient(135deg, #102a43, #071525);
+          padding: 30px;
+          border-radius: 18px;
+          border: 1px solid #244a6b;
+          margin-bottom: 30px;
+        ">
+
+          <h1 style="
+            margin: 0 0 10px 0;
+            font-size: 36px;
+          ">
+            Sign ${escapeHTML(player.first_name)}
+            ${escapeHTML(player.last_name)}
+          </h1>
+
+          <div style="
+            color: #9fc5e8;
+            font-size: 18px;
+          ">
+            Choose a team
+          </div>
+
+        </div>
+
+
+        <h2>
+          Available Teams
+        </h2>
+
+
+        <div id="signingTeams">
+
+          <div class="loading">
+            Loading teams...
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+
+    try {
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,owner_id,money&order=name.asc`,
+        {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Unable to load teams."
+        );
+      }
+
+
+      const teams =
+        await response.json();
+
+
+      const container =
+        document.getElementById("signingTeams");
+
+
+      container.innerHTML = "";
+
+
+      if (teams.length === 0) {
+
+        container.innerHTML = `
+          <div class="loading">
+            No teams are currently available.
+          </div>
+        `;
+
+        return;
+      }
+
+
+      teams.forEach(team => {
+
+        const card =
+          document.createElement("div");
+
+
+        card.style.cssText = `
+          background: #102a43;
+          border: 1px solid #244a6b;
+          border-radius: 14px;
+          padding: 20px;
+          margin-bottom: 15px;
+        `;
+
+
+        const isUnowned =
+          team.owner_id === null;
+
+
+        card.innerHTML = `
+
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+          ">
+
+            <div>
+
+              <h3 style="
+                margin: 0 0 6px 0;
+              ">
+                ${escapeHTML(team.name)}
+              </h3>
+
+              <div style="
+                color: #9fc5e8;
+              ">
+                ${escapeHTML(team.city)}
+                · ${escapeHTML(team.abbreviation)}
+              </div>
+
+              <div style="
+                margin-top: 8px;
+                color: ${isUnowned ? "#7dd3fc" : "#9fb3c8"};
+                font-weight: bold;
+              ">
+
+                ${
+                  isUnowned
+                    ? "Unowned — Automatic Contract"
+                    : "Owner Required — Contract Offer"
+                }
+
+              </div>
+
+            </div>
+
+
+            <button
+              type="button"
+              onclick="chooseSigningTeam(
+                '${player.id}',
+                '${team.id}'
+              )"
+              style="
+                padding: 12px 20px;
+                border: none;
+                border-radius: 8px;
+                background: #2f80ed;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+              "
+            >
+              Choose Team
+            </button>
+
+          </div>
+        `;
+
+
+        container.appendChild(card);
+
+      });
+
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      document.getElementById("signingTeams").innerHTML = `
+        <div class="error">
+          Unable to load available teams.
+        </div>
+      `;
+    }
+  }
+
+
+  function chooseSigningTeam(playerId, teamId) {
+
+    alert(
+      "Team selected. The contract offer and jersey number selection will be added next."
+    );
+  }
+
+
+  /*
+   * ============================================
+   * START ICEVERSE
+   * ============================================
+   */
+
+  loadCurrentUser().then(() => {
+    updateAuthNavigation();
+  });
+
+
+  loadTeams();
+
 </script>
-
-</body>
-</html>
