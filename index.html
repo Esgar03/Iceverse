@@ -1942,10 +1942,6 @@ async function loginUser() {
 
 function hideAllMainSections() {
 
-  /*
-    Hide the hero section.
-  */
-
   const hero =
     document.querySelector(".hero");
 
@@ -1954,150 +1950,77 @@ function hideAllMainSections() {
   }
 
 
-  /*
-    Hide authentication section.
-  */
-
   const authSection =
-    document.getElementById(
-      "authSection"
-    );
+    document.getElementById("authSection");
 
   if (authSection) {
     authSection.style.display = "none";
   }
 
 
-  /*
-    Hide the home/team listing section.
-  */
-
   const homeSection =
-    document.getElementById(
-      "homeSection"
-    );
+    document.getElementById("homeSection");
 
   if (homeSection) {
     homeSection.style.display = "none";
   }
 
 
-  /*
-    Hide the section immediately following
-    the hero, if one exists.
-
-    Kept for compatibility with the
-    existing page structure.
-  */
-
-  if (
-    hero &&
-    hero.nextElementSibling &&
-    !hero.nextElementSibling.id
-  ) {
-
-    hero.nextElementSibling.style.display =
-      "none";
-
-  }
-
-
-  /*
-    Hide Players.
-  */
-
   const playersSection =
-    document.getElementById(
-      "playersSection"
-    );
+    document.getElementById("playersSection");
 
   if (playersSection) {
     playersSection.style.display = "none";
   }
 
 
-  /*
-    Hide Create Player.
-  */
-
   const createPlayerSection =
-    document.getElementById(
-      "createPlayerSection"
-    );
+    document.getElementById("createPlayerSection");
 
   if (createPlayerSection) {
-    createPlayerSection.style.display =
-      "none";
+    createPlayerSection.style.display = "none";
   }
 
-
-  /*
-    Hide Player Profile.
-  */
 
   const playerProfileSection =
-    document.getElementById(
-      "playerProfileSection"
-    );
+    document.getElementById("playerProfileSection");
 
   if (playerProfileSection) {
-    playerProfileSection.style.display =
-      "none";
+    playerProfileSection.style.display = "none";
   }
 
-
-  /*
-    Hide User Profile.
-  */
 
   const userProfileSection =
-    document.getElementById(
-      "userProfileSection"
-    );
+    document.getElementById("userProfileSection");
 
   if (userProfileSection) {
-    userProfileSection.style.display =
-      "none";
+    userProfileSection.style.display = "none";
   }
 
-
-  /*
-    Hide Team Profile.
-  */
 
   const teamProfileSection =
-    document.getElementById(
-      "teamProfileSection"
-    );
+    document.getElementById("teamProfileSection");
 
   if (teamProfileSection) {
-    teamProfileSection.style.display =
-      "none";
+    teamProfileSection.style.display = "none";
   }
 
-
-  /*
-    Hide Team Customization.
-  */
 
   const teamCustomizeSection =
-    document.getElementById(
-      "teamCustomizeSection"
-    );
+    document.getElementById("teamCustomizeSection");
 
   if (teamCustomizeSection) {
-    teamCustomizeSection.style.display =
-      "none";
+    teamCustomizeSection.style.display = "none";
   }
+
+
   const teamManagementSection =
-    document.getElementById(
-      "teamManagementSection"
-    );
+    document.getElementById("teamManagementSection");
 
   if (teamManagementSection) {
-    teamManagementSection.style.display =
-      "none";
+    teamManagementSection.style.display = "none";
   }
+
 }
 
 
