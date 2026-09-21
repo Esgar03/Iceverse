@@ -807,111 +807,69 @@ function showLogin() {
 
   async function loadTeams() {
 
-    const container =
-      document.getElementById("teams");
+  const teamsContainer = document.getElementById("teams");
 
+  teamsContainer.innerHTML = "Loading teams...";
 
-    try {
+  try {
 
-     const response = await fetch(
-  `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,player_attributes(*),rosters(team_id,jersey_number,teams(name,abbreviation))&order=overall.desc`,
-  {
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": `Bearer ${SUPABASE_KEY}`
-    }
-  }
-);
-
-
-      const responseText =
-        await response.text();
-
-
-      if (!response.ok) {
-
-        console.error(
-          "Supabase teams error:",
-          response.status,
-          responseText
-        );
-
-
-        container.innerHTML = `
-          <div class="error">
-            Supabase error ${response.status}:<br>
-            ${escapeHTML(responseText)}
-          </div>
-        `;
-
-        return;
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
+      {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
       }
+    );
 
-
-      const teams =
-        JSON.parse(responseText);
-
-
-      if (teams.length === 0) {
-
-        container.innerHTML =
-          '<div class="loading">No teams currently exist.</div>';
-
-        return;
-      }
-
-
-      container.innerHTML = "";
-
-
-      teams.forEach(team => {
-
-        const card =
-          document.createElement("div");
-
-
-        card.className =
-          "team-card";
-
-
-        card.innerHTML = `
-          <div class="team-name">
-            ${escapeHTML(team.name)}
-          </div>
-
-          <div class="team-info">
-            ${escapeHTML(team.city)}
-            · ${escapeHTML(team.abbreviation)}
-          </div>
-
-          <div class="team-info">
-            Record:
-            ${team.wins}-${team.losses}-${team.overtime_losses}
-          </div>
-        `;
-
-
-        container.appendChild(card);
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        "Unable to load teams:",
-        error
-      );
-
-
-      container.innerHTML = `
-        <div class="error">
-          JavaScript error while loading teams:<br>
-          ${escapeHTML(error.message)}
-        </div>
-      `;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Team loading error:", errorText);
+      teamsContainer.innerHTML =
+        "Unable to load Iceverse teams.";
+      return;
     }
+
+    const teams = await response.json();
+
+    if (!teams || teams.length === 0) {
+      teamsContainer.innerHTML = "No teams found.";
+      return;
+    }
+
+    teamsContainer.innerHTML = teams.map(team => `
+      <div class="team-card">
+
+        <h3>${escapeHTML(team.name || "Unknown Team")}</h3>
+
+        <p>
+          <strong>Abbreviation:</strong>
+          ${escapeHTML(team.abbreviation || "---")}
+        </p>
+
+        <p>
+          <strong>City:</strong>
+          ${escapeHTML(team.city || "---")}
+        </p>
+
+        <p>
+          <strong>Record:</strong>
+          ${team.wins ?? 0}-${team.losses ?? 0}-${team.overtime_losses ?? 0}
+        </p>
+
+      </div>
+    `).join("");
+
+  } catch (error) {
+
+    console.error("Team loading error:", error);
+
+    teamsContainer.innerHTML =
+      "Unable to load Iceverse teams.";
+
   }
+}
 
 
   /*
