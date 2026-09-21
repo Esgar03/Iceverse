@@ -313,7 +313,7 @@ async function loadCurrentUser() {
     try {
 
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,wins,losses,overtime_losses&order=name`,
+        `${SUPABASE_URL}/rest/v1/players?select=id,first_name,last_name,age,primary_position,overall,archetype,personality,created_by,player_attributes(*),rosters(team_id,teams(name,abbreviation))&order=overall.desc`,
         {
           headers: {
             "apikey": SUPABASE_KEY,
