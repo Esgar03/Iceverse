@@ -8736,7 +8736,7 @@ async function submitPlayerCreation(){
   const hand=document.getElementById("playerHandedness")?.value||"Left";
   const nationality=document.getElementById("playerNationality")?.value||"USA";
   const archetype=document.getElementById("playerArchetype")?.value||"Two-Way Forward";
-  const personality=document.getElementById("playerPersonality")?.value||"Balanced";
+  const personality=document.getElementById("playerPersonality")?.value||"Team Player";
   const height=parseInt(document.getElementById("playerHeight")?.value||"72",10);
   const weight=parseInt(document.getElementById("playerWeight")?.value||"190",10);
 
@@ -8845,6 +8845,73 @@ async function runSimulationLab(){
   if(re){box.innerHTML=`<div class="error">${escapeHTML(re.message)}</div>`;return;}
   box.innerHTML=`<div class="metric-card"><div class="muted">FINAL</div><div class="metric-value">${r.home_score} – ${r.away_score}</div><div class="muted">Engine ${escapeHTML(r.engine_version||"Iceverse")} · Seed ${seed}</div></div>`;
 }
+</script>
+
+
+<script>
+/* ICEVERSE V12.3B — canonical personality enum UI */
+const ICEVERSE_PERSONALITIES=[
+ "Leader","Quiet","Competitive","Team Player","Big Ego","Money-Focused",
+ "Loyal","Ambitious","Hot-Headed","Media-Friendly","Introverted",
+ "Workaholic","Laid-Back"
+];
+
+function ivInstallPersonalityPicker(){
+ const form =
+   document.getElementById("playerPersonality") ||
+   document.querySelector('[name="personality"]');
+
+ if(form){
+   if(form.tagName==="SELECT"){
+     const current=form.value;
+     form.innerHTML=ICEVERSE_PERSONALITIES.map(x =>
+       `<option value="${escapeHTML(x)}">${escapeHTML(x)}</option>`
+     ).join("");
+     form.value=ICEVERSE_PERSONALITIES.includes(current)?current:"Team Player";
+     form.id="playerPersonality";
+   } else {
+     const select=document.createElement("select");
+     select.id="playerPersonality";
+     select.name="personality";
+     select.innerHTML=ICEVERSE_PERSONALITIES.map(x =>
+       `<option value="${escapeHTML(x)}"${x==="Team Player"?" selected":""}>${escapeHTML(x)}</option>`
+     ).join("");
+     form.replaceWith(select);
+   }
+   return;
+ }
+
+ // Older creation forms had no personality field. Add it before their submit button.
+ const container =
+   document.getElementById("createPlayerContent") ||
+   document.getElementById("playersContent");
+ if(!container)return;
+ const submit=[...container.querySelectorAll("button")].find(b =>
+   /create player|finish creation|create$/i.test((b.textContent||"").trim())
+ );
+ if(!submit)return;
+ const wrap=document.createElement("label");
+ wrap.style.display="block";
+ wrap.style.marginTop="12px";
+ wrap.innerHTML=`Personality
+   <select id="playerPersonality">
+    ${ICEVERSE_PERSONALITIES.map(x=>`<option value="${escapeHTML(x)}"${x==="Team Player"?" selected":""}>${escapeHTML(x)}</option>`).join("")}
+   </select>
+   <div class="muted" style="margin-top:5px">Personality influences chemistry, contracts and career behavior.</div>`;
+ submit.parentNode.insertBefore(wrap,submit);
+}
+
+// Wrap every known player-creation opener so the picker is installed after render.
+["showCreatePlayer","openCreatePlayer","showPlayerCreator"].forEach(name=>{
+ const old=window[name];
+ if(typeof old==="function"){
+   window[name]=async function(...args){
+     const r=await old.apply(this,args);
+     setTimeout(ivInstallPersonalityPicker,0);
+     return r;
+   };
+ }
+});
 </script>
 
 </body>
