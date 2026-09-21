@@ -2083,32 +2083,75 @@ function showHome() {
 
   hideAllMainSections();
 
-  document.querySelector(".hero").style.display =
-    "block";
+  const homeSection =
+    document.getElementById(
+      "homeSection"
+    );
 
-  document.querySelector(".hero").nextElementSibling.style.display =
+  if (!homeSection) {
+    console.error(
+      "Home section was not found."
+    );
+    return;
+  }
+
+  homeSection.style.display =
     "block";
 
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
+
+  loadTeams();
 }
 
 
 function showLeague() {
 
-  document.querySelector(".hero").nextElementSibling.scrollIntoView({
+  const homeSection =
+    document.getElementById(
+      "homeSection"
+    );
+
+  if (!homeSection) {
+    return;
+  }
+
+  hideAllMainSections();
+
+  homeSection.style.display =
+    "block";
+
+  homeSection.scrollIntoView({
     behavior: "smooth"
   });
+
+  loadTeams();
 }
 
 
 function showTeams() {
 
-  document.querySelector(".hero").nextElementSibling.scrollIntoView({
+  const homeSection =
+    document.getElementById(
+      "homeSection"
+    );
+
+  if (!homeSection) {
+    return;
+  }
+
+  hideAllMainSections();
+
+  homeSection.style.display =
+    "block";
+
+  homeSection.scrollIntoView({
     behavior: "smooth"
   });
+
+  loadTeams();
 }
 
 
