@@ -427,6 +427,21 @@
 .iv-system-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
 </style>
 
+
+<style>
+/* V12 readability repair */
+button.panel, .panel.profile-link, .app-grid button.panel { color:#f8fbff !important; text-decoration:none !important; }
+button.panel h3, .panel.profile-link h3 { color:#ffffff !important; }
+button.panel p, .panel.profile-link p { color:#b8c8d9 !important; }
+nav button { color:#ffffff !important; }
+.iv-schedule-day{margin:18px 0 8px;font-size:18px;font-weight:900;color:#fff}
+.iv-game-card{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:14px;padding:16px;margin:8px 0;background:#0d2035;border:1px solid #294766;border-radius:12px}
+.iv-game-team:last-child{text-align:right}.iv-game-time{text-align:center;color:#ffd166;font-weight:900;white-space:nowrap}
+.iv-feed-card{padding:18px;background:#0d2035;border:1px solid #203c59;border-radius:14px;margin-bottom:12px}
+.iv-feed-type{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#ffd166;font-weight:900}
+@media(max-width:650px){.iv-game-card{grid-template-columns:1fr}.iv-game-team:last-child{text-align:left}.iv-game-time{text-align:left}}
+</style>
+
 </head>
 
 <body>
@@ -439,6 +454,7 @@
 
   <nav>
     <button onclick="showDashboard()">Dashboard</button>
+    <button onclick="showFeed()">Feed</button>
     <button onclick="showLeagueHub()">League</button>
     <button onclick="showPlayersHub()">Players</button>
     <button id="teamNavButton" onclick="showMyTeamOrTeams()">Team</button>
@@ -1169,6 +1185,7 @@
 
 
 <section id="dashboardSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Manager Dashboard</h2><span class="pill">Persistent Iceverse</span></div><div id="dashboardContent"><div class="loading">Loading dashboard...</div></div></section>
+<section id="feedSection" class="section" style="display:none;"><div id="feedContent"><div class="loading">Loading Iceverse feed...</div></div></section>
 <section id="standingsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>IHL Standings</h2><span class="pill">2 pts W · 1 pt OTL</span></div><div id="standingsContent"><div class="loading">Loading standings...</div></div></section>
 <section id="freeAgentsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Free Agents</h2><span class="pill">Unrostered players</span></div><div id="freeAgentsContent"><div class="loading">Loading free agents...</div></div></section>
 <section id="newsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse News</h2><span class="pill">Iceverse Network</span></div><div id="newsContent"><div class="loading">Loading news...</div></div></section>
@@ -2024,7 +2041,7 @@ function hideAllMainSections() {
   }
 
 
-  ["dashboardSection","standingsSection","freeAgentsSection","newsSection","myProfileSection","contractsSection"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
+  ["dashboardSection","feedSection","standingsSection","freeAgentsSection","newsSection","myProfileSection","contractsSection"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
 
   const teamManagementSection =
     document.getElementById("teamManagementSection");
@@ -8526,6 +8543,123 @@ showAdmin=async function(){
  await ivOldShowAdmin();
  const c=document.getElementById("adminContent");
  if(c)c.insertAdjacentHTML("afterbegin",`<div class="panel" style="margin-bottom:16px;border-color:#d6a84b"><h3>🚀 Iceverse Universe V11</h3><p class="muted">Start the schedule now, activate automatic due-game simulation, CPU GMs, economy, tournaments, international rosters and career systems.</p><button class="primary-button" onclick="adminBootUniverse()">BOOT ICEVERSE NOW</button> <button class="secondary-button" onclick="showUniverseControl()">Universe Control</button></div>`);
+};
+</script>
+
+
+<script>
+/* ==========================================================
+   ICEVERSE V12 FRONTEND RELIABILITY LAYER
+   ========================================================== */
+
+async function ivIsAdmin(){
+  if(!currentUser)return false;
+  try{
+    const {data,error}=await supabaseClient.rpc('is_iceverse_admin');
+    return !error && data===true;
+  }catch(e){return false;}
+}
+
+// Replace brittle UUID-only admin routing with the server-authorized check.
+showAdmin=async function(){
+  if(!currentUser){showLogin();return;}
+  const ok=await ivIsAdmin();
+  if(!ok){alert('Your signed-in account is not authorized as an Iceverse admin.');return;}
+  showSection('adminSection');
+  const c=document.getElementById('adminContent');
+  c.innerHTML='<div class="loading">Loading Iceverse control center...</div>';
+  const [{data:leagues,error:le},{data:games,error:ge},{data:world}] = await Promise.all([
+    supabaseClient.from('leagues').select('*').order('level'),
+    supabaseClient.from('games').select('id,status,scheduled_at,home_team_id,away_team_id').order('scheduled_at').limit(20),
+    supabaseClient.from('world_state').select('*').eq('id',1).maybeSingle()
+  ]);
+  if(le){c.innerHTML=`<div class="error">Admin load failed: ${escapeHTML(le.message)}</div>`;return;}
+  const active=(leagues||[]).filter(x=>x.active);
+  const opts=active.map(l=>`<option value="${l.id}">${escapeHTML(l.name)} (${escapeHTML(l.abbreviation)})</option>`).join('');
+  const scheduled=(games||[]).filter(g=>g.status==='scheduled').length;
+  c.innerHTML=`
+   <div class="section-toolbar"><div><h2>Iceverse Control Center</h2><div class="muted">Live universe administration</div></div><span class="pill">ADMIN AUTHORIZED</span></div>
+   <div class="app-grid">
+    <div class="metric-card"><div class="muted">World Day</div><div class="metric-value">${world?.world_day||1}</div></div>
+    <div class="metric-card"><div class="muted">Upcoming Games</div><div class="metric-value">${scheduled}</div></div>
+    <div class="metric-card"><div class="muted">Engine</div><div class="metric-value" style="font-size:20px">${escapeHTML(world?.engine_version||'V12')}</div></div>
+   </div>
+   <div class="app-grid" style="margin-top:18px">
+    <div class="panel"><h3>🚀 Universe</h3><p class="muted">Build the schedule and activate the persistent world.</p><button class="primary-button" onclick="adminMakeSchedule(false)">Ensure Schedule Exists</button> <button class="secondary-button" onclick="adminMakeSchedule(true)">Rebuild Schedule</button><div style="margin-top:10px"><button class="secondary-button" onclick="ivTickWorld(false)">Play Due Games Now</button></div></div>
+    <div class="panel"><h3>Schedule</h3><p class="muted">Open the actual planned season calendar.</p><button class="primary-button" onclick="showSchedule()">View Full Schedule</button></div>
+    <div class="panel"><h3>Simulation</h3><p class="muted">Official games persist results, stats, shifts, rewards and standings.</p><button class="secondary-button" onclick="adminSimNextGame()">Sim Next Official Game</button> <button class="secondary-button" onclick="adminSimDueGames()">Sim All Due</button></div>
+    <div class="panel"><h3>Test Engine</h3><p class="muted">Run a non-record exhibition.</p><button class="secondary-button" onclick="showTestSimulator()">Simulation Lab</button></div>
+   </div>
+   <div class="app-grid" style="margin-top:18px">
+    <div class="panel"><h3>Add Team</h3><label>League<select id="adminTeamLeague" style="margin-top:6px">${opts}</select></label><input id="adminTeamCity" placeholder="City" style="margin-top:10px"><input id="adminTeamName" placeholder="Team name" style="margin-top:10px"><input id="adminTeamAbbr" placeholder="Abbreviation" maxlength="4" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminAddTeam()">Add Team</button></div>
+    <div class="panel"><h3>Give Icepoints</h3><input id="adminUsername" placeholder="Username"><input id="adminIcepoints" type="number" min="1" value="1000" style="margin-top:10px"><button class="primary-button" style="margin-top:12px" onclick="adminGiveIcepoints()">Give Icepoints</button></div>
+    <div class="panel"><h3>System Check</h3><button class="secondary-button" onclick="runSystemCheck()">Run System Check</button><div id="systemCheckResult" class="muted" style="margin-top:10px"></div></div>
+   </div>`;
+};
+
+async function adminMakeSchedule(force){
+  const {data,error}=await supabaseClient.rpc('admin_ensure_iceverse_schedule',{p_force:!!force});
+  if(error){alert('Schedule build failed: '+error.message);return;}
+  alert(`Schedule ready.\n${data?.scheduled||data?.created||0} games are scheduled.`);
+  await showSchedule();
+}
+
+// Always render the actual games table; no placeholder schedule UI.
+async function showSchedule(){
+  showSection('scheduleSection');
+  const c=document.getElementById('scheduleContent');
+  c.innerHTML='<div class="loading">Loading official Iceverse schedule...</div>';
+  let {data:games,error}=await supabaseClient.from('games')
+    .select('id,season_id,competition,home_team_id,away_team_id,scheduled_at,status,home_score,away_score,winner_team_id')
+    .order('scheduled_at',{ascending:true}).limit(500);
+  if(error){c.innerHTML=`<div class="error">Schedule error: ${escapeHTML(error.message)}</div>`;return;}
+  const teamIds=[...new Set((games||[]).flatMap(g=>[g.home_team_id,g.away_team_id]).filter(Boolean))];
+  let teams={};
+  if(teamIds.length){const {data:td}=await supabaseClient.from('teams').select('id,city,name,abbreviation').in('id',teamIds);(td||[]).forEach(t=>teams[t.id]=t);}
+  if(!(games||[]).length){
+    const admin=await ivIsAdmin();
+    c.innerHTML=`<div class="empty-state"><h3>No games are scheduled yet.</h3><p style="margin:10px 0">The active season needs its calendar generated.</p>${admin?'<button class="primary-button" onclick="adminMakeSchedule(false)">Create Season Schedule Now</button>':''}</div>`;
+    return;
+  }
+  const groups={};
+  games.forEach(g=>{const d=new Date(g.scheduled_at);const key=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});(groups[key]??=[]).push(g);});
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Official Schedule</h2><div class="muted">${games.length} games loaded from the active Iceverse calendar.</div></div><button class="secondary-button" onclick="ivTickWorld(false).then(()=>showSchedule())">Refresh / Play Due Games</button></div>`+
+   Object.entries(groups).map(([day,list])=>`<div class="iv-schedule-day">${escapeHTML(day)}</div>${list.map(g=>{const h=teams[g.home_team_id]||{},a=teams[g.away_team_id]||{},dt=new Date(g.scheduled_at);const done=g.status==='completed';return `<div class="iv-game-card profile-link" onclick="openGameDetail('${g.id}')"><div class="iv-game-team"><strong>${escapeHTML(a.city||'')} ${escapeHTML(a.name||'Away')}</strong><div class="muted">${escapeHTML(a.abbreviation||'')}</div></div><div class="iv-game-time">${done?`${g.away_score} – ${g.home_score}<br><span class="muted">FINAL</span>`:`${dt.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}<br><span class="muted">${escapeHTML(g.status)}</span>`}</div><div class="iv-game-team"><strong>${escapeHTML(h.city||'')} ${escapeHTML(h.name||'Home')}</strong><div class="muted">${escapeHTML(h.abbreviation||'')}</div></div></div>`}).join('')}`).join('');
+}
+
+async function showFeed(){
+  showSection('feedSection');
+  const c=document.getElementById('feedContent');
+  c.innerHTML='<div class="loading">Loading the Iceverse feed...</div>';
+  const [{data:feed,error},{data:games}] = await Promise.all([
+    supabaseClient.from('iceverse_feed').select('*').order('created_at',{ascending:false}).limit(75),
+    supabaseClient.from('games').select('id,scheduled_at,status,home_score,away_score,home_team_id,away_team_id').eq('status','completed').order('scheduled_at',{ascending:false}).limit(15)
+  ]);
+  if(error){c.innerHTML=`<div class="error">Feed error: ${escapeHTML(error.message)}</div>`;return;}
+  const ids=[...new Set((games||[]).flatMap(g=>[g.home_team_id,g.away_team_id]))];let tm={};
+  if(ids.length){const {data:t}=await supabaseClient.from('teams').select('id,city,name').in('id',ids);(t||[]).forEach(x=>tm[x.id]=x);}
+  const gameFeed=(games||[]).map(g=>({id:g.id,created_at:g.scheduled_at,feed_type:'game',title:'Final Score',body:`${tm[g.away_team_id]?.city||''} ${tm[g.away_team_id]?.name||'Away'} ${g.away_score} — ${g.home_score} ${tm[g.home_team_id]?.city||''} ${tm[g.home_team_id]?.name||'Home'}`,game_id:g.id}));
+  const all=[...(feed||[]),...gameFeed].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,80);
+  c.innerHTML=`<div class="section-toolbar"><div><h2>Iceverse Feed</h2><div class="muted">Games, signings, league stories and universe activity.</div></div><button class="secondary-button" onclick="showFeed()">Refresh</button></div>${all.length?all.map(x=>`<article class="iv-feed-card ${x.game_id?'profile-link':''}" ${x.game_id?`onclick="openGameDetail('${x.game_id}')"`:''}><div class="iv-feed-type">${escapeHTML(x.feed_type||'news')}</div><h3 style="margin:6px 0">${escapeHTML(x.title||'Iceverse Update')}</h3><p class="muted">${escapeHTML(x.body||'')}</p><small class="muted">${new Date(x.created_at).toLocaleString()}</small></article>`).join(''):'<div class="empty-state">The feed will populate as games and transactions occur.</div>'}`;
+}
+
+// Dashboard now visibly links to Feed and Schedule.
+const ivV12OldDashboard=showDashboard;
+showDashboard=async function(){
+  await ivV12OldDashboard();
+  const c=document.getElementById('dashboardContent');
+  if(c && !document.getElementById('ivDashboardQuickNav')){
+    c.insertAdjacentHTML('afterbegin',`<div id="ivDashboardQuickNav" class="panel" style="margin-bottom:18px"><div class="section-toolbar" style="margin-bottom:0"><div><strong>Iceverse Live</strong><div class="muted">Follow the world or jump to the official calendar.</div></div><div><button class="primary-button" onclick="showFeed()">Open Feed</button> <button class="secondary-button" onclick="showSchedule()">View Schedule</button></div></div></div>`);
+  }
+};
+
+// Make the admin navigation state deterministic after login/auth refresh.
+updateAdminNavigation=async function(){
+  const admin=document.getElementById('adminNavButton');
+  const notes=document.getElementById('notificationsNavButton');
+  if(notes)notes.style.display=currentUser?'inline-block':'none';
+  if(admin)admin.style.display=(await ivIsAdmin())?'inline-block':'none';
+  if(currentUser)refreshNotificationBadge();
 };
 </script>
 
