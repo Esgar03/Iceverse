@@ -1951,11 +1951,32 @@ function hideAllMainSections() {
 
 
   /*
-    Hide the section immediately following
-    the hero, if one exists.
+    Hide the home/team listing section.
   */
 
-  if (hero && hero.nextElementSibling) {
+  const homeSection =
+    document.getElementById(
+      "homeSection"
+    );
+
+  if (homeSection) {
+    homeSection.style.display = "none";
+  }
+
+
+  /*
+    Hide the section immediately following
+    the hero, if one exists.
+
+    Kept for compatibility with the
+    existing page structure.
+  */
+
+  if (
+    hero &&
+    hero.nextElementSibling &&
+    !hero.nextElementSibling.id
+  ) {
 
     hero.nextElementSibling.style.display =
       "none";
@@ -2018,6 +2039,36 @@ function hideAllMainSections() {
 
   if (userProfileSection) {
     userProfileSection.style.display =
+      "none";
+  }
+
+
+  /*
+    Hide Team Profile.
+  */
+
+  const teamProfileSection =
+    document.getElementById(
+      "teamProfileSection"
+    );
+
+  if (teamProfileSection) {
+    teamProfileSection.style.display =
+      "none";
+  }
+
+
+  /*
+    Hide Team Customization.
+  */
+
+  const teamCustomizeSection =
+    document.getElementById(
+      "teamCustomizeSection"
+    );
+
+  if (teamCustomizeSection) {
+    teamCustomizeSection.style.display =
       "none";
   }
 
