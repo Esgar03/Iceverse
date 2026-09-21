@@ -557,34 +557,82 @@
 <!-- HOME -->
 <!-- ========================================= -->
 
-<section class="hero">
+<section
+  id="homeSection"
+>
 
-  <h1>
-    ICEVERSE
-  </h1>
+  <section class="hero">
 
-  <p>
-    A persistent multiplayer hockey universe where you create players,
-    manage teams, build lines, develop talent, and compete against other
-    hockey managers.
-  </p>
+    <h1>
+      ICEVERSE
+    </h1>
+
+    <p>
+      A persistent multiplayer hockey universe where you create players,
+      manage teams, build lines, develop talent, and compete against other
+      hockey managers.
+    </p>
+
+  </section>
+
+
+  <section class="section">
+
+    <h2>
+      Iceverse Hockey League
+    </h2>
+
+    <div
+      id="teams"
+      class="teams"
+    >
+
+      <div class="loading">
+        Loading Iceverse teams...
+      </div>
+
+    </div>
+
+  </section>
 
 </section>
 
 
-<section class="section">
+<section
+  id="teamProfileSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
 
-  <h2>
-    Iceverse Hockey League
-  </h2>
-
-  <div
-    id="teams"
-    class="teams"
-  >
+  <div id="teamProfile">
 
     <div class="loading">
-      Loading Iceverse teams...
+      Loading team...
+    </div>
+
+  </div>
+
+</section>
+
+
+<section
+  id="teamCustomizeSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <div id="teamCustomize">
+
+    <div class="loading">
+      Loading team customization...
     </div>
 
   </div>
