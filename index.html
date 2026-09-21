@@ -524,7 +524,58 @@ async function loadPlayers() {
   loadTeams();
   
 function openPlayerProfile(playerId) {
-  console.log("Opening player:", playerId);
+
+  const players = window.iceversePlayers || [];
+
+  const player = players.find(
+    p => p.id === playerId
+  );
+
+  if (!player) {
+    return;
+  }
+
+  document.querySelector(".hero").style.display = "none";
+  document.querySelector(".section").style.display = "none";
+
+  const profileSection =
+    document.getElementById("playerProfileSection");
+
+  profileSection.style.display = "block";
+
+  const profile =
+    document.getElementById("playerProfile");
+
+  profile.innerHTML = `
+    <h2>
+      ${escapeHTML(player.first_name)}
+      ${escapeHTML(player.last_name)}
+    </h2>
+
+    <div class="team-info">
+      Position: ${escapeHTML(player.primary_position)}
+    </div>
+
+    <div class="team-info">
+      Age: ${player.age}
+    </div>
+
+    <div class="team-info">
+      Overall: ${player.overall}
+    </div>
+
+    <div class="team-info">
+      Archetype: ${escapeHTML(player.archetype)}
+    </div>
+
+    <div class="team-info">
+      Personality: ${escapeHTML(player.personality)}
+    </div>
+  `;
+
+  profileSection.scrollIntoView({
+    behavior: "smooth"
+  });
 }
   
 </script>
