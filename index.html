@@ -2092,7 +2092,15 @@ function hideAllMainSections() {
     teamCustomizeSection.style.display =
       "none";
   }
+  const teamManagementSection =
+    document.getElementById(
+      "teamManagementSection"
+    );
 
+  if (teamManagementSection) {
+    teamManagementSection.style.display =
+      "none";
+  }
 }
 
 
