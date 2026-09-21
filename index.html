@@ -173,12 +173,23 @@
   <button onclick="showLeague()">League</button>
   <button onclick="showTeams()">Teams</button>
   <button onclick="showPlayers()">Players</button>
-  <button onclick="showLogin()">Log In</button>
-  <button onclick="showSignup()">Create Account</button>
-</nav>
-</header>
 
-<main>
+  <button id="loginButton" onclick="showLogin()">
+    Log In
+  </button>
+
+  <button id="signupButton" onclick="showSignup()">
+    Create Account
+  </button>
+
+  <button
+    id="logoutButton"
+    onclick="logoutUser()"
+    style="display: none;"
+  >
+    Log Out
+  </button>
+</nav>
 <section id="authSection" class="section" style="display: none;">
 
   <div style="
