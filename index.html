@@ -2131,7 +2131,17 @@ function displayPlayers(players) {
   const container =
     document.getElementById("players");
 
-  if (players.length === 0) {
+  if (!container) {
+
+    console.error(
+      "Players container was not found."
+    );
+
+    return;
+  }
+
+
+  if (!players || players.length === 0) {
 
     container.innerHTML =
       '<div class="loading">No players found.</div>';
@@ -2139,7 +2149,9 @@ function displayPlayers(players) {
     return;
   }
 
+
   container.innerHTML = "";
+
 
   players.forEach(player => {
 
@@ -2149,15 +2161,18 @@ function displayPlayers(players) {
     card.className =
       "team-card";
 
+
     const flag =
       getFlag(player.nationality);
+
 
     card.innerHTML = `
 
       <div
-        class="team-name"
-        style="cursor: pointer;"
-        onclick="openPlayerProfile('${player.id}')"
+        class="team-name player-name-link"
+        style="
+          cursor: pointer;
+        "
       >
 
         <span class="flag">
@@ -2169,13 +2184,19 @@ function displayPlayers(players) {
 
       </div>
 
+
       <div class="team-info">
 
         ${escapeHTML(player.primary_position)}
 
-        ${player.secondary_position
-          ? " / " + escapeHTML(player.secondary_position)
-          : ""}
+        ${
+          player.secondary_position
+            ? " / " +
+              escapeHTML(
+                player.secondary_position
+              )
+            : ""
+        }
 
         · Age ${player.age}
 
@@ -2183,18 +2204,26 @@ function displayPlayers(players) {
 
       </div>
 
+
       <div
         class="team-info"
-        style="margin-top: 5px;"
+        style="
+          margin-top: 5px;
+        "
       >
 
-        ${escapeHTML(player.archetype)}
+        ${escapeHTML(
+          player.archetype
+        )}
 
       </div>
 
+
       <div
         class="country-line"
-        style="margin-top: 10px;"
+        style="
+          margin-top: 10px;
+        "
       >
 
         <span>
@@ -2202,15 +2231,51 @@ function displayPlayers(players) {
         </span>
 
         <span>
-          ${escapeHTML(player.nationality || "Unknown")}
+          ${escapeHTML(
+            player.nationality ||
+            "Unknown"
+          )}
         </span>
 
       </div>
 
     `;
 
+
+    /*
+      Make the player name clickable.
+
+      Using addEventListener instead of
+      inline onclick makes the navigation
+      more reliable and easier to expand later.
+    */
+
+    const playerName =
+      card.querySelector(
+        ".player-name-link"
+      );
+
+
+    if (playerName) {
+
+      playerName.addEventListener(
+        "click",
+        function() {
+
+          openPlayerProfile(
+            player.id
+          );
+
+        }
+      );
+
+    }
+
+
     container.appendChild(card);
+
   });
+
 }
 
 
