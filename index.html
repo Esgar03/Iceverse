@@ -6191,6 +6191,9 @@ function getUpgradeCost(
 
 function calculateOverall(attributes) {
 
+  // Overall is calculated only from attributes that belong to the current build.
+  // Goalie builds therefore use goalie/physical/mental ratings rather than hidden
+  // default skater ratings.
   const values =
     Object.values(attributes);
 
@@ -7991,22 +7994,8 @@ function calculateCategoryRating(
   let keys =
     ATTRIBUTE_GROUPS[category] || [];
 
-  if (
-    position === "G"
-  ) {
-
-    keys = [
-      "reflexes",
-      "goalie_positioning",
-      "glove",
-      "blocker",
-      "rebound_control",
-      "athleticism",
-      "puck_handling",
-      "goalie_iq",
-      "goalie_endurance"
-    ];
-
+  if (position === "G") {
+    keys = GOALIE_ATTRIBUTE_GROUPS[category] || [];
   }
 
   const values =
@@ -8081,9 +8070,7 @@ function renderPublicSkillRatings(
 
   if (position === "G") {
     categories = [
-      "Skating",
-      "Puck Skills",
-      "Defense",
+      "Goalie",
       "Physical",
       "Mental"
     ];
