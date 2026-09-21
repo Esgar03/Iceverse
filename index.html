@@ -275,7 +275,30 @@ const supabaseClient = createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+let currentUser = null;
 
+
+async function loadCurrentUser() {
+
+  const {
+    data: { user },
+    error
+  } = await supabaseClient.auth.getUser();
+
+  if (error) {
+
+    console.error(
+      "Unable to get current user:",
+      error
+    );
+
+    currentUser = null;
+    return;
+  }
+
+  currentUser = user;
+}
+  
 
 /*
  * ============================================
@@ -536,7 +559,8 @@ function displayPlayers(players) {
    * Start Iceverse
    */
 
-  loadTeams();
+  loadCurrentUser();
+loadTeams();
   
 function openPlayerProfile(playerId) {
   const players = window.iceversePlayers || [];
