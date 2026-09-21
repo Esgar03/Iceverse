@@ -3650,14 +3650,14 @@ async function openTeamProfile(
   ------------------------------------------------------------
 */
 
-async function openTeamCustomize(
+async function openTeamManagement(
   teamId
 ) {
 
   if (!currentUser) {
 
     alert(
-      "You must be logged in to customize a team."
+      "You must be logged in to manage a team."
     );
 
     return;
@@ -3670,14 +3670,20 @@ async function openTeamCustomize(
 
   const section =
     document.getElementById(
-      "teamCustomizeSection"
+      "teamManagementSection"
     );
 
 
-  if (!section) {
+  const container =
+    document.getElementById(
+      "teamManagement"
+    );
+
+
+  if (!section || !container) {
 
     console.error(
-      "Team customization section was not found."
+      "Team management section was not found."
     );
 
     return;
@@ -3694,25 +3700,21 @@ async function openTeamCustomize(
   });
 
 
-  const container =
-    document.getElementById(
-      "teamCustomize"
-    );
-
-
   container.innerHTML =
-    '<div class="loading">Loading team customization...</div>';
+    '<div class="loading">Loading team management...</div>';
 
 
   try {
 
     /*
-      Load the team and verify ownership.
+      ========================================================
+      LOAD TEAM
+      ========================================================
     */
 
     const {
       data: team,
-      error
+      error: teamError
     } =
       await supabaseClient
         .from("teams")
@@ -3724,8 +3726,8 @@ async function openTeamCustomize(
         .single();
 
 
-    if (error) {
-      throw error;
+    if (teamError) {
+      throw teamError;
     }
 
 
@@ -3745,7 +3747,7 @@ async function openTeamCustomize(
           <button
             type="button"
             class="secondary-button"
-            id="backUnauthorizedTeamButton"
+            id="managementBackButton"
           >
             ← Back to Team
           </button>
@@ -3757,7 +3759,7 @@ async function openTeamCustomize(
 
       document
         .getElementById(
-          "backUnauthorizedTeamButton"
+          "managementBackButton"
         )
         ?.addEventListener(
           "click",
@@ -3777,21 +3779,168 @@ async function openTeamCustomize(
 
 
     /*
-      Current colors.
+      ========================================================
+      LOAD TEAM SETTINGS
+      ========================================================
     */
 
-    const primaryColor =
-      team.primary_color ||
-      "#1D4ED8";
+    const {
+      data: settings,
+      error: settingsError
+    } =
+      await supabaseClient
+        .from("team_settings")
+        .select("*")
+        .eq(
+          "team_id",
+          teamId
+        )
+        .maybeSingle();
 
-    const secondaryColor =
-      team.secondary_color ||
-      "#FFFFFF";
 
-    const tertiaryColor =
-      team.tertiary_color ||
-      "#111827";
+    if (settingsError) {
+      throw settingsError;
+    }
 
+
+    /*
+      ========================================================
+      LOAD ROSTER
+      ========================================================
+    */
+
+    const {
+      data: rosterRows,
+      error: rosterError
+    } =
+      await supabaseClient
+        .from("rosters")
+        .select(`
+          player_id,
+          players (
+            id,
+            first_name,
+            last_name,
+            primary_position,
+            secondary_position,
+            overall,
+            archetype
+          )
+        `)
+        .eq(
+          "team_id",
+          teamId
+        );
+
+
+    if (rosterError) {
+      throw rosterError;
+    }
+
+
+    const players =
+      (rosterRows || [])
+        .map(
+          row => row.players
+        )
+        .filter(
+          player => !!player
+        );
+
+
+    /*
+      ========================================================
+      PLAYER OPTIONS
+      ========================================================
+    */
+
+    const playerOptions =
+      `
+        <option value="">
+          None
+        </option>
+
+        ${
+          players.map(
+            player => `
+
+              <option
+                value="${player.id}"
+              >
+                ${escapeHTML(
+                  player.first_name
+                )}
+                ${escapeHTML(
+                  player.last_name
+                )}
+                -
+                ${escapeHTML(
+                  player.primary_position
+                )}
+                -
+                OVR ${player.overall ?? "--"}
+              </option>
+
+            `
+          ).join("")
+        }
+      `;
+
+
+    /*
+      ========================================================
+      DEFAULT SETTINGS
+      ========================================================
+    */
+
+    const current =
+      settings || {};
+
+
+    const lineUsage =
+      current.line_usage || {};
+
+
+    const playerRoles =
+      current.player_roles || {};
+
+
+    const lines =
+      current.lines || {};
+
+
+    /*
+      ========================================================
+      HELPER
+      ========================================================
+    */
+
+    function getPlayerSelect(
+      id,
+      selected
+    ) {
+
+      return `
+
+        <select
+          data-player-slot="${id}"
+          class="management-player-select"
+        >
+
+          ${playerOptions}
+
+        </select>
+
+      `;
+
+    }
+
+
+    /*
+      ========================================================
+      MANAGEMENT PAGE
+      ========================================================
+    */
 
     container.innerHTML = `
 
@@ -3800,7 +3949,7 @@ async function openTeamCustomize(
         <button
           type="button"
           class="secondary-button"
-          id="backToTeamFromCustomize"
+          id="managementBackButton"
           style="
             margin-bottom: 25px;
           "
@@ -3810,41 +3959,37 @@ async function openTeamCustomize(
 
 
         <h2>
-          Customize ${escapeHTML(
+          ${escapeHTML(
             team.name
           )}
+          Management
         </h2>
 
 
         <p>
-          Customize your team's identity.
+          Set the instructions that will control
+          how your team is used during games.
         </p>
 
 
+        <!-- ================================================= -->
+        <!-- TACTICS -->
+        <!-- ================================================= -->
+
         <div
+          class="management-section"
           style="
-            margin: 30px 0;
-            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top:
+              1px solid #1b3550;
           "
         >
 
-          <div
-            id="customJerseyPreview"
-          >
+          <h3>
+            Team Tactics
+          </h3>
 
-            ${getTeamJerseyHTML(
-              team,
-              "large"
-            )}
-
-          </div>
-
-        </div>
-
-
-        <form
-          id="teamCustomizeForm"
-        >
 
           <div
             style="
@@ -3852,199 +3997,603 @@ async function openTeamCustomize(
               grid-template-columns:
                 repeat(
                   auto-fit,
-                  minmax(250px, 1fr)
+                  minmax(220px, 1fr)
                 );
-              gap: 20px;
+              gap: 18px;
+              margin-top: 20px;
             "
           >
 
-            <div>
 
-              <label
-                for="teamNameInput"
+            <label>
+              Offensive Tactic
+
+              <select
+                id="offensiveTactic"
               >
-                Team Name
-              </label>
 
-              <input
-                id="teamNameInput"
-                type="text"
-                value="${escapeHTML(
-                  team.name || ""
-                )}"
-                maxlength="40"
-                required
-              />
+                ${[
+                  "Balanced",
+                  "Aggressive",
+                  "Defensive",
+                  "Possession",
+                  "Counter Attack"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.offensive_tactic ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
 
-            </div>
+              </select>
+
+            </label>
 
 
-            <div>
+            <label>
+              Defensive Tactic
 
-              <label
-                for="teamAbbreviationInput"
+              <select
+                id="defensiveTactic"
               >
-                Abbreviation
-              </label>
 
-              <input
-                id="teamAbbreviationInput"
-                type="text"
-                value="${escapeHTML(
-                  team.abbreviation ||
-                  ""
-                )}"
-                maxlength="5"
-                required
-              />
+                ${[
+                  "Balanced",
+                  "Aggressive",
+                  "Protect Lead",
+                  "Shot Suppression",
+                  "Physical"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.defensive_tactic ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
 
-            </div>
+              </select>
+
+            </label>
 
 
-            <div>
+            <label>
+              Forecheck
 
-              <label
-                for="teamCityInput"
+              <select
+                id="forecheck"
               >
-                City
-              </label>
 
-              <input
-                id="teamCityInput"
-                type="text"
-                value="${escapeHTML(
-                  team.city ||
-                  ""
-                )}"
-                maxlength="40"
-              />
+                ${[
+                  "2-1-2",
+                  "1-2-2",
+                  "1-3-1",
+                  "Aggressive"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.forecheck ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
 
-            </div>
+              </select>
+
+            </label>
+
+
+            <label>
+              Neutral Zone
+
+              <select
+                id="neutralZone"
+              >
+
+                ${[
+                  "1-2-2",
+                  "1-3-1",
+                  "Trap",
+                  "Aggressive"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.neutral_zone ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Defensive Zone
+
+              <select
+                id="defensiveZone"
+              >
+
+                ${[
+                  "Zone",
+                  "Man Coverage",
+                  "Box + 1",
+                  "Pressure"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.defensive_zone ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Physicality
+
+              <select
+                id="physicality"
+              >
+
+                ${[
+                  "Conservative",
+                  "Balanced",
+                  "Physical"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.physicality ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Passing
+
+              <select
+                id="passingTendency"
+              >
+
+                ${[
+                  "Low",
+                  "Balanced",
+                  "High"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.passing_tendency ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Shooting
+
+              <select
+                id="shootingTendency"
+              >
+
+                ${[
+                  "Low",
+                  "Balanced",
+                  "High"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.shooting_tendency ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Aggressiveness
+
+              <select
+                id="aggressiveness"
+              >
+
+                ${[
+                  "Conservative",
+                  "Balanced",
+                  "Aggressive"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.aggressiveness ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Discipline
+
+              <select
+                id="discipline"
+              >
+
+                ${[
+                  "Disciplined",
+                  "Balanced",
+                  "Risk Taking"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.discipline ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
+
+              </select>
+
+            </label>
 
           </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- GOALIES -->
+        <!-- ================================================= -->
+
+        <div
+          style="
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top:
+              1px solid #1b3550;
+          "
+        >
+
+          <h3>
+            Goalie Management
+          </h3>
 
 
           <div
             style="
-              margin-top: 30px;
+              display: grid;
+              grid-template-columns:
+                repeat(
+                  auto-fit,
+                  minmax(220px, 1fr)
+                );
+              gap: 18px;
+              margin-top: 20px;
             "
           >
 
-            <h3>
-              Team Colors
-            </h3>
+            <label>
+              Starting Goalie
+
+              <select
+                id="startingGoalie"
+              >
+
+                ${playerOptions}
+
+              </select>
+
+            </label>
 
 
-            <div
-              style="
-                display: grid;
-                grid-template-columns:
-                  repeat(
-                    auto-fit,
-                    minmax(180px, 1fr)
-                  );
-                gap: 20px;
-                margin-top: 15px;
-              "
-            >
+            <label>
+              Backup Goalie
 
-              <div>
+              <select
+                id="backupGoalie"
+              >
 
-                <label
-                  for="teamPrimaryColor"
-                >
-                  Primary Color
-                </label>
+                ${playerOptions}
 
-                <input
-                  id="teamPrimaryColor"
-                  type="color"
-                  value="${escapeHTML(
-                    primaryColor
-                  )}"
-                  style="
-                    width: 100%;
-                    height: 55px;
-                    cursor: pointer;
-                  "
-                />
+              </select>
 
-              </div>
+            </label>
 
 
-              <div>
+            <label>
+              Starting Goalie Frequency
 
-                <label
-                  for="teamSecondaryColor"
-                >
-                  Secondary Color
-                </label>
+              <select
+                id="goalieRotation"
+              >
 
-                <input
-                  id="teamSecondaryColor"
-                  type="color"
-                  value="${escapeHTML(
-                    secondaryColor
-                  )}"
-                  style="
-                    width: 100%;
-                    height: 55px;
-                    cursor: pointer;
-                  "
-                />
+                ${[
+                  "Starter Heavy",
+                  "Mostly Starter",
+                  "Balanced",
+                  "Mostly Backup",
+                  "Equal Rotation"
+                ].map(
+                  value => `
+                    <option
+                      ${
+                        current.goalie_rotation ===
+                        value
+                          ? "selected"
+                          : ""
+                      }
+                    >
+                      ${value}
+                    </option>
+                  `
+                ).join("")}
 
-              </div>
+              </select>
 
-
-              <div>
-
-                <label
-                  for="teamTertiaryColor"
-                >
-                  Tertiary Color
-                </label>
-
-                <input
-                  id="teamTertiaryColor"
-                  type="color"
-                  value="${escapeHTML(
-                    tertiaryColor
-                  )}"
-                  style="
-                    width: 100%;
-                    height: 55px;
-                    cursor: pointer;
-                  "
-                />
-
-              </div>
-
-            </div>
+            </label>
 
           </div>
 
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- LINE USAGE -->
+        <!-- ================================================= -->
+
+        <div
+          style="
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top:
+              1px solid #1b3550;
+          "
+        >
+
+          <h3>
+            Line Usage
+          </h3>
+
 
           <div
-            id="teamCustomizeMessage"
             style="
+              display: grid;
+              grid-template-columns:
+                repeat(
+                  auto-fit,
+                  minmax(180px, 1fr)
+                );
+              gap: 18px;
               margin-top: 20px;
-              min-height: 24px;
             "
-          ></div>
+          >
+
+            ${[
+              ["line1", "Even Strength Line 1"],
+              ["line2", "Even Strength Line 2"],
+              ["line3", "Even Strength Line 3"],
+              ["line4", "Even Strength Line 4"],
+              ["pair1", "Defense Pair 1"],
+              ["pair2", "Defense Pair 2"],
+              ["pair3", "Defense Pair 3"],
+              ["pp1", "Power Play 1"],
+              ["pp2", "Power Play 2"],
+              ["pk1", "Penalty Kill 1"],
+              ["pk2", "Penalty Kill 2"],
+              ["pk3", "3-Man Penalty Kill"],
+              ["ot1", "3v3 Overtime Line 1"],
+              ["ot2", "3v3 Overtime Line 2"]
+            ].map(
+              item => {
+
+                const value =
+                  lineUsage[
+                    item[0]
+                  ] ??
+                  25;
 
 
-          <button
-            type="submit"
-            class="secondary-button"
+                return `
+
+                  <label>
+
+                    ${item[1]}
+
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      data-usage="${item[0]}"
+                      value="${value}"
+                    />
+
+                    <small>
+                      Usage %
+                    </small>
+
+                  </label>
+
+                `;
+
+              }
+            ).join("")}
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- LINES -->
+        <!-- ================================================= -->
+
+        <div
+          style="
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top:
+              1px solid #1b3550;
+          "
+        >
+
+          <h3>
+            Line Combinations
+          </h3>
+
+
+          <p>
+            Assign players to each situation.
+            A player can appear on multiple lines.
+          </p>
+
+
+          <div
+            id="lineCombinationContainer"
             style="
               margin-top: 20px;
             "
           >
-            Save Team
-          </button>
+
+          </div>
+
+        </div>
 
 
-        </form>
+        <!-- ================================================= -->
+        <!-- PLAYER ROLES -->
+        <!-- ================================================= -->
+
+        <div
+          style="
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top:
+              1px solid #1b3550;
+          "
+        >
+
+          <h3>
+            Player Roles
+          </h3>
+
+
+          <div
+            id="playerRolesContainer"
+            style="
+              margin-top: 20px;
+            "
+          >
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="managementMessage"
+          style="
+            margin-top: 25px;
+            min-height: 25px;
+          "
+        ></div>
+
+
+        <button
+          type="button"
+          class="secondary-button"
+          id="saveTeamManagement"
+          style="
+            margin-top: 15px;
+          "
+        >
+          Save Team Management
+        </button>
 
       </div>
 
@@ -4052,12 +4601,557 @@ async function openTeamCustomize(
 
 
     /*
-      Back button.
+      ========================================================
+      SET CURRENT GOALIES
+      ========================================================
+    */
+
+    const startingGoalie =
+      document.getElementById(
+        "startingGoalie"
+      );
+
+
+    const backupGoalie =
+      document.getElementById(
+        "backupGoalie"
+      );
+
+
+    if (startingGoalie) {
+
+      startingGoalie.value =
+        current.starting_goalie_id ||
+        "";
+
+    }
+
+
+    if (backupGoalie) {
+
+      backupGoalie.value =
+        current.backup_goalie_id ||
+        "";
+
+    }
+
+
+    /*
+      ========================================================
+      LINE COMBINATIONS
+      ========================================================
+    */
+
+    const lineDefinitions = [
+
+      {
+        id: "line1",
+        name: "Forward Line 1",
+        slots: 3
+      },
+
+      {
+        id: "line2",
+        name: "Forward Line 2",
+        slots: 3
+      },
+
+      {
+        id: "line3",
+        name: "Forward Line 3",
+        slots: 3
+      },
+
+      {
+        id: "line4",
+        name: "Forward Line 4",
+        slots: 3
+      },
+
+      {
+        id: "pair1",
+        name: "Defense Pair 1",
+        slots: 2
+      },
+
+      {
+        id: "pair2",
+        name: "Defense Pair 2",
+        slots: 2
+      },
+
+      {
+        id: "pair3",
+        name: "Defense Pair 3",
+        slots: 2
+      },
+
+      {
+        id: "pp1",
+        name: "Power Play 1",
+        slots: 5
+      },
+
+      {
+        id: "pp2",
+        name: "Power Play 2",
+        slots: 5
+      },
+
+      {
+        id: "pk1",
+        name: "Penalty Kill 1",
+        slots: 4
+      },
+
+      {
+        id: "pk2",
+        name: "Penalty Kill 2",
+        slots: 4
+      },
+
+      {
+        id: "pk3",
+        name: "3-Man Penalty Kill",
+        slots: 3
+      },
+
+      {
+        id: "ot1",
+        name: "3v3 Overtime Line 1",
+        slots: 3
+      },
+
+      {
+        id: "ot2",
+        name: "3v3 Overtime Line 2",
+        slots: 3
+      }
+
+    ];
+
+
+    const lineContainer =
+      document.getElementById(
+        "lineCombinationContainer"
+      );
+
+
+    lineContainer.innerHTML =
+      lineDefinitions.map(
+        definition => {
+
+          const existing =
+            lines[
+              definition.id
+            ] || [];
+
+
+          return `
+
+            <div
+              style="
+                margin-bottom: 25px;
+                padding: 15px;
+                border:
+                  1px solid #1b3550;
+                border-radius: 10px;
+              "
+            >
+
+              <h4>
+                ${definition.name}
+              </h4>
+
+
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns:
+                    repeat(
+                      auto-fit,
+                      minmax(180px, 1fr)
+                    );
+                  gap: 10px;
+                "
+              >
+
+                ${Array.from({
+                  length:
+                    definition.slots
+                }).map(
+                  (_, index) => {
+
+                    const selected =
+                      existing[index] ||
+                      "";
+
+
+                    return `
+
+                      <select
+                        data-line-id="${definition.id}"
+                        data-line-slot="${index}"
+                        class="line-player-select"
+                      >
+
+                        ${playerOptions}
+
+                      </select>
+
+                    `;
+
+                  }
+                ).join("")}
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      ).join("");
+
+
+    /*
+      Set existing line selections.
+    */
+
+    document
+      .querySelectorAll(
+        ".line-player-select"
+      )
+      .forEach(
+        select => {
+
+          const lineId =
+            select.dataset.lineId;
+
+          const slot =
+            Number(
+              select.dataset.lineSlot
+            );
+
+
+          const existing =
+            lines[lineId] || [];
+
+
+          select.value =
+            existing[slot] ||
+            "";
+
+        }
+      );
+
+
+    /*
+      ========================================================
+      PLAYER ROLES
+      ========================================================
+    */
+
+    const rolesContainer =
+      document.getElementById(
+        "playerRolesContainer"
+      );
+
+
+    rolesContainer.innerHTML =
+      players.map(
+        player => {
+
+          const role =
+            playerRoles[
+              player.id
+            ] || {};
+
+
+          return `
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns:
+                  1.5fr
+                  repeat(
+                    4,
+                    minmax(120px, 1fr)
+                  );
+                gap: 10px;
+                align-items: center;
+                margin-bottom: 10px;
+              "
+            >
+
+              <strong>
+
+                ${escapeHTML(
+                  player.first_name
+                )}
+
+                ${escapeHTML(
+                  player.last_name
+                )}
+
+              </strong>
+
+
+              <select
+                data-role-player="${player.id}"
+                data-role="captain"
+              >
+
+                <option
+                  value=""
+                >
+                  Captain
+                </option>
+
+                <option
+                  value="captain"
+                  ${
+                    role.captain ===
+                    "captain"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Captain
+                </option>
+
+                <option
+                  value="alternate"
+                  ${
+                    role.captain ===
+                    "alternate"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Alternate
+                </option>
+
+              </select>
+
+
+              <select
+                data-role-player="${player.id}"
+                data-role="offensive"
+              >
+
+                <option
+                  value=""
+                >
+                  Offensive Role
+                </option>
+
+                <option
+                  value="shooter"
+                  ${
+                    role.offensive ===
+                    "shooter"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Shooter
+                </option>
+
+                <option
+                  value="playmaker"
+                  ${
+                    role.offensive ===
+                    "playmaker"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Playmaker
+                </option>
+
+                <option
+                  value="net_front"
+                  ${
+                    role.offensive ===
+                    "net_front"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Net Front
+                </option>
+
+                <option
+                  value="two_way"
+                  ${
+                    role.offensive ===
+                    "two_way"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Two-Way
+                </option>
+
+              </select>
+
+
+              <select
+                data-role-player="${player.id}"
+                data-role="defensive"
+              >
+
+                <option
+                  value=""
+                >
+                  Defensive Role
+                </option>
+
+                <option
+                  value="shutdown"
+                  ${
+                    role.defensive ===
+                    "shutdown"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Shutdown
+                </option>
+
+                <option
+                  value="shot_blocker"
+                  ${
+                    role.defensive ===
+                    "shot_blocker"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Shot Blocker
+                </option>
+
+                <option
+                  value="physical"
+                  ${
+                    role.defensive ===
+                    "physical"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Physical
+                </option>
+
+              </select>
+
+
+              <select
+                data-role-player="${player.id}"
+                data-role="faceoff"
+              >
+
+                <option
+                  value=""
+                >
+                  Faceoff Role
+                </option>
+
+                <option
+                  value="primary"
+                  ${
+                    role.faceoff ===
+                    "primary"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Primary
+                </option>
+
+                <option
+                  value="secondary"
+                  ${
+                    role.faceoff ===
+                    "secondary"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Secondary
+                </option>
+
+              </select>
+
+
+              <select
+                data-role-player="${player.id}"
+                data-role="special"
+              >
+
+                <option
+                  value=""
+                >
+                  Special Role
+                </option>
+
+                <option
+                  value="pp"
+                  ${
+                    role.special ===
+                    "pp"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  PP Specialist
+                </option>
+
+                <option
+                  value="pk"
+                  ${
+                    role.special ===
+                    "pk"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  PK Specialist
+                </option>
+
+                <option
+                  value="energy"
+                  ${
+                    role.special ===
+                    "energy"
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  Energy Player
+                </option>
+
+              </select>
+
+            </div>
+
+          `;
+
+        }
+      ).join("");
+
+
+    /*
+      ========================================================
+      BACK BUTTON
+      ========================================================
     */
 
     document
       .getElementById(
-        "backToTeamFromCustomize"
+        "managementBackButton"
       )
       ?.addEventListener(
         "click",
@@ -4072,304 +5166,310 @@ async function openTeamCustomize(
 
 
     /*
-      Live jersey preview.
+      ========================================================
+      SAVE MANAGEMENT
+      ========================================================
     */
 
-    const updatePreview =
-      function() {
+    document
+      .getElementById(
+        "saveTeamManagement"
+      )
+      ?.addEventListener(
+        "click",
+        async function() {
 
-        const updatedTeam = {
-
-          ...team,
-
-          name:
-            document
-              .getElementById(
-                "teamNameInput"
-              )
-              ?.value ||
-            team.name,
-
-          abbreviation:
-            document
-              .getElementById(
-                "teamAbbreviationInput"
-              )
-              ?.value ||
-            team.abbreviation,
-
-          primary_color:
-            document
-              .getElementById(
-                "teamPrimaryColor"
-              )
-              ?.value ||
-            primaryColor,
-
-          secondary_color:
-            document
-              .getElementById(
-                "teamSecondaryColor"
-              )
-              ?.value ||
-            secondaryColor,
-
-          tertiary_color:
-            document
-              .getElementById(
-                "teamTertiaryColor"
-              )
-              ?.value ||
-            tertiaryColor
-
-        };
-
-
-        const preview =
-          document.getElementById(
-            "customJerseyPreview"
-          );
-
-
-        if (preview) {
-
-          preview.innerHTML =
-            getTeamJerseyHTML(
-              updatedTeam,
-              "large"
+          const message =
+            document.getElementById(
+              "managementMessage"
             );
 
-        }
-
-      };
-
-
-    [
-      "teamNameInput",
-      "teamAbbreviationInput",
-      "teamPrimaryColor",
-      "teamSecondaryColor",
-      "teamTertiaryColor"
-    ].forEach(
-      id => {
-
-        document
-          .getElementById(id)
-          ?.addEventListener(
-            "input",
-            updatePreview
-          );
-
-      }
-    );
-
-
-    /*
-      Save team.
-    */
-
-    const form =
-      document.getElementById(
-        "teamCustomizeForm"
-      );
-
-
-    form.addEventListener(
-      "submit",
-      async function(event) {
-
-        event.preventDefault();
-
-
-        const message =
-          document.getElementById(
-            "teamCustomizeMessage"
-          );
-
-
-        const name =
-          document
-            .getElementById(
-              "teamNameInput"
-            )
-            .value
-            .trim();
-
-
-        const abbreviation =
-          document
-            .getElementById(
-              "teamAbbreviationInput"
-            )
-            .value
-            .trim()
-            .toUpperCase();
-
-
-        const city =
-          document
-            .getElementById(
-              "teamCityInput"
-            )
-            .value
-            .trim();
-
-
-        const primary_color =
-          document
-            .getElementById(
-              "teamPrimaryColor"
-            )
-            .value;
-
-
-        const secondary_color =
-          document
-            .getElementById(
-              "teamSecondaryColor"
-            )
-            .value;
-
-
-        const tertiary_color =
-          document
-            .getElementById(
-              "teamTertiaryColor"
-            )
-            .value;
-
-
-        if (!name) {
 
           message.textContent =
-            "Team name is required.";
+            "Saving team management...";
 
-          return;
-
-        }
-
-
-        if (!abbreviation) {
-
-          message.textContent =
-            "Team abbreviation is required.";
-
-          return;
-
-        }
-
-
-        if (
-          abbreviation.length >
-          5
-        ) {
-
-          message.textContent =
-            "Abbreviation must be 5 characters or fewer.";
-
-          return;
-
-        }
-
-
-        message.textContent =
-          "Saving team...";
-
-
-        try {
 
           /*
-            owner_id is included in
-            the filter AND checked
-            before the update.
+            Gather line usage.
+          */
 
-            This prevents another user
-            from editing the team.
+          const updatedLineUsage =
+            {};
+
+
+          document
+            .querySelectorAll(
+              "[data-usage]"
+            )
+            .forEach(
+              input => {
+
+                const value =
+                  Math.max(
+                    0,
+                    Math.min(
+                      100,
+                      Number(
+                        input.value
+                      ) || 0
+                    )
+                  );
+
+
+                updatedLineUsage[
+                  input.dataset.usage
+                ] =
+                  value;
+
+              }
+            );
+
+
+          /*
+            Gather lines.
+          */
+
+          const updatedLines =
+            {};
+
+
+          document
+            .querySelectorAll(
+              ".line-player-select"
+            )
+            .forEach(
+              select => {
+
+                const lineId =
+                  select.dataset.lineId;
+
+                const slot =
+                  Number(
+                    select.dataset.lineSlot
+                  );
+
+
+                if (
+                  !updatedLines[lineId]
+                ) {
+
+                  updatedLines[lineId] =
+                    [];
+
+                }
+
+
+                updatedLines[lineId][slot] =
+                  select.value || null;
+
+              }
+            );
+
+
+          /*
+            Gather player roles.
+          */
+
+          const updatedRoles =
+            {};
+
+
+          document
+            .querySelectorAll(
+              "[data-role-player]"
+            )
+            .forEach(
+              select => {
+
+                const playerId =
+                  select.dataset.rolePlayer;
+
+                const role =
+                  select.dataset.role;
+
+
+                if (
+                  !updatedRoles[playerId]
+                ) {
+
+                  updatedRoles[playerId] =
+                    {};
+
+                }
+
+
+                updatedRoles[playerId][role] =
+                  select.value || null;
+
+              }
+            );
+
+
+          /*
+            Save only if we still own
+            the team.
           */
 
           const {
-            data: updatedTeam,
-            error: updateError
+            error
           } =
             await supabaseClient
-              .from("teams")
+              .from("team_settings")
               .update({
 
-                name,
+                offensive_tactic:
+                  document
+                    .getElementById(
+                      "offensiveTactic"
+                    )
+                    .value,
 
-                abbreviation,
+                defensive_tactic:
+                  document
+                    .getElementById(
+                      "defensiveTactic"
+                    )
+                    .value,
 
-                city:
-                  city || null,
+                forecheck:
+                  document
+                    .getElementById(
+                      "forecheck"
+                    )
+                    .value,
 
-                primary_color,
+                neutral_zone:
+                  document
+                    .getElementById(
+                      "neutralZone"
+                    )
+                    .value,
 
-                secondary_color,
+                defensive_zone:
+                  document
+                    .getElementById(
+                      "defensiveZone"
+                    )
+                    .value,
 
-                tertiary_color
+                physicality:
+                  document
+                    .getElementById(
+                      "physicality"
+                    )
+                    .value,
+
+                passing_tendency:
+                  document
+                    .getElementById(
+                      "passingTendency"
+                    )
+                    .value,
+
+                shooting_tendency:
+                  document
+                    .getElementById(
+                      "shootingTendency"
+                    )
+                    .value,
+
+                aggressiveness:
+                  document
+                    .getElementById(
+                      "aggressiveness"
+                    )
+                    .value,
+
+                discipline:
+                  document
+                    .getElementById(
+                      "discipline"
+                    )
+                    .value,
+
+                starting_goalie_id:
+                  document
+                    .getElementById(
+                      "startingGoalie"
+                    )
+                    .value ||
+                  null,
+
+                backup_goalie_id:
+                  document
+                    .getElementById(
+                      "backupGoalie"
+                    )
+                    .value ||
+                  null,
+
+                goalie_rotation:
+                  document
+                    .getElementById(
+                      "goalieRotation"
+                    )
+                    .value,
+
+                line_usage:
+                  updatedLineUsage,
+
+                player_roles:
+                  updatedRoles,
+
+                lines:
+                  updatedLines,
+
+                updated_at:
+                  new Date()
+                    .toISOString()
 
               })
               .eq(
-                "id",
+                "team_id",
                 teamId
-              )
-              .eq(
-                "owner_id",
-                currentUser.id
-              )
-              .select()
-              .single();
+              );
 
 
-          if (updateError) {
+          if (error) {
 
-            throw updateError;
+            console.error(
+              "Team management save error:",
+              error
+            );
+
+
+            message.textContent =
+              "Unable to save: " +
+              error.message;
+
+            return;
 
           }
 
 
           message.textContent =
-            "Team saved!";
+            "Team management saved!";
 
-
-          /*
-            Open the updated team page.
-          */
 
           setTimeout(
             function() {
 
               openTeamProfile(
-                updatedTeam.id
+                teamId
               );
 
             },
-            400
+            500
           );
-
-
-        } catch (error) {
-
-          console.error(
-            "Team save error:",
-            error
-          );
-
-
-          message.textContent =
-            "Unable to save team: " +
-            error.message;
 
         }
-
-      }
-    );
+      );
 
 
   } catch (error) {
 
     console.error(
-      "Team customization error:",
+      "Team management error:",
       error
     );
 
@@ -4378,7 +5478,7 @@ async function openTeamCustomize(
 
       <div class="error">
 
-        Unable to load team customization.
+        Unable to load team management.
 
         <br><br>
 
