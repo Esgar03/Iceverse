@@ -2121,14 +2121,21 @@ async function loadTeams() {
   const teamsContainer =
     document.getElementById("teams");
 
+  if (!teamsContainer) {
+    console.error(
+      "Teams container was not found."
+    );
+    return;
+  }
+
   teamsContainer.innerHTML =
-    "Loading teams...";
+    '<div class="loading">Loading Iceverse teams...</div>';
 
   try {
 
     const response =
       await fetch(
-        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id&order=name.asc`,
+        `${SUPABASE_URL}/rest/v1/teams?select=id,name,abbreviation,city,money,wins,losses,overtime_losses,owner_id,primary_color,secondary_color,tertiary_color&order=name.asc`,
         {
           headers: {
             "apikey": SUPABASE_KEY,
@@ -2148,10 +2155,9 @@ async function loadTeams() {
         errorText
       );
 
-      teamsContainer.innerHTML =
-        "Unable to load Iceverse teams.";
-
-      return;
+      throw new Error(
+        `Supabase error ${response.status}`
+      );
     }
 
     const teams =
@@ -2160,40 +2166,201 @@ async function loadTeams() {
     if (!teams || teams.length === 0) {
 
       teamsContainer.innerHTML =
-        "No teams found.";
+        '<div class="loading">No teams found.</div>';
 
       return;
     }
 
-    teamsContainer.innerHTML =
-      teams.map(team => `
+    teamsContainer.innerHTML = "";
 
-        <div class="team-card">
+    teams.forEach(team => {
 
-          <h3>
-            ${escapeHTML(team.name || "Unknown Team")}
-          </h3>
+      const primaryColor =
+        team.primary_color ||
+        "#1D4ED8";
 
-          <p>
-            <strong>Abbreviation:</strong>
-            ${escapeHTML(team.abbreviation || "---")}
-          </p>
+      const secondaryColor =
+        team.secondary_color ||
+        "#FFFFFF";
 
-          <p>
-            <strong>City:</strong>
-            ${escapeHTML(team.city || "---")}
-          </p>
+      const tertiaryColor =
+        team.tertiary_color ||
+        "#111827";
 
-          <p>
-            <strong>Record:</strong>
-            ${team.wins ?? 0}-
-            ${team.losses ?? 0}-
-            ${team.overtime_losses ?? 0}
-          </p>
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "team-card";
+
+      card.style.cursor =
+        "pointer";
+
+      card.style.borderColor =
+        primaryColor;
+
+      const ownerText =
+        team.owner_id
+          ? "Owned"
+          : "Unclaimed";
+
+      const buttonHTML =
+        team.owner_id
+          ? ""
+          : `
+            <button
+              type="button"
+              class="secondary-button claim-team-button"
+              style="
+                margin-top: 15px;
+              "
+            >
+              Claim Team
+            </button>
+          `;
+
+      card.innerHTML = `
+
+        <div
+          class="team-jersey-preview"
+          style="
+            width: 90px;
+            height: 110px;
+            margin: 0 auto 15px;
+            border-radius: 12px 12px 18px 18px;
+            background: ${escapeHTML(primaryColor)};
+            border: 6px solid ${escapeHTML(tertiaryColor)};
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            color: ${escapeHTML(secondaryColor)};
+            font-weight: 900;
+            font-size: 22px;
+            overflow: hidden;
+          "
+        >
+
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 14px;
+              background: ${escapeHTML(secondaryColor)};
+            "
+          ></div>
+
+          <div
+            style="
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              width: 100%;
+              height: 14px;
+              background: ${escapeHTML(tertiaryColor)};
+            "
+          ></div>
+
+          <span
+            style="
+              position: relative;
+              z-index: 2;
+              text-shadow:
+                1px 1px 2px ${escapeHTML(tertiaryColor)};
+            "
+          >
+            ${escapeHTML(
+              team.abbreviation || "IHL"
+            )}
+          </span>
 
         </div>
 
-      `).join("");
+
+        <h3>
+          ${escapeHTML(
+            team.name || "Unknown Team"
+          )}
+        </h3>
+
+        <p>
+          <strong>
+            ${escapeHTML(
+              team.abbreviation || "---"
+            )}
+          </strong>
+
+          ${
+            team.city
+              ? " · " +
+                escapeHTML(team.city)
+              : ""
+          }
+        </p>
+
+        <p>
+          <strong>Record:</strong>
+          ${team.wins ?? 0}-
+          ${team.losses ?? 0}-
+          ${team.overtime_losses ?? 0}
+        </p>
+
+        <p>
+          <strong>Status:</strong>
+          ${ownerText}
+        </p>
+
+        ${buttonHTML}
+
+      `;
+
+      card.addEventListener(
+        "click",
+        function(event) {
+
+          if (
+            event.target.closest(
+              ".claim-team-button"
+            )
+          ) {
+            return;
+          }
+
+          openTeamProfile(
+            team.id
+          );
+
+        }
+      );
+
+      const claimButton =
+        card.querySelector(
+          ".claim-team-button"
+        );
+
+      if (claimButton) {
+
+        claimButton.addEventListener(
+          "click",
+          async function(event) {
+
+            event.stopPropagation();
+
+            await claimTeam(
+              team.id
+            );
+
+          }
+        );
+
+      }
+
+      teamsContainer.appendChild(card);
+
+    });
 
   } catch (error) {
 
@@ -2202,9 +2369,18 @@ async function loadTeams() {
       error
     );
 
-    teamsContainer.innerHTML =
-      "Unable to load Iceverse teams.";
+    teamsContainer.innerHTML = `
+      <div class="error">
+        Unable to load Iceverse teams.<br>
+        ${escapeHTML(
+          error.message ||
+          "Unknown error"
+        )}
+      </div>
+    `;
+
   }
+
 }
 
 
