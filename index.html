@@ -491,41 +491,103 @@
 
   function showSignup() {
 
-    document.querySelector(".hero").style.display = "none";
+  document.querySelector(".hero").style.display =
+    "none";
 
-    document.getElementById("authSection").style.display = "block";
+  document.getElementById("authSection").style.display =
+    "block";
 
-    document.querySelector(".section").style.display = "none";
+  document.querySelector(".hero").nextElementSibling.style.display =
+    "none";
 
-    document.getElementById("playersSection").style.display = "none";
+  document.getElementById("playersSection").style.display =
+    "none";
 
-    document.getElementById("playerProfileSection").style.display = "none";
-
-
-    document.getElementById("authTitle").textContent =
-      "Create Account";
-
-    document.getElementById("authButton").textContent =
-      "Create Account";
-
-    document.getElementById("authButton").onclick =
-      createAccount;
-
-    document.getElementById("authUsername").style.display =
-      "block";
-
-    document.getElementById("authMessage").textContent = "";
+  document.getElementById("playerProfileSection").style.display =
+    "none";
 
 
-    document.getElementById("authUsername").value = "";
-    document.getElementById("authEmail").value = "";
-    document.getElementById("authPassword").value = "";
+  document.getElementById("authTitle").textContent =
+    "Create Account";
+
+  document.getElementById("authButton").textContent =
+    "Create Account";
+
+  document.getElementById("authButton").onclick =
+    createAccount;
 
 
-    document.getElementById("authSection").scrollIntoView({
-      behavior: "smooth"
-    });
-  }
+  document.getElementById("authUsername").style.display =
+    "block";
+
+
+  document.getElementById("authMessage").textContent =
+    "";
+
+
+  document.getElementById("authUsername").value =
+    "";
+
+  document.getElementById("authEmail").value =
+    "";
+
+  document.getElementById("authPassword").value =
+    "";
+
+
+  document.getElementById("authSection").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+
+function showLogin() {
+
+  document.querySelector(".hero").style.display =
+    "none";
+
+  document.getElementById("authSection").style.display =
+    "block";
+
+  document.querySelector(".hero").nextElementSibling.style.display =
+    "none";
+
+  document.getElementById("playersSection").style.display =
+    "none";
+
+  document.getElementById("playerProfileSection").style.display =
+    "none";
+
+
+  document.getElementById("authTitle").textContent =
+    "Log In";
+
+  document.getElementById("authButton").textContent =
+    "Log In";
+
+  document.getElementById("authButton").onclick =
+    loginUser;
+
+
+  document.getElementById("authUsername").style.display =
+    "none";
+
+
+  document.getElementById("authMessage").textContent =
+    "";
+
+
+  document.getElementById("authEmail").value =
+    "";
+
+  document.getElementById("authPassword").value =
+    "";
+
+
+  document.getElementById("authSection").scrollIntoView({
+    behavior: "smooth"
+  });
+}
 
 
   function showLogin() {
