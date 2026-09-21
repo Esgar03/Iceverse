@@ -382,6 +382,27 @@
 
     /* ===== ICEVERSE REBUILD UI ===== */
     .app-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.metric-card,.panel{background:#0d2035;border:1px solid #203c59;border-radius:14px;padding:20px}.metric-value{font-size:30px;font-weight:900;margin-top:6px}.muted{color:#9fb1c5}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#142b45;border:1px solid #294766;font-size:12px}.data-list{display:grid;gap:10px}.data-row{display:flex;justify-content:space-between;gap:15px;padding:12px;border-bottom:1px solid #203854}.section-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs button{background:#142b45;color:white;border:1px solid #294766;border-radius:8px;padding:9px 12px;cursor:pointer}.danger{color:#ffb7bd}.good{color:#86efac}.gold{color:#ffd166}.table-wrap{overflow-x:auto}.iv-table{width:100%;border-collapse:collapse}.iv-table th,.iv-table td{padding:11px;border-bottom:1px solid #203854;text-align:left}.iv-table th{color:#9fb1c5;font-size:12px;text-transform:uppercase}.empty-state{padding:30px;text-align:center;color:#9fb1c5}.profile-link{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  
+    /* ICEVERSE PRO-STYLE JERSEYS */
+    .iv-jersey{position:relative;margin:8px auto 14px;filter:drop-shadow(0 13px 12px rgba(0,0,0,.38));isolation:isolate}
+    .iv-jersey-shadow{position:absolute;left:18%;right:18%;bottom:-4%;height:12%;background:rgba(0,0,0,.38);filter:blur(8px);border-radius:50%;z-index:-2}
+    .iv-jersey-body{position:absolute;left:20%;right:20%;top:5%;bottom:3%;background:linear-gradient(100deg,rgba(255,255,255,.11),transparent 24%,transparent 72%,rgba(0,0,0,.17)),var(--jersey-primary);clip-path:polygon(16% 0,35% 5%,50% 4%,65% 5%,84% 0,100% 16%,92% 100%,8% 100%,0 16%);border-radius:10% 10% 14% 14%;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
+    .iv-sleeve{position:absolute;top:12%;width:31%;height:59%;background:linear-gradient(100deg,rgba(255,255,255,.08),transparent 35%),var(--jersey-primary);z-index:-1;overflow:hidden}
+    .iv-sleeve-left{left:2%;clip-path:polygon(34% 0,100% 8%,88% 82%,8% 100%,0 83%,18% 18%)}
+    .iv-sleeve-right{right:2%;clip-path:polygon(66% 0,0 8%,12% 82%,92% 100%,100% 83%,82% 18%)}
+    .iv-sleeve i{position:absolute;left:0;right:0;bottom:18%;height:17%;background:var(--jersey-secondary);box-shadow:0 6px 0 var(--jersey-tertiary),0 -4px 0 var(--jersey-tertiary)}
+    .iv-yoke{position:absolute;left:7%;right:7%;top:0;height:24%;background:var(--jersey-tertiary);clip-path:polygon(0 0,30% 8%,50% 24%,70% 8%,100% 0,91% 70%,65% 55%,50% 72%,35% 55%,9% 70%);opacity:.97}
+    .iv-collar{position:absolute;top:-2%;left:50%;transform:translateX(-50%);width:35%;height:18%;background:var(--jersey-secondary);clip-path:polygon(0 0,100% 0,83% 55%,66% 82%,50% 100%,34% 82%,17% 55%)}
+    .iv-collar span{position:absolute;inset:18% 17% 23%;background:#07111f;clip-path:inherit}
+    .iv-laces{position:absolute;top:12%;left:50%;transform:translateX(-50%);font-size:.58em;color:var(--jersey-secondary);opacity:.85;z-index:4}
+    .iv-chest-stripe{position:absolute;left:0;right:0;top:47%;height:11%;background:var(--jersey-secondary);box-shadow:0 5px 0 var(--jersey-tertiary),0 -5px 0 var(--jersey-tertiary)}
+    .iv-waist-stripes{position:absolute;left:0;right:0;bottom:8%;height:8%;background:var(--jersey-secondary);box-shadow:0 6px 0 var(--jersey-tertiary)}
+    .iv-crest{position:absolute;left:50%;top:43%;transform:translate(-50%,-50%);width:43%;aspect-ratio:1;border-radius:50%;background:var(--jersey-secondary);border:4px solid var(--jersey-tertiary);display:grid;place-items:center;z-index:5;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+    .iv-crest:before{content:"";position:absolute;inset:8%;border:2px solid var(--jersey-primary);border-radius:50%}
+    .iv-crest span{position:relative;color:var(--jersey-primary);font-weight:1000;letter-spacing:-1px;text-shadow:1px 1px 0 rgba(0,0,0,.12)}
+    .world-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}.world-nav button{padding:9px 12px}
+    .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#86efac;margin-right:6px}.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.feature-card{background:#0d2035;border:1px solid #203c59;border-radius:14px;padding:18px}.feature-card h3{margin-bottom:8px}.mini-bar{height:8px;border-radius:99px;background:#071525;overflow:hidden;margin-top:7px}.mini-bar span{display:block;height:100%;background:linear-gradient(90deg,#2f80ed,#86efac)}
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -427,6 +448,8 @@
     <button onclick="showFreeAgents()">Free Agents</button>
     <button onclick="showNews()">News</button>
     <button id="myProfileNavButton" onclick="showMyProfile()" style="display:none;">My Profile</button>
+    <button onclick="showSchedule()">Schedule</button>
+    <button onclick="showWorldHub()">World</button>
 
     <button
       id="loginButton"
@@ -1176,6 +1199,8 @@
 <section id="newsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse News</h2><span class="pill">Iceverse Network</span></div><div id="newsContent"><div class="loading">Loading news...</div></div></section>
 <section id="myProfileSection" class="section" style="display:none;"><div class="section-toolbar"><h2>My Iceverse</h2><span class="pill">Manager & Player Careers</span></div><div id="myProfileContent"><div class="loading">Loading profile...</div></div></section>
 <section id="contractsSection" class="section" style="display:none;"><div id="contractsContent"></div></section>
+<section id="scheduleSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Schedule & Games</h2><span class="pill">Live Iceverse</span></div><div id="scheduleContent"></div></section>
+<section id="worldSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse World</h2><span class="pill">Career · Competition · Legacy</span></div><div id="worldContent"></div></section>
 
 </main>
 
@@ -1969,6 +1994,8 @@ async function loginUser() {
 
 function hideAllMainSections() {
 
+  document.querySelectorAll("main > section").forEach(section => section.style.display = "none");
+
   const hero =
     document.querySelector(".hero");
 
@@ -2128,195 +2155,27 @@ function showTeams() {
   ------------------------------------------------------------
 */
 
-function getTeamJerseyHTML(
-  team,
-  size = "large"
-) {
-
-  const primaryColor =
-    team.primary_color ||
-    "#1D4ED8";
-
-  const secondaryColor =
-    team.secondary_color ||
-    "#FFFFFF";
-
-  const tertiaryColor =
-    team.tertiary_color ||
-    "#111827";
-
-  let width = 150;
-  let height = 185;
-  let fontSize = 34;
-
-  if (size === "small") {
-    width = 90;
-    height = 110;
-    fontSize = 22;
-  }
-
-  if (size === "medium") {
-    width = 120;
-    height = 150;
-    fontSize = 28;
-  }
-
+function getTeamJerseyHTML(team, size = "large") {
+  const primary = escapeHTML(team.primary_color || "#1D4ED8");
+  const secondary = escapeHTML(team.secondary_color || "#FFFFFF");
+  const tertiary = escapeHTML(team.tertiary_color || "#111827");
+  const abbr = escapeHTML(team.abbreviation || "IHL");
+  const dims = size === "small" ? [104,112,18] : size === "medium" ? [142,154,24] : [184,200,31];
+  const [w,h,font] = dims;
   return `
-
-    <div
-      class="team-jersey"
-      style="
-        width: ${width}px;
-        height: ${height}px;
-        margin: 0 auto;
-        border-radius:
-          18px 18px 28px 28px;
-
-        background:
-          ${escapeHTML(primaryColor)};
-
-        border:
-          ${size === "small" ? 5 : 7}px
-          solid
-          ${escapeHTML(tertiaryColor)};
-
-        position: relative;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        box-sizing: border-box;
-
-        color:
-          ${escapeHTML(secondaryColor)};
-
-        font-weight: 900;
-
-        font-size: ${fontSize}px;
-
-        overflow: hidden;
-
-        box-shadow:
-          0 8px 18px
-          rgba(0,0,0,0.35);
-      "
-    >
-
-      <!-- Neck -->
-      <div
-        style="
-          position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-
-          width: 38%;
-          height: 15%;
-
-          background:
-            ${escapeHTML(tertiaryColor)};
-
-          border-radius:
-            0 0 18px 18px;
-        "
-      ></div>
-
-
-      <!-- Left sleeve -->
-      <div
-        style="
-          position: absolute;
-          top: 16%;
-          left: -8%;
-
-          width: 35%;
-          height: 48%;
-
-          background:
-            ${escapeHTML(secondaryColor)};
-
-          transform:
-            rotate(14deg);
-
-          opacity: 0.95;
-        "
-      ></div>
-
-
-      <!-- Right sleeve -->
-      <div
-        style="
-          position: absolute;
-          top: 16%;
-          right: -8%;
-
-          width: 35%;
-          height: 48%;
-
-          background:
-            ${escapeHTML(secondaryColor)};
-
-          transform:
-            rotate(-14deg);
-
-          opacity: 0.95;
-        "
-      ></div>
-
-
-      <!-- Chest stripe -->
-      <div
-        style="
-          position: absolute;
-          top: 43%;
-          left: 0;
-
-          width: 100%;
-          height: 11%;
-
-          background:
-            ${escapeHTML(secondaryColor)};
-        "
-      ></div>
-
-
-      <!-- Bottom stripe -->
-      <div
-        style="
-          position: absolute;
-          bottom: 0;
-          left: 0;
-
-          width: 100%;
-          height: 10%;
-
-          background:
-            ${escapeHTML(tertiaryColor)};
-        "
-      ></div>
-
-
-      <!-- Team abbreviation -->
-      <span
-        style="
-          position: relative;
-          z-index: 5;
-
-          text-shadow:
-            2px 2px 3px
-            ${escapeHTML(tertiaryColor)};
-        "
-      >
-        ${escapeHTML(
-          team.abbreviation ||
-          "IHL"
-        )}
-      </span>
-
-    </div>
-
-  `;
+    <div class="iv-jersey iv-jersey-${size}" style="--jersey-primary:${primary};--jersey-secondary:${secondary};--jersey-tertiary:${tertiary};width:${w}px;height:${h}px" aria-label="${abbr} jersey">
+      <div class="iv-jersey-shadow"></div>
+      <div class="iv-sleeve iv-sleeve-left"><i></i></div>
+      <div class="iv-sleeve iv-sleeve-right"><i></i></div>
+      <div class="iv-jersey-body">
+        <div class="iv-yoke"></div>
+        <div class="iv-collar"><span></span></div>
+        <div class="iv-laces">╳</div>
+        <div class="iv-chest-stripe"></div>
+        <div class="iv-waist-stripes"></div>
+        <div class="iv-crest" style="font-size:${font}px"><span>${abbr}</span></div>
+      </div>
+    </div>`;
 }
   
 
@@ -8225,6 +8084,37 @@ async function showTeamOperations(teamId){showSection("contractsSection");const 
 
 /* Contract offer flow: team manager -> player owner */
 async function startPlayerSigning(playerId){if(!currentUser){showLogin();return;}const team=await getMyTeam();if(!team){alert("Claim a team before making contract offers.");return;}const salary=Number(prompt("Annual salary offer?","100000"));if(!salary||salary<0)return;const seasons=Number(prompt("Contract length (1-7 seasons)?","1"));if(!Number.isInteger(seasons)||seasons<1||seasons>7){alert("Length must be 1-7 seasons.");return;}const role=prompt("Projected role (example: 1st Line, 2nd Pair, Starter)","")||null;const ntc=confirm("Include a no-trade clause?");const days=Number(prompt("Offer expires in how many days (1-7)?","3"));if(!Number.isInteger(days)||days<1||days>7){alert("Expiry must be 1-7 days.");return;}const expires=new Date(Date.now()+days*86400000).toISOString();const {error}=await supabaseClient.from("contract_offers").insert({player_id:playerId,team_id:team.id,salary,seasons,projected_role:role,no_trade_clause:ntc,expires_at:expires,status:"active"});if(error){alert("Offer failed: "+error.message);return;}alert("Contract offer sent.");}
+
+
+/* =========================================================
+   ICEVERSE WORLD HUB / SCHEDULE / CAREER SYSTEM SURFACES
+   These screens expose the persistent systems stored in Supabase.
+   ========================================================= */
+async function showSchedule(){
+  showSection("scheduleSection"); const c=document.getElementById("scheduleContent");
+  c.innerHTML='<div class="loading">Loading Iceverse schedule...</div>';
+  try{const {data,error}=await supabaseClient.from("games").select("id,scheduled_at,status,competition_type,home_score,away_score,home_team_id,away_team_id,teams!games_home_team_id_fkey(name,abbreviation)").order("scheduled_at",{ascending:true}).limit(80); if(error)throw error;
+    const teamIds=[...new Set((data||[]).flatMap(g=>[g.home_team_id,g.away_team_id]))]; const {data:teams}=teamIds.length?await supabaseClient.from("teams").select("id,name,abbreviation").in("id",teamIds):{data:[]}; const tm=Object.fromEntries((teams||[]).map(t=>[t.id,t]));
+    c.innerHTML=(data||[]).length?`<div class="data-list">${data.map(g=>`<div class="panel"><div class="section-toolbar"><span><strong>${escapeHTML(tm[g.away_team_id]?.name||'TBD')}</strong> @ <strong>${escapeHTML(tm[g.home_team_id]?.name||'TBD')}</strong></span><span class="pill">${escapeHTML(g.competition_type||'League')}</span></div><div class="muted">${new Date(g.scheduled_at).toLocaleString()} · ${escapeHTML(g.status)}</div>${g.status==='final'?`<div class="metric-value">${g.away_score} - ${g.home_score}</div>`:''}</div>`).join('')}</div>`:'<div class="empty-state">No games have been scheduled yet. The season engine will populate this calendar.</div>';
+  }catch(e){c.innerHTML=`<div class="error">Schedule: ${escapeHTML(e.message)}</div>`;}
+}
+async function showWorldHub(){
+  showSection("worldSection"); const c=document.getElementById("worldContent"); c.innerHTML='<div class="loading">Loading the Iceverse...</div>';
+  try{const [tourQ,recordQ,staffQ,injQ,seasonQ]=await Promise.all([supabaseClient.from("tournaments").select("*").order("starts_at",{ascending:true}).limit(12),supabaseClient.from("league_records").select("*").eq("active",true).order("achieved_at",{ascending:false}).limit(12),supabaseClient.from("staff").select("*").eq("retired",false).order("overall",{ascending:false}).limit(12),supabaseClient.from("injuries").select("*,players(first_name,last_name)").eq("status","active").limit(12),supabaseClient.from("seasons").select("*").order("created_at",{ascending:false}).limit(1)]);
+    const season=seasonQ.data?.[0];
+    c.innerHTML=`<div class="app-grid"><div class="metric-card"><div class="muted">Current Season</div><div class="metric-value">${escapeHTML(season?.name||season?.season_label||'Preseason')}</div></div><div class="metric-card"><div class="muted">Active Tournaments</div><div class="metric-value">${(tourQ.data||[]).filter(t=>t.status!=='completed').length}</div></div><div class="metric-card"><div class="muted">Active Injuries</div><div class="metric-value">${(injQ.data||[]).length}</div></div><div class="metric-card"><div class="muted">Staff Market</div><div class="metric-value">${(staffQ.data||[]).length}+</div></div></div>
+    <div class="world-nav"><button class="secondary-button" onclick="showWorldPanel('tournaments')">Tournaments</button><button class="secondary-button" onclick="showWorldPanel('records')">Records</button><button class="secondary-button" onclick="showWorldPanel('staff')">Staff Market</button><button class="secondary-button" onclick="showWorldPanel('injuries')">Injuries</button><button class="secondary-button" onclick="showWorldPanel('international')">International</button><button class="secondary-button" onclick="showWorldPanel('systems')">Career Systems</button></div><div id="worldPanel"></div>`;
+    window.iceverseWorld={tournaments:tourQ.data||[],records:recordQ.data||[],staff:staffQ.data||[],injuries:injQ.data||[]}; showWorldPanel('systems');
+  }catch(e){c.innerHTML=`<div class="error">World hub: ${escapeHTML(e.message)}</div>`;}
+}
+async function showWorldPanel(kind){const p=document.getElementById('worldPanel');if(!p)return;const w=window.iceverseWorld||{};
+ if(kind==='tournaments'){p.innerHTML=`<div class="feature-grid">${w.tournaments?.length?w.tournaments.map(t=>`<div class="feature-card"><h3>${escapeHTML(t.name)}</h3><div class="muted">${escapeHTML(t.tournament_type)} · ${escapeHTML(t.status)}</div><p style="margin-top:8px">${t.starts_at?new Date(t.starts_at).toLocaleDateString():'Date TBD'}${t.host_country?' · Host: '+escapeHTML(t.host_country):''}</p></div>`).join(''):'<div class="empty-state">Weekend and international tournaments will appear here.</div>'}</div>`;return;}
+ if(kind==='records'){p.innerHTML=`<div class="panel"><h3>Iceverse Record Book</h3><div class="data-list">${w.records?.length?w.records.map(r=>`<div class="data-row"><span>${escapeHTML(r.record_name)}<br><span class="muted">${escapeHTML(r.competition)}</span></span><strong>${r.value}</strong></div>`).join(''):'<div class="empty-state">Records begin when official games are played.</div>'}</div></div>`;return;}
+ if(kind==='staff'){p.innerHTML=`<div class="feature-grid">${w.staff?.length?w.staff.map(s=>`<div class="feature-card"><h3>${escapeHTML(s.first_name)} ${escapeHTML(s.last_name)}</h3><div class="muted">${escapeHTML(s.primary_role)} · ${escapeHTML(s.specialty||'Generalist')}</div><div class="metric-value">${s.overall} OVR</div><div class="muted">Expected ${fmtMoney(s.salary_expectation)}</div></div>`).join(''):'<div class="empty-state">Staff candidates will populate the market.</div>'}</div>`;return;}
+ if(kind==='injuries'){p.innerHTML=`<div class="panel"><h3>League Injury Report</h3>${w.injuries?.length?w.injuries.map(i=>`<div class="data-row"><span>${escapeHTML(i.players?.first_name||'')} ${escapeHTML(i.players?.last_name||'')}</span><span>${escapeHTML(i.injury_type)} · ${escapeHTML(i.severity)}</span></div>`).join(''):'<div class="empty-state">No active injuries.</div>'}</div>`;return;}
+ if(kind==='international'){const {data}=await supabaseClient.from('national_teams').select('*').order('world_ranking',{ascending:true});p.innerHTML=`<div class="feature-grid">${(data||[]).map(n=>`<div class="feature-card"><h3>${getFlag(n.country)} ${escapeHTML(n.country)}</h3><div class="muted">World Ranking</div><div class="metric-value">#${n.world_ranking||'—'}</div><div>Prestige ${n.prestige||0}</div></div>`).join('')||'<div class="empty-state">National programs will appear here.</div>'}</div>`;return;}
+ p.innerHTML=`<div class="feature-grid"><div class="feature-card"><h3>Player Careers</h3><p class="muted">Age 18 creation, hidden potential, automatic development, breakouts, decline, retirement, reputation, milestones and Hall of Fame legacy.</p></div><div class="feature-card"><h3>Team Management</h3><p class="muted">23-player rosters, position-aware lines, PP/PK/3v3 units, tactics, goalie rotation, roles, staff, facilities and finances.</p></div><div class="feature-card"><h3>Competition</h3><p class="muted">60-game weekday seasons, 2-point standings, best-of-seven playoffs, weekend double-elimination tournaments and international events.</p></div><div class="feature-card"><h3>Simulation</h3><p class="muted">Shift-based events, fatigue, chemistry, momentum, special teams, injuries, detailed play-by-play, box scores and advanced stats.</p></div><div class="feature-card"><h3>Player Market</h3><p class="muted">Contracts, projected roles, 1-7 year terms, NTCs, free agency, CPU signings, trades and transaction history.</p></div><div class="feature-card"><h3>Living World</h3><p class="muted">Luke Davenport and fictional media, notifications, records, awards, rivalries, franchise histories and persistent career stories.</p></div></div>`;
+}
 
 /* =========================================================
    START ICEVERSE
