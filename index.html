@@ -3445,412 +3445,249 @@ function showCreatePlayer() {
 
 async function openPlayerProfile(playerId) {
 
-  const players =
-    window.iceversePlayers || [];
-
-  const player =
-    players.find(
-      p => p.id === playerId
-    );
-
-  if (!player) {
-    return;
-  }
-
-  hideAllMainSections();
-
-  document.getElementById("playerProfileSection").style.display =
-    "block";
-
-  const profile =
+  const playerProfile =
     document.getElementById("playerProfile");
 
-  profile.innerHTML =
-    '<div class="loading">Loading player...</div>';
+  playerProfile.innerHTML =
+    "<p>Loading player...</p>";
 
   try {
 
-    const response =
-      await fetch(
-        `${SUPABASE_URL}/rest/v1/players?select=*&id=eq.${encodeURIComponent(playerId)}`,
-        {
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization":
-              `Bearer ${SUPABASE_KEY}`
-          }
-        }
-      );
+    const {
+      data: player,
+      error: playerError
+    } =
+      await supabaseClient
+        .from("players")
+        .select("*")
+        .eq("id", playerId)
+        .single();
 
-    if (!response.ok) {
-      throw new Error(
-        `Unable to load player (${response.status})`
+    if (playerError) {
+      throw playerError;
+    }
+
+    /*
+      Get the player's current team.
+      This is separate from player ownership.
+    */
+
+    const {
+      data: rosterRows,
+      error: rosterError
+    } =
+      await supabaseClient
+        .from("rosters")
+        .select(`
+          team_id,
+          teams (
+            id,
+            name,
+            abbreviation
+          )
+        `)
+        .eq("player_id", playerId);
+
+    if (rosterError) {
+      console.error(
+        "Roster lookup error:",
+        rosterError
       );
     }
 
-    const playerRows =
-      await response.json();
+    const currentRoster =
+      rosterRows &&
+      rosterRows.length > 0
+        ? rosterRows[0]
+        : null;
 
-    if (!playerRows.length) {
-      throw new Error(
-        "Player not found."
-      );
-    }
+    const currentTeam =
+      currentRoster &&
+      currentRoster.teams
+        ? currentRoster.teams
+        : null;
 
-    const fullPlayer =
-      playerRows[0];
+    /*
+      Get the username of the player owner.
 
-    const rosterResponse =
-      await fetch(
-        `${SUPABASE_URL}/rest/v1/rosters?select=jersey_number,team_id,teams(id,name,abbreviation,owner_id)&player_id=eq.${encodeURIComponent(playerId)}`,
-        {
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization":
-              `Bearer ${SUPABASE_KEY}`
-          }
-        }
-      );
+      created_by is the permanent owner of
+      the player. It does NOT change when
+      the player changes teams.
+    */
 
-    let roster =
-      null;
+    let ownerUsername = null;
 
-    if (rosterResponse.ok) {
+    if (player.created_by) {
 
-      const rosterRows =
-        await rosterResponse.json();
-
-      roster =
-        rosterRows[0] || null;
-    }
-
-    const team =
-      roster?.teams || null;
-
-    const isOwner =
-      currentUser &&
-      fullPlayer.created_by === currentUser.id;
-
-    const isCoach =
-      currentUser &&
-      team &&
-      team.owner_id === currentUser.id;
-
-    let attributes =
-      null;
-
-    if (isOwner || isCoach) {
-
-      const attributeResponse =
-        await fetch(
-          `${SUPABASE_URL}/rest/v1/player_attributes?select=*&player_id=eq.${encodeURIComponent(playerId)}`,
+      const {
+        data: username,
+        error: usernameError
+      } =
+        await supabaseClient.rpc(
+          "get_public_username",
           {
-            headers: {
-              "apikey": SUPABASE_KEY,
-              "Authorization":
-                `Bearer ${SUPABASE_KEY}`
-            }
+            target_user_id:
+              player.created_by
           }
         );
 
-      if (attributeResponse.ok) {
+      if (usernameError) {
 
-        const attributeRows =
-          await attributeResponse.json();
+        console.error(
+          "Username lookup error:",
+          usernameError
+        );
 
-        attributes =
-          attributeRows[0] || null;
+      } else {
+
+        ownerUsername =
+          username;
+
       }
     }
 
+    /*
+      Build owner display.
+    */
 
-    const flag =
-      getFlag(
-        fullPlayer.nationality
-      );
+    const ownerHTML =
+      player.created_by &&
+      ownerUsername
+        ? `
+          <p>
+            <strong>Owner:</strong>
+            <a
+              href="#"
+              class="player-owner-link"
+              data-user-id="${player.created_by}"
+            >
+              ${ownerUsername}
+            </a>
+          </p>
+        `
+        : "";
 
+    /*
+      Build current team display.
+    */
 
-    profile.innerHTML = `
+    const teamHTML =
+      currentTeam
+        ? `
+          <p>
+            <strong>Team:</strong>
+            ${currentTeam.name}
+          </p>
+        `
+        : `
+          <p>
+            <strong>Team:</strong>
+            Free Agent
+          </p>
+        `;
 
-      <div style="
-        max-width: 900px;
-        margin: 0 auto;
-      ">
+    playerProfile.innerHTML = `
 
-        <div style="
-          background: linear-gradient(135deg, #102a43, #071525);
-          border: 1px solid #294766;
-          border-radius: 18px;
-          padding: 30px;
-          margin-bottom: 30px;
-        ">
+      <div class="player-profile-card">
 
-          <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 20px;
-            flex-wrap: wrap;
-          ">
-
-            <div>
-
-              <h1 style="
-                margin: 0 0 10px 0;
-                font-size: 36px;
-              ">
-
-                <span class="flag">
-                  ${flag}
-                </span>
-
-                ${escapeHTML(fullPlayer.first_name)}
-                ${escapeHTML(fullPlayer.last_name)}
-
-              </h1>
-
-              <div style="
-                color: #9fb3c8;
-                font-size: 18px;
-              ">
-
-                ${escapeHTML(fullPlayer.primary_position)}
-
-                ${fullPlayer.secondary_position
-                  ? " / " +
-                    escapeHTML(fullPlayer.secondary_position)
-                  : ""}
-
-                • Age ${fullPlayer.age}
-
-                • Overall ${fullPlayer.overall}
-
-              </div>
-
-            </div>
-
-            <div style="
-              font-size: 48px;
-              font-weight: bold;
-            ">
-
-              ${roster?.jersey_number
-                ? "#" + roster.jersey_number
-                : "—"}
-
-            </div>
-
-          </div>
-
-
-          <div
-            class="country-line"
-            style="margin-top: 22px;"
-          >
-
-            <span class="flag">
-              ${flag}
-            </span>
-
-            <strong>
-              ${escapeHTML(
-                fullPlayer.nationality || "Unknown"
-              )}
-            </strong>
-
-          </div>
-
-
-          <div
-            class="team-info"
-            style="margin-top: 15px;"
-          >
-
-            <strong>
-              Team:
-            </strong>
-
-            ${
-              team
-                ? `${escapeHTML(team.name)}
-                   (${escapeHTML(team.abbreviation)})`
-                : "Free Agent"
-            }
-
-          </div>
-
-        </div>
-
+        <button
+          type="button"
+          onclick="showSection('players')"
+        >
+          ← Back to Players
+        </button>
 
         <h2>
-          Player Bio
+          ${player.first_name}
+          ${player.last_name}
         </h2>
 
-        <div style="
-          background: #102a43;
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 30px;
-          line-height: 2;
-        ">
+        <p>
+          ${player.nationality || ""}
+        </p>
 
-          <p>
-            <strong>Position:</strong>
-            ${escapeHTML(fullPlayer.primary_position)}
-          </p>
+        ${ownerHTML}
 
-          <p>
-            <strong>Secondary Position:</strong>
-            ${
-              fullPlayer.secondary_position
-                ? escapeHTML(fullPlayer.secondary_position)
-                : "None"
-            }
-          </p>
+        ${teamHTML}
 
-          <p>
-            <strong>Age:</strong>
-            ${fullPlayer.age}
-          </p>
-
-          <p>
-            <strong>Height:</strong>
-            ${formatHeight(fullPlayer.height_inches)}
-          </p>
-
-          <p>
-            <strong>Weight:</strong>
-            ${fullPlayer.weight_lbs || "—"} lbs
-          </p>
-
-          <p>
-            <strong>Handedness:</strong>
-            ${escapeHTML(fullPlayer.handedness || "—")}
-          </p>
-
-          <p>
-            <strong>Nationality:</strong>
-            ${flag}
-            ${escapeHTML(fullPlayer.nationality || "—")}
-          </p>
-
-          <p>
-            <strong>Overall:</strong>
-            ${fullPlayer.overall}
-          </p>
-
-          <p>
-            <strong>Archetype:</strong>
-            ${escapeHTML(fullPlayer.archetype)}
-          </p>
-
-          <p>
-            <strong>Personality:</strong>
-            ${escapeHTML(fullPlayer.personality || "Balanced")}
-          </p>
-
-        </div>
-
-
-        <h2>
-          Skill Ratings
-        </h2>
-
-        <div style="
-          background: #102a43;
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 30px;
-        ">
-
-          ${renderPublicSkillRatings(
-            attributes,
-            fullPlayer.primary_position
-          )}
-
-        </div>
-
+        <p>
+          <strong>Position:</strong>
+          ${player.primary_position}
+        </p>
 
         ${
-          attributes
+          player.secondary_position
             ? `
-
-              <h2>
-                Exact Attributes
-              </h2>
-
-              <div style="
-                background: #102a43;
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 30px;
-              ">
-
-                <div style="
-                  margin-bottom: 15px;
-                  color: #86efac;
-                  font-weight: bold;
-                ">
-
-                  ${
-                    isOwner
-                      ? "You own this player."
-                      : "You are the coach of this player."
-                  }
-
-                  Exact attributes are visible to you.
-
-                </div>
-
-                ${renderExactAttributes(attributes)}
-
-              </div>
-
+              <p>
+                <strong>Secondary:</strong>
+                ${player.secondary_position}
+              </p>
             `
-            : `
-
-              <div style="
-                background: #102a43;
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 30px;
-              ">
-
-                <strong>
-                  Exact attributes are private.
-                </strong>
-
-                <div class="privacy-note">
-
-                  Only the player owner and that player's
-                  current team coach can see exact individual
-                  attribute numbers.
-
-                </div>
-
-              </div>
-
-            `
+            : ""
         }
+
+        <p>
+          <strong>Archetype:</strong>
+          ${player.archetype}
+        </p>
+
+        <p>
+          <strong>Age:</strong>
+          ${player.age}
+        </p>
+
+        <p>
+          <strong>Overall:</strong>
+          ${player.overall}
+        </p>
 
       </div>
     `;
 
-    document.getElementById("playerProfileSection")
-      .scrollIntoView({
-        behavior: "smooth"
-      });
+    /*
+      Make the owner username clickable.
+
+      For now this takes us to a placeholder
+      user-profile section. We'll build the
+      actual user profile page next.
+    */
+
+    const ownerLink =
+      playerProfile.querySelector(
+        ".player-owner-link"
+      );
+
+    if (ownerLink) {
+
+      ownerLink.addEventListener(
+        "click",
+        function(event) {
+
+          event.preventDefault();
+
+          const userId =
+            this.dataset.userId;
+
+          openUserProfile(userId);
+
+        }
+      );
+
+    }
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Player profile error:",
+      error
+    );
 
-    profile.innerHTML = `
-      <div class="error">
-        Unable to load player profile.<br>
-        ${escapeHTML(error.message)}
-      </div>
+    playerProfile.innerHTML = `
+      <p>
+        Unable to load player profile.
+      </p>
     `;
+
   }
 }
 
