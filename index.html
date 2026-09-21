@@ -8084,17 +8084,22 @@ async function appendOwnedPlayerControls(player){
   card.appendChild(wrap);
 }
 async function acceptContractOffer(offerId){
-  if(!confirm("Accept this contract offer?"))return;
-  const {error}=await supabaseClient.rpc("accept_contract_offer",{p_offer_id:offerId});
-  if(error){console.error("accept_contract_offer",error);return alert("Contract acceptance failed: "+error.message);}
-  alert("Contract accepted. The player is now on the team's roster.");
-  if(document.getElementById("notificationsSection")?.style.display!=="none") showNotifications(); else showMyProfile();
+  if(!currentUser)return alert("Log in first.");
+  if(!confirm("Accept this contract offer and join the team roster?"))return;
+  const {data,error}=await supabaseClient.rpc("accept_contract_offer",{p_offer_id:offerId});
+  if(error){console.error(error);return alert("Contract acceptance failed: "+error.message);}
+  alert("Contract accepted. Your player is now signed and on the roster.");
+  await refreshNotificationBadge();
+  await showNotifications();
 }
 async function rejectContractOffer(offerId){
-  const {error}=await supabaseClient.rpc("reject_contract_offer",{p_offer_id:offerId});
-  if(error){console.error("reject_contract_offer",error);return alert("Offer rejection failed: "+error.message);}
+  if(!currentUser)return alert("Log in first.");
+  if(!confirm("Reject this contract offer?"))return;
+  const {data,error}=await supabaseClient.rpc("reject_contract_offer",{p_offer_id:offerId});
+  if(error){console.error(error);return alert("Offer rejection failed: "+error.message);}
   alert("Offer rejected.");
-  if(document.getElementById("notificationsSection")?.style.display!=="none") showNotifications(); else showMyProfile();
+  await refreshNotificationBadge();
+  await showNotifications();
 }
 async function retireOwnedPlayer(playerId,name){
   if(!confirm(`Retire ${name}? This ends the player's active career and frees the creation slot.`))return;
@@ -8272,6 +8277,7 @@ async function showAdmin() {
     <div class="panel"><h3>Season Tools</h3><p class="muted">Schedules are generated automatically when a season is created.</p><button class="secondary-button" onclick="adminRegenerateSchedule()">Regenerate Active Season Schedule</button></div>
     <div class="panel"><h3>System Status</h3><p class="muted">Verify your session, admin permission and core database services.</p><button class="secondary-button" onclick="runSystemCheck()">Run System Check</button><div id="systemCheckResult" class="muted" style="margin-top:10px"></div></div>
     <div class="panel"><h3>Simulation Lab</h3><p class="muted">Run the real engine in exhibition mode without changing official records.</p><button class="primary-button" onclick="showTestSimulator()">Open Test Simulator</button></div>
+    <div class="panel"><h3>Automatic Due Games</h3><p class="muted">Simulate every scheduled official game whose start time has passed. Results, play-by-play, stats and standings are permanently saved.</p><button class="primary-button" onclick="adminSimDueGames()">Sim All Due Games</button></div>
     <div class="panel"><h3>Official Game Engine</h3><p class="muted">Simulate the next scheduled official game and permanently write the result, play-by-play and stats.</p><button class="secondary-button" onclick="adminSimNextGame()">Sim Next Official Game</button></div>
   </div>`;
 }
@@ -8315,12 +8321,21 @@ async function runSystemCheck(){
   out.innerHTML=checks.map(x=>`<div>${x}</div>`).join("");
 }
 
+
+async function adminSimDueGames(){
+  if(!confirm("Simulate every scheduled game whose start time has passed?"))return;
+  const {data,error}=await supabaseClient.rpc("admin_simulate_due_games",{p_limit:100});
+  if(error){console.error(error);return alert("Due-game simulation failed: "+error.message);}
+  alert(`${data||0} due game(s) simulated. Stats and standings were updated.`);
+  showAdminPanel();
+}
+
 async function adminSimNextGame(){
   if(!confirm("Simulate the next scheduled official game? This result WILL count."))return;
   const {data:g,error:e}=await supabaseClient.from("games").select("id,scheduled_at").eq("status","scheduled").order("scheduled_at").limit(1).maybeSingle();
   if(e||!g)return alert(e?.message||"No scheduled game found.");
   const {data:run,error}=await supabaseClient.rpc("admin_simulate_official_game",{p_game_id:g.id,p_seed:null});
-  if(error)return alert("Simulation failed: "+error.message);
+  if(error)return alert("Simulation failed: "+error.message+"\n\nMake sure ICEVERSE_FINAL_V9_DATABASE.sql completed successfully.");
   alert("Official game simulated.");
   openGameDetail(g.id);
 }
