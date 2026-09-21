@@ -600,27 +600,27 @@ document.getElementById("playerProfileSection").style.display = "block";
 ">
 
   <div class="team-info">
-    <strong>Speed:</strong> ${player.player_attributes?.speed ?? "N/A"}
+    <strong>Speed:</strong> ${player.player_attributes?.[0]?.speed ?? "N/A"}
   </div>
 
   <div class="team-info">
-    <strong>Acceleration:</strong> ${player.player_attributes?.acceleration ?? "N/A"}
+    <strong>Acceleration:</strong> ${player.player_attributes?.[0]?.acceleration ?? "N/A"}
   </div>
 
   <div class="team-info">
-    <strong>Agility:</strong> ${player.player_attributes?.agility ?? "N/A"}
+   <strong>Agility:</strong> ${player.player_attributes?.[0]?.agility ?? "N/A"}
   </div>
 
   <div class="team-info">
-    <strong>Shooting:</strong> ${player.player_attributes?.shooting ?? "N/A"}
+    <strong>Shooting:</strong> ${player.player_attributes?.[0]?.shooting ?? "N/A"}
   </div>
 
   <div class="team-info">
-    <strong>Passing:</strong> ${player.player_attributes?.passing ?? "N/A"}
+   <strong>Passing:</strong> ${player.player_attributes?.[0]?.passing ?? "N/A"}
   </div>
 
   <div class="team-info">
-    <strong>Puck Control:</strong> ${player.player_attributes?.puck_control ?? "N/A"}
+   <strong>Puck Control:</strong> ${player.player_attributes?.[0]?.puck_control ?? "N/A"}
   </div>
 
 </div>
