@@ -1,16 +1,477 @@
- <div class="team-row">
-                    <span class="team-name">Arctic Eagles</span>
-                    <span class="record">0–0</span>
-                </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-            </div>
+    <title>Iceverse Hockey League</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #07111f;
+            color: #ffffff;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            width: 100%;
+            background: #101d31;
+            border-bottom: 2px solid #29476b;
+            padding: 18px 30px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            white-space: nowrap;
+        }
+
+        .logo-ice {
+            color: #ffffff;
+        }
+
+        .logo-verse {
+            color: #4da8ff;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .navigation button {
+            border: 1px solid #3b5c82;
+            background: #1b304b;
+            color: #ffffff;
+
+            padding: 9px 15px;
+            border-radius: 6px;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .navigation button:hover {
+            background: #2b4b70;
+            border-color: #5c85b4;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 90px 25px 70px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(42px, 7vw, 72px);
+            font-weight: 800;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 span {
+            color: #4da8ff;
+        }
+
+        .hero-description {
+            max-width: 720px;
+            margin: 0 auto;
+
+            color: #b8c7da;
+            font-size: 19px;
+            line-height: 1.7;
+        }
+
+        .hero-button {
+            margin-top: 32px;
+
+            background: #2378c9;
+            color: #ffffff;
+
+            border: none;
+            border-radius: 7px;
+
+            padding: 14px 30px;
+
+            font-size: 17px;
+            font-weight: 700;
+
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .hero-button:hover {
+            background: #3190e8;
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           MAIN CONTENT
+        ========================= */
+
+        .content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 25px 80px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 30px;
+            margin-bottom: 22px;
+            color: #ffffff;
+        }
+
+        /* =========================
+           FEATURE CARDS
+        ========================= */
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: #101d31;
+            border: 1px solid #29476b;
+            border-radius: 10px;
+
+            padding: 26px;
+
+            min-height: 180px;
+        }
+
+        .feature-card h3 {
+            font-size: 21px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #aebed2;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* =========================
+           LEAGUE
+        ========================= */
+
+        .league-container {
+            background: #101d31;
+            border: 1px solid #29476b;
+            border-radius: 10px;
+
+            overflow: hidden;
+        }
+
+        .league-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background: #172943;
+            border-bottom: 1px solid #29476b;
+
+            padding: 16px 20px;
+
+            font-weight: 700;
+        }
+
+        .league-header span:last-child {
+            color: #8fa6c0;
+            font-size: 14px;
+        }
+
+        .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 17px 20px;
+
+            border-bottom: 1px solid #243b58;
+        }
+
+        .team-row:last-child {
+            border-bottom: none;
+        }
+
+        .team-name {
+            font-weight: 700;
+        }
+
+        .team-record {
+            color: #91a5bc;
+            font-size: 14px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            border-top: 1px solid #29476b;
+            background: #091522;
+
+            text-align: center;
+
+            padding: 25px;
+
+            color: #72869f;
+            font-size: 14px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            .header {
+                flex-direction: column;
+                padding: 18px;
+            }
+
+            .navigation {
+                justify-content: center;
+            }
+
+            .hero {
+                padding-top: 60px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 25px;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .navigation button {
+                padding: 8px 11px;
+                font-size: 13px;
+            }
+
+            .hero-description {
+                font-size: 16px;
+            }
+
+            .content {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header class="header">
+
+        <div class="logo">
+            <span class="logo-ice">ICE</span><span class="logo-verse">VERSE</span>
+        </div>
+
+        <nav class="navigation">
+            <button>Home</button>
+            <button>League</button>
+            <button>Teams</button>
+            <button>Players</button>
+            <button>Games</button>
+        </nav>
+
+    </header>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main>
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <h1>
+                Welcome to <span>Iceverse</span>
+            </h1>
+
+            <p class="hero-description">
+                A persistent multiplayer hockey universe where you create
+                players, manage teams, build lines, develop talent, and
+                compete against other hockey managers.
+            </p>
+
+            <button class="hero-button">
+                Enter Iceverse
+            </button>
 
         </section>
+
+
+        <div class="content">
+
+            <!-- FEATURES -->
+
+            <section class="section">
+
+                <h2 class="section-title">
+                    The Iceverse Experience
+                </h2>
+
+                <div class="feature-grid">
+
+                    <div class="feature-card">
+                        <h3>🏒 Build Your Team</h3>
+
+                        <p>
+                            Create players, manage your roster, build lines,
+                            choose tactics, and shape your team's identity.
+                        </p>
+                    </div>
+
+
+                    <div class="feature-card">
+                        <h3>🧊 Play the Game</h3>
+
+                        <p>
+                            Watch your players compete in a persistent hockey
+                            simulation where every shift and decision matters.
+                        </p>
+                    </div>
+
+
+                    <div class="feature-card">
+                        <h3>📈 Build a Legacy</h3>
+
+                        <p>
+                            Develop players, track careers, win championships,
+                            and create stories that become part of Iceverse history.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- LEAGUE -->
+
+            <section class="section">
+
+                <h2 class="section-title">
+                    Iceverse Hockey League
+                </h2>
+
+                <div class="league-container">
+
+                    <div class="league-header">
+                        <span>Team</span>
+                        <span>Record</span>
+                    </div>
+
+
+                    <div class="team-row">
+                        <span class="team-name">
+                            Iceverse Wolves
+                        </span>
+
+                        <span class="team-record">
+                            0–0
+                        </span>
+                    </div>
+
+
+                    <div class="team-row">
+                        <span class="team-name">
+                            Northern Storm
+                        </span>
+
+                        <span class="team-record">
+                            0–0
+                        </span>
+                    </div>
+
+
+                    <div class="team-row">
+                        <span class="team-name">
+                            Frost Giants
+                        </span>
+
+                        <span class="team-record">
+                            0–0
+                        </span>
+                    </div>
+
+
+                    <div class="team-row">
+                        <span class="team-name">
+                            Arctic Eagles
+                        </span>
+
+                        <span class="team-record">
+                            0–0
+                        </span>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
 
     </main>
 
 
-    <footer>
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer class="footer">
 
         Iceverse Hockey League · Building the future of online hockey
 
