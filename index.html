@@ -3478,13 +3478,29 @@ function showCreatePlayer() {
 
 async function openPlayerProfile(playerId) {
 
+  hideAllMainSections();
+
+  const playerProfileSection =
+    document.getElementById("playerProfileSection");
+
+  playerProfileSection.style.display =
+    "block";
+
+  playerProfileSection.scrollIntoView({
+    behavior: "smooth"
+  });
+
   const playerProfile =
     document.getElementById("playerProfile");
 
   playerProfile.innerHTML =
-    "<p>Loading player...</p>";
+    '<div class="loading">Loading player...</div>';
 
   try {
+
+    /*
+      Get the player.
+    */
 
     const {
       data: player,
@@ -3500,9 +3516,13 @@ async function openPlayerProfile(playerId) {
       throw playerError;
     }
 
+
     /*
       Get the player's current team.
+
       This is separate from player ownership.
+      A player can belong to a team without
+      the team owner owning the player.
     */
 
     const {
@@ -3522,10 +3542,12 @@ async function openPlayerProfile(playerId) {
         .eq("player_id", playerId);
 
     if (rosterError) {
+
       console.error(
         "Roster lookup error:",
         rosterError
       );
+
     }
 
     const currentRoster =
@@ -3540,11 +3562,13 @@ async function openPlayerProfile(playerId) {
         ? currentRoster.teams
         : null;
 
-    /*
-      Get the username of the player owner.
 
-      created_by is the permanent owner of
-      the player. It does NOT change when
+    /*
+      Get the username of the permanent
+      player owner.
+
+      players.created_by represents player
+      ownership and does not change when
       the player changes teams.
     */
 
@@ -3577,7 +3601,9 @@ async function openPlayerProfile(playerId) {
           username;
 
       }
+
     }
+
 
     /*
       Build owner display.
@@ -3589,16 +3615,23 @@ async function openPlayerProfile(playerId) {
         ? `
           <p>
             <strong>Owner:</strong>
+
             <a
               href="#"
               class="player-owner-link"
               data-user-id="${player.created_by}"
             >
-              ${ownerUsername}
+              ${escapeHTML(ownerUsername)}
             </a>
           </p>
         `
-        : "";
+        : `
+          <p>
+            <strong>Owner:</strong>
+            NPC / Unowned
+          </p>
+        `;
+
 
     /*
       Build current team display.
@@ -3609,7 +3642,7 @@ async function openPlayerProfile(playerId) {
         ? `
           <p>
             <strong>Team:</strong>
-            ${currentTeam.name}
+            ${escapeHTML(currentTeam.name)}
           </p>
         `
         : `
@@ -3619,70 +3652,164 @@ async function openPlayerProfile(playerId) {
           </p>
         `;
 
+
+    /*
+      Build player profile.
+    */
+
     playerProfile.innerHTML = `
 
       <div class="player-profile-card">
 
         <button
           type="button"
-          onclick="showSection('players')"
+          class="secondary-button"
+          id="backToPlayersButton"
+          style="margin-bottom: 20px;"
         >
           ← Back to Players
         </button>
 
+
         <h2>
-          ${player.first_name}
-          ${player.last_name}
+          ${escapeHTML(player.first_name)}
+          ${escapeHTML(player.last_name)}
         </h2>
 
+
         <p>
-          ${player.nationality || ""}
+          ${getFlag(player.nationality)}
+          ${escapeHTML(player.nationality || "Unknown")}
         </p>
+
 
         ${ownerHTML}
 
         ${teamHTML}
 
+
         <p>
           <strong>Position:</strong>
-          ${player.primary_position}
+          ${escapeHTML(player.primary_position)}
         </p>
+
 
         ${
           player.secondary_position
             ? `
               <p>
                 <strong>Secondary:</strong>
-                ${player.secondary_position}
+                ${escapeHTML(player.secondary_position)}
               </p>
             `
             : ""
         }
 
+
         <p>
           <strong>Archetype:</strong>
-          ${player.archetype}
+          ${escapeHTML(player.archetype)}
         </p>
+
 
         <p>
           <strong>Age:</strong>
           ${player.age}
         </p>
 
+
         <p>
           <strong>Overall:</strong>
           ${player.overall}
         </p>
 
+
+        ${
+          player.height_inches
+            ? `
+              <p>
+                <strong>Height:</strong>
+                ${Math.floor(player.height_inches / 12)}'
+                ${player.height_inches % 12}"
+              </p>
+            `
+            : ""
+        }
+
+
+        ${
+          player.weight_lbs
+            ? `
+              <p>
+                <strong>Weight:</strong>
+                ${player.weight_lbs} lbs
+              </p>
+            `
+            : ""
+        }
+
+
+        ${
+          player.handedness
+            ? `
+              <p>
+                <strong>Handedness:</strong>
+                ${escapeHTML(player.handedness)}
+              </p>
+            `
+            : ""
+        }
+
+
+        <div
+          style="
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #1b3550;
+          "
+        >
+
+          <h3>
+            Skills
+          </h3>
+
+          <p>
+            Detailed attributes are visible to the
+            player owner and appropriate team staff.
+          </p>
+
+        </div>
+
       </div>
+
     `;
+
+
+    /*
+      Back to Players button.
+    */
+
+    const backButton =
+      document.getElementById(
+        "backToPlayersButton"
+      );
+
+    if (backButton) {
+
+      backButton.addEventListener(
+        "click",
+        function() {
+
+          showPlayers();
+
+        }
+      );
+
+    }
+
 
     /*
       Make the owner username clickable.
-
-      For now this takes us to a placeholder
-      user-profile section. We'll build the
-      actual user profile page next.
     */
 
     const ownerLink =
@@ -3716,13 +3843,29 @@ async function openPlayerProfile(playerId) {
     );
 
     playerProfile.innerHTML = `
-      <p>
-        Unable to load player profile.
-      </p>
+
+      <div class="error">
+
+        <p>
+          Unable to load player profile.
+        </p>
+
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="showPlayers()"
+        >
+          ← Back to Players
+        </button>
+
+      </div>
+
     `;
 
   }
+
 }
+
 
 async function openUserProfile(userId) {
 
@@ -3738,6 +3881,7 @@ async function openUserProfile(userId) {
     behavior: "smooth"
   });
 
+
   const userProfile =
     document.getElementById("userProfile");
 
@@ -3747,10 +3891,11 @@ async function openUserProfile(userId) {
     </div>
   `;
 
+
   try {
 
     /*
-      Get username
+      Get username.
     */
 
     const {
@@ -3772,6 +3917,9 @@ async function openUserProfile(userId) {
     /*
       Get every player permanently owned
       by this user.
+
+      This is based on players.created_by,
+      NOT the player's current team.
     */
 
     const {
@@ -3780,7 +3928,18 @@ async function openUserProfile(userId) {
     } =
       await supabaseClient
         .from("players")
-        .select("*")
+        .select(`
+          id,
+          first_name,
+          last_name,
+          age,
+          nationality,
+          primary_position,
+          secondary_position,
+          archetype,
+          overall,
+          created_at
+        `)
         .eq("created_by", userId)
         .order(
           "created_at",
@@ -3804,19 +3963,20 @@ async function openUserProfile(userId) {
     } =
       await supabaseClient
         .from("teams")
-        .select(
-          "name, abbreviation"
-        )
-        .eq(
-          "owner_id",
-          userId
-        );
+        .select(`
+          id,
+          name,
+          abbreviation
+        `)
+        .eq("owner_id", userId);
 
     if (teamsError) {
+
       console.error(
         "Team lookup error:",
         teamsError
       );
+
     }
 
 
@@ -3828,7 +3988,7 @@ async function openUserProfile(userId) {
 
 
     /*
-      Build the owned-player list.
+      Build owned-player list.
     */
 
     let playersHTML = "";
@@ -3859,17 +4019,46 @@ async function openUserProfile(userId) {
           >
 
             <strong>
-              ${player.first_name}
-              ${player.last_name}
+
+              ${escapeHTML(player.first_name)}
+              ${escapeHTML(player.last_name)}
+
             </strong>
 
-            <div style="margin-top: 5px;">
 
-              ${player.primary_position}
+            <div
+              style="
+                margin-top: 5px;
+              "
+            >
+
+              ${getFlag(player.nationality)}
+
+              ${escapeHTML(
+                player.primary_position
+              )}
 
               ·
 
               OVR ${player.overall}
+
+            </div>
+
+
+            <div
+              style="
+                margin-top: 5px;
+                color: #9fb3c8;
+              "
+            >
+
+              ${escapeHTML(
+                player.archetype
+              )}
+
+              ·
+
+              Age ${player.age}
 
             </div>
 
@@ -3881,23 +4070,49 @@ async function openUserProfile(userId) {
 
 
     /*
-      Render the user profile.
+      Render user profile.
     */
 
     userProfile.innerHTML = `
 
       <div>
 
+        <button
+          type="button"
+          class="secondary-button"
+          id="backFromUserProfileButton"
+          style="margin-bottom: 20px;"
+        >
+          ← Back to Players
+        </button>
+
+
         <h1>
-          ${username || "Unknown User"}
+          ${escapeHTML(username || "Unknown User")}
         </h1>
+
 
         ${
           team
             ? `
               <p>
-                <strong>Team:</strong>
-                ${team.name}
+
+                <strong>
+                  Team:
+                </strong>
+
+                ${escapeHTML(team.name)}
+
+                ${
+                  team.abbreviation
+                    ? `
+                      (${escapeHTML(
+                        team.abbreviation
+                      )})
+                    `
+                    : ""
+                }
+
               </p>
             `
             : `
@@ -3908,6 +4123,7 @@ async function openUserProfile(userId) {
             `
         }
 
+
         <hr
           style="
             margin: 25px 0;
@@ -3916,13 +4132,16 @@ async function openUserProfile(userId) {
           "
         >
 
+
         <h2>
           Owned Players
         </h2>
 
+
         <div>
           ${playersHTML}
         </div>
+
 
         <hr
           style="
@@ -3932,9 +4151,11 @@ async function openUserProfile(userId) {
           "
         >
 
+
         <h2>
           Awards
         </h2>
+
 
         <p>
           No awards yet.
@@ -3946,7 +4167,30 @@ async function openUserProfile(userId) {
 
 
     /*
-      Make owned players clickable.
+      Back to Players.
+    */
+
+    const backButton =
+      document.getElementById(
+        "backFromUserProfileButton"
+      );
+
+    if (backButton) {
+
+      backButton.addEventListener(
+        "click",
+        function() {
+
+          showPlayers();
+
+        }
+      );
+
+    }
+
+
+    /*
+      Make every owned player clickable.
     */
 
     userProfile
@@ -3976,12 +4220,27 @@ async function openUserProfile(userId) {
     );
 
     userProfile.innerHTML = `
-      <p>
-        Unable to load user profile.
-      </p>
+
+      <div class="error">
+
+        <p>
+          Unable to load user profile.
+        </p>
+
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="showPlayers()"
+        >
+          ← Back to Players
+        </button>
+
+      </div>
+
     `;
 
   }
+
 }
 
 /* =========================================================
