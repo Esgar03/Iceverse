@@ -1883,26 +1883,103 @@ async function loginUser() {
 
 function hideAllMainSections() {
 
-  document.querySelector(".hero").style.display =
-    "none";
+  /*
+    Hide the hero section.
+  */
 
-  document.getElementById("authSection").style.display =
-    "none";
+  const hero =
+    document.querySelector(".hero");
 
-  document.querySelector(".hero").nextElementSibling.style.display =
-    "none";
+  if (hero) {
+    hero.style.display = "none";
+  }
 
-  document.getElementById("playersSection").style.display =
-    "none";
 
-  document.getElementById("createPlayerSection").style.display =
-    "none";
+  /*
+    Hide authentication section.
+  */
 
-  document.getElementById("playerProfileSection").style.display =
-    "none";
+  const authSection =
+    document.getElementById(
+      "authSection"
+    );
 
-  document.getElementById("userProfileSection").style.display =
-    "none";
+  if (authSection) {
+    authSection.style.display = "none";
+  }
+
+
+  /*
+    Hide the section immediately following
+    the hero, if one exists.
+  */
+
+  if (hero && hero.nextElementSibling) {
+
+    hero.nextElementSibling.style.display =
+      "none";
+
+  }
+
+
+  /*
+    Hide Players.
+  */
+
+  const playersSection =
+    document.getElementById(
+      "playersSection"
+    );
+
+  if (playersSection) {
+    playersSection.style.display = "none";
+  }
+
+
+  /*
+    Hide Create Player.
+  */
+
+  const createPlayerSection =
+    document.getElementById(
+      "createPlayerSection"
+    );
+
+  if (createPlayerSection) {
+    createPlayerSection.style.display =
+      "none";
+  }
+
+
+  /*
+    Hide Player Profile.
+  */
+
+  const playerProfileSection =
+    document.getElementById(
+      "playerProfileSection"
+    );
+
+  if (playerProfileSection) {
+    playerProfileSection.style.display =
+      "none";
+  }
+
+
+  /*
+    Hide User Profile.
+  */
+
+  const userProfileSection =
+    document.getElementById(
+      "userProfileSection"
+    );
+
+  if (userProfileSection) {
+    userProfileSection.style.display =
+      "none";
+  }
+
 }
 
 
