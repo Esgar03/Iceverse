@@ -563,7 +563,7 @@ document.getElementById("playerProfileSection").style.display = "block";
 
     <h3>Player Bio</h3>
     
-    <div style="
+       <div style="
   background: #0d2035;
   padding: 20px;
   border-radius: 12px;
@@ -590,7 +590,41 @@ document.getElementById("playerProfileSection").style.display = "block";
   </div>
 </div>
 
-   
+<h3>Attributes</h3>
+
+<div style="
+  background: #0d2035;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+">
+
+  <div class="team-info">
+    <strong>Speed:</strong> ${player.player_attributes?.speed ?? "N/A"}
+  </div>
+
+  <div class="team-info">
+    <strong>Acceleration:</strong> ${player.player_attributes?.acceleration ?? "N/A"}
+  </div>
+
+  <div class="team-info">
+    <strong>Agility:</strong> ${player.player_attributes?.agility ?? "N/A"}
+  </div>
+
+  <div class="team-info">
+    <strong>Shooting:</strong> ${player.player_attributes?.shooting ?? "N/A"}
+  </div>
+
+  <div class="team-info">
+    <strong>Passing:</strong> ${player.player_attributes?.passing ?? "N/A"}
+  </div>
+
+  <div class="team-info">
+    <strong>Puck Control:</strong> ${player.player_attributes?.puck_control ?? "N/A"}
+  </div>
+
+</div>
+
   `;
 
   profileSection.scrollIntoView({
