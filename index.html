@@ -383,12 +383,12 @@
   }
 
   async function showPlayers() {
-
   document.querySelector(".hero").style.display = "none";
   document.querySelector(".section").style.display = "none";
 
-  const playersSection = document.getElementById("playersSection");
+  document.getElementById("playerProfileSection").style.display = "none";
 
+  const playersSection = document.getElementById("playersSection");
   playersSection.style.display = "block";
 
   playersSection.scrollIntoView({
