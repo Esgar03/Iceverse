@@ -2947,11 +2947,6 @@ function upgradeCreationAttribute(attribute) {
   creationBuild.remainingPoints -=
     cost;
 
-  const realism =
-    getBuildRealism(
-      creationBuild.attributes,
-      creationBuild.archetype
-    );
 
   document.getElementById("buildPoints").textContent =
     creationBuild.remainingPoints;
@@ -2961,8 +2956,7 @@ function upgradeCreationAttribute(attribute) {
       creationBuild.attributes
     );
 
-  document.getElementById("buildMessage").textContent =
-    `Build realism: ${realism}/100`;
+ 
 
   renderAttributeEditor();
 }
