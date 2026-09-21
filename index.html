@@ -531,7 +531,9 @@ async function loadPlayers() {
   loadTeams();
   
 function openPlayerProfile(playerId) {
+
   const players = window.iceversePlayers || [];
+
   const player = players.find(
     p => p.id === playerId
   );
@@ -551,6 +553,12 @@ function openPlayerProfile(playerId) {
 
   const profile =
     document.getElementById("playerProfile");
+
+  const roster = player.rosters?.[0];
+  const team = roster?.teams;
+
+  const teamName = team?.name ?? "Free Agent";
+  const teamAbbreviation = team?.abbreviation ?? "";
 
   profile.innerHTML = `
     <div style="
@@ -585,11 +593,16 @@ function openPlayerProfile(playerId) {
         </div>
 
         <div class="team-info">
-          <strong>Team:</strong> Not assigned yet
+          <strong>Team:</strong>
+          ${escapeHTML(teamName)}
+          ${teamAbbreviation
+            ? ` (${escapeHTML(teamAbbreviation)})`
+            : ""}
         </div>
 
         <div class="team-info">
-          <strong>Jersey Number:</strong> Not assigned yet
+          <strong>Jersey Number:</strong>
+          Not assigned yet
         </div>
 
       </div>
