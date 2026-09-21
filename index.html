@@ -434,10 +434,14 @@ async function loadPlayers() {
     card.className = "team-card";
 
     card.innerHTML = `
-      <div class="team-name">
-        ${escapeHTML(player.first_name)}
-        ${escapeHTML(player.last_name)}
-      </div>
+      <div
+  class="team-name"
+  style="cursor: pointer;"
+  onclick="openPlayerProfile('${player.id}')"
+>
+  ${escapeHTML(player.first_name)}
+  ${escapeHTML(player.last_name)}
+</div>
 
       <div class="team-info">
         ${escapeHTML(player.primary_position)}
