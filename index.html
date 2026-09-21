@@ -414,6 +414,19 @@
 </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+.iv-rink{position:relative;max-width:900px;aspect-ratio:2/1;margin:18px auto;background:#eaf6ff;border:5px solid #d7e3ee;border-radius:90px;overflow:hidden;color:#071525}
+.iv-rink:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;background:#d94b5b;transform:translateX(-50%)}
+.iv-rink:after{content:"";position:absolute;left:50%;top:50%;width:18%;aspect-ratio:1;border:4px solid #4d8ed9;border-radius:50%;transform:translate(-50%,-50%)}
+.iv-blue{position:absolute;top:0;bottom:0;width:4px;background:#3274c5}.iv-blue.a{left:33%}.iv-blue.b{right:33%}
+.iv-goal{position:absolute;top:39%;width:4%;height:22%;border:3px solid #d94b5b}.iv-goal.a{left:3%}.iv-goal.b{right:3%}
+.iv-puck{position:absolute;width:13px;height:13px;border-radius:50%;background:#111;transition:all .45s linear;z-index:5}
+.iv-skater-dot{position:absolute;width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px #0008;transition:all .45s linear}
+.iv-live-score{font-size:34px;font-weight:900;text-align:center}.iv-event-banner{text-align:center;min-height:28px;font-weight:700}
+.iv-system-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+</style>
+
 </head>
 
 <body>
@@ -8379,6 +8392,141 @@ loadCurrentUser()
 
 loadTeams();
 
+</script>
+
+
+<script>
+/* ICEVERSE V11 UNIVERSE FRONTEND */
+let ivWorldTickTimer=null;
+
+async function ivTickWorld(silent=true){
+  try{
+    const {data,error}=await supabaseClient.rpc("iceverse_world_tick",{p_game_limit:8});
+    if(error){if(!silent)alert("World tick failed: "+error.message);return null;}
+    if(!silent)alert(`Iceverse advanced.\nGames played: ${data?.games||0}\nDaily systems: ${data?.daily?"yes":"no"}`);
+    return data;
+  }catch(e){if(!silent)alert(e.message);return null;}
+}
+function ivStartWorldClock(){
+  if(ivWorldTickTimer)clearInterval(ivWorldTickTimer);
+  ivTickWorld(true);
+  ivWorldTickTimer=setInterval(()=>ivTickWorld(true),120000);
+}
+window.addEventListener("load",()=>setTimeout(ivStartWorldClock,2500));
+
+async function adminBootUniverse(){
+  if(!confirm("BOOT ICEVERSE NOW?\n\nThis creates/rebuilds the active schedule, starts games today, fills CPU rosters, creates weekend tournaments, creates the international event, and activates the live world clock."))return;
+  const {data,error}=await supabaseClient.rpc("admin_boot_iceverse");
+  if(error)return alert("Universe boot failed: "+error.message);
+  alert(`ICEVERSE IS LIVE\n\nScheduled games: ${data?.scheduled_games||0}\nCPU actions: ${data?.cpu_actions||0}\nWeekend tournaments: ${data?.weekend_tournaments||0}`);
+  showAdmin();
+}
+
+async function showUniverseControl(){
+  showSection("adminSection");
+  const c=document.getElementById("adminContent");
+  const [{data:w},{data:g},{data:t},{data:h},{data:n}] = await Promise.all([
+    supabaseClient.from("world_state").select("*").eq("id",1).maybeSingle(),
+    supabaseClient.from("games").select("id,status,scheduled_at",{count:"exact"}).order("scheduled_at").limit(12),
+    supabaseClient.from("tournaments").select("*").order("starts_at").limit(10),
+    supabaseClient.from("hall_of_fame").select("id",{count:"exact"}).limit(1),
+    supabaseClient.from("national_teams").select("id",{count:"exact"}).limit(1)
+  ]);
+  c.innerHTML=`<button class="secondary-button" onclick="showAdmin()">← Admin</button>
+  <div class="section-toolbar" style="margin-top:18px"><div><h2>Universe Control</h2><div class="muted">Persistent Iceverse world systems.</div></div><span class="pill">${escapeHTML(w?.engine_version||"v11")}</span></div>
+  <div class="iv-system-grid">
+   <div class="metric-card"><div class="muted">World Day</div><div class="metric-value">${w?.world_day||1}</div></div>
+   <div class="metric-card"><div class="muted">Scheduled Games</div><div class="metric-value">${(g||[]).filter(x=>x.status==="scheduled").length}+</div></div>
+   <div class="metric-card"><div class="muted">National Programs</div><div class="metric-value">${n?.length||0}+</div></div>
+   <div class="metric-card"><div class="muted">Hall of Fame</div><div class="metric-value">${h?.length||0}</div></div>
+  </div>
+  <div class="panel" style="margin-top:16px"><h3>World Controls</h3><button class="primary-button" onclick="adminBootUniverse()">Boot / Rebuild Universe</button> <button class="secondary-button" onclick="ivTickWorld(false)">Advance Due Systems</button></div>
+  <div class="panel" style="margin-top:16px"><h3>Upcoming World Events</h3>${(t||[]).map(x=>`<div class="data-row"><span>${escapeHTML(x.name)}</span><span>${x.starts_at?new Date(x.starts_at).toLocaleString():"TBD"}</span></div>`).join("")||'<div class="empty-state">No events.</div>'}</div>`;
+}
+
+async function showHallOfFame(){
+  showSection("worldSection"); const c=document.getElementById("worldContent");
+  const {data,error}=await supabaseClient.from("hall_of_fame").select("*,players(first_name,last_name,nationality,primary_position,overall,reputation)").order("inducted_at",{ascending:false});
+  if(error)return c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;
+  c.innerHTML=`<button class="secondary-button" onclick="showWorldHub()">← World</button><h2 style="margin:18px 0">Iceverse Hall of Fame</h2>
+  <div class="feature-grid">${(data||[]).map(x=>`<div class="feature-card"><h3>${getFlag(x.players?.nationality)} ${escapeHTML(x.players?.first_name||"")} ${escapeHTML(x.players?.last_name||"")}</h3><div class="muted">${escapeHTML(x.players?.primary_position||"")} · Induction score ${Math.round(x.induction_score||0)}</div><p style="margin-top:8px">Career points: ${x.career_summary?.career_points||0} · Awards: ${x.career_summary?.awards||0}</p></div>`).join("")||'<div class="empty-state">The Hall opens as retired careers meet induction standards.</div>'}</div>`;
+}
+
+async function showCareerLeaders(){
+  showSection("worldSection");const c=document.getElementById("worldContent");
+  const {data,error}=await supabaseClient.from("player_season_totals").select("player_id,points,goals,assists,players(first_name,last_name,nationality)").order("points",{ascending:false}).limit(100);
+  if(error)return c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;
+  const agg={};(data||[]).forEach(x=>{const a=agg[x.player_id]||(agg[x.player_id]={...x,points:0,goals:0,assists:0});a.points+=x.points||0;a.goals+=x.goals||0;a.assists+=x.assists||0;});
+  const rows=Object.values(agg).sort((a,b)=>b.points-a.points).slice(0,50);
+  c.innerHTML=`<button class="secondary-button" onclick="showWorldHub()">← World</button><h2 style="margin:18px 0">Career Leaders</h2><div class="panel table-wrap"><table class="iv-table"><thead><tr><th>#</th><th>Player</th><th>G</th><th>A</th><th>PTS</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${getFlag(x.players?.nationality)} ${escapeHTML(x.players?.first_name||"")} ${escapeHTML(x.players?.last_name||"")}</td><td>${x.goals}</td><td>${x.assists}</td><td><strong>${x.points}</strong></td></tr>`).join("")}</tbody></table></div>`;
+}
+
+async function showTournamentCenter(){
+  showSection("worldSection");const c=document.getElementById("worldContent");
+  const {data,error}=await supabaseClient.from("tournaments").select("*").order("starts_at",{ascending:true}).limit(40);
+  if(error)return c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;
+  c.innerHTML=`<button class="secondary-button" onclick="showWorldHub()">← World</button><h2 style="margin:18px 0">Tournament Center</h2><div class="feature-grid">${(data||[]).map(t=>`<div class="feature-card"><span class="pill">${escapeHTML(t.tournament_type)}</span><h3 style="margin-top:10px">${escapeHTML(t.name)}</h3><div class="muted">${escapeHTML(t.status)} · ${t.starts_at?new Date(t.starts_at).toLocaleString():"TBD"}</div>${t.host_country?`<div style="margin-top:8px">Host: ${getFlag(t.host_country)} ${escapeHTML(t.host_country)}</div>`:""}<div style="margin-top:8px">Format: ${t.tournament_type==="weekend"?"Double elimination · 16-team pool":"International group/knockout ecosystem"}</div></div>`).join("")}</div>`;
+}
+
+async function showInternationalCenter(){
+  showSection("worldSection");const c=document.getElementById("worldContent");
+  const [{data:teams,error},{data:rosters}]=await Promise.all([
+    supabaseClient.from("national_teams").select("*").order("world_ranking"),
+    supabaseClient.from("national_team_rosters").select("national_team_id,player_id")
+  ]);
+  if(error)return c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;
+  const counts={};(rosters||[]).forEach(r=>counts[r.national_team_id]=(counts[r.national_team_id]||0)+1);
+  c.innerHTML=`<button class="secondary-button" onclick="showWorldHub()">← World</button><h2 style="margin:18px 0">International Hockey</h2><div class="feature-grid">${(teams||[]).map(n=>`<div class="feature-card"><h3>${getFlag(n.country)} ${escapeHTML(n.country)}</h3><div class="metric-value">#${n.world_ranking||"—"}</div><div class="muted">Prestige ${n.prestige} · Chemistry ${n.chemistry}</div><div style="margin-top:8px">Coach: ${escapeHTML(n.coach_name||"National Staff")} (${n.coach_rating})</div><div>Selected roster: ${counts[n.id]||0}/23</div></div>`).join("")}</div>`;
+}
+
+function ivRinkHTML(){
+ return `<div class="iv-live-score" id="ivRinkScore">0 - 0</div><div class="iv-event-banner" id="ivRinkEvent">Ready</div><div class="iv-rink" id="ivRink"><i class="iv-blue a"></i><i class="iv-blue b"></i><i class="iv-goal a"></i><i class="iv-goal b"></i><i class="iv-puck" id="ivPuck" style="left:49%;top:49%"></i>${[0,1,2,3,4].map(i=>`<i class="iv-skater-dot" id="ivH${i}" style="left:${18+i*3}%;top:${25+i*10}%;background:#1d4ed8"></i><i class="iv-skater-dot" id="ivA${i}" style="left:${76-i*3}%;top:${25+i*10}%;background:#d9485f"></i>`).join("")}</div>`;
+}
+function ivMoveRink(payload,homeScore,awayScore,eventText){
+ const zone=payload?.zone||"neutral";const puck=document.getElementById("ivPuck");if(!puck)return;
+ const x=zone==="home_zone"?18:zone==="away_zone"?78:50;const y=25+Math.floor(Math.random()*50);
+ puck.style.left=x+"%";puck.style.top=y+"%";
+ document.getElementById("ivRinkScore").textContent=`${awayScore} - ${homeScore}`;
+ document.getElementById("ivRinkEvent").textContent=eventText||"";
+ for(let i=0;i<5;i++){const h=document.getElementById("ivH"+i),a=document.getElementById("ivA"+i);if(h){h.style.left=(Math.max(8,x-20)+i*2)+"%";h.style.top=(18+i*14)+"%";}if(a){a.style.left=(Math.min(88,x+12)-i*2)+"%";a.style.top=(18+i*14)+"%";}}
+}
+async function watchGame2D(gameId){
+ showSection("gameDetailSection");const c=document.getElementById("gameDetailContent");
+ const [{data:g,error},{data:e}]=await Promise.all([
+   supabaseClient.from("games").select("*,home:home_team_id(name,city),away:away_team_id(name,city)").eq("id",gameId).single(),
+   supabaseClient.from("game_events").select("*").eq("game_id",gameId).order("sequence_no")
+ ]);
+ if(error)return c.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;
+ c.innerHTML=`<button class="secondary-button" onclick="openGameDetail('${gameId}')">← Game Detail</button><h2 style="margin:16px 0">2D Rink Replay</h2><div class="muted">${escapeHTML(g.away?.city||"")} ${escapeHTML(g.away?.name||"")} @ ${escapeHTML(g.home?.city||"")} ${escapeHTML(g.home?.name||"")}</div>${ivRinkHTML()}<div id="ivReplayFeed" class="panel"></div>`;
+ let hs=0,as=0;for(const ev of (e||[])){await new Promise(r=>setTimeout(r,350));if(ev.event_type==="goal"||ev.event_type==="overtime_goal"){if(ev.team_id===g.home_team_id)hs++;else as++;}ivMoveRink(ev.metadata,hs,as,ev.description);document.getElementById("ivReplayFeed").innerHTML=`<strong>${ev.period===4?"OT":"P"+ev.period} ${Math.floor(ev.clock_seconds/60)}:${String(ev.clock_seconds%60).padStart(2,"0")}</strong> · ${escapeHTML(ev.description)}`;}
+ document.getElementById("ivRinkScore").textContent=`${g.away_score} - ${g.home_score}`;document.getElementById("ivRinkEvent").textContent="FINAL";
+}
+
+/* Upgrade world hub to expose implemented systems. */
+const ivOldShowWorldHub=showWorldHub;
+showWorldHub=async function(){
+ await ivOldShowWorldHub();
+ const nav=document.querySelector("#worldContent .world-nav");
+ if(nav)nav.insertAdjacentHTML("beforeend",`<button class="secondary-button" onclick="showTournamentCenter()">Tournament Center</button><button class="secondary-button" onclick="showInternationalCenter()">National Teams</button><button class="secondary-button" onclick="showHallOfFame()">Hall of Fame</button><button class="secondary-button" onclick="showCareerLeaders()">Career Leaders</button>`);
+};
+
+/* Upgrade game detail with rink replay. */
+const ivOldOpenGameDetail=openGameDetail;
+openGameDetail=async function(gameId){
+ await ivOldOpenGameDetail(gameId);
+ const c=document.getElementById("gameDetailContent");
+ if(c && !document.getElementById("iv2dReplayButton")){
+   c.insertAdjacentHTML("afterbegin",`<button id="iv2dReplayButton" class="primary-button" style="margin-bottom:14px" onclick="watchGame2D('${gameId}')">▶ Watch 2D Rink Replay</button>`);
+ }
+};
+
+/* Upgrade Admin with one-button universe boot. */
+const ivOldShowAdmin=showAdmin;
+showAdmin=async function(){
+ await ivOldShowAdmin();
+ const c=document.getElementById("adminContent");
+ if(c)c.insertAdjacentHTML("afterbegin",`<div class="panel" style="margin-bottom:16px;border-color:#d6a84b"><h3>🚀 Iceverse Universe V11</h3><p class="muted">Start the schedule now, activate automatic due-game simulation, CPU GMs, economy, tournaments, international rosters and career systems.</p><button class="primary-button" onclick="adminBootUniverse()">BOOT ICEVERSE NOW</button> <button class="secondary-button" onclick="showUniverseControl()">Universe Control</button></div>`);
+};
 </script>
 
 </body>
