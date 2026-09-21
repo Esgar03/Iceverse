@@ -2305,19 +2305,18 @@ function initializeCreationForm() {
     '<option value="">Select archetype</option>';
 
   Object.keys(ARCHETYPES)
-    .forEach(archetype => {
+  .forEach(archetype => {
+    const option =
+      document.createElement("option");
 
-      const option =
-        document.createElement("option");
+    option.value =
+      archetype;
 
-      option.value =
-        archetype;
+    option.textContent =
+      ARCHETYPES[archetype].displayName;
 
-      option.textContent =
-        archetype;
-
-      archetypeSelect.appendChild(option);
-    });
+    archetypeSelect.appendChild(option);
+  });
 
   updateSecondaryPositionOptions();
 }
