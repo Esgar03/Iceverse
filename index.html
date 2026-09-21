@@ -3151,7 +3151,7 @@ async function createPlayer() {
       handedness
     );
 
-  const playerData = {
+ const playerData = {
 
     first_name:
       firstName,
@@ -3173,28 +3173,11 @@ async function createPlayer() {
     archetype:
       creationBuild.archetype,
 
-    personality:
-  [
-    "Leader",
-    "Quiet",
-    "Competitive",
-    "Team Player",
-    "Big Ego",
-    "Money-Focused",
-    "Loyal",
-    "Ambitious",
-    "Hot-Headed",
-    "Media-Friendly",
-    "Introverted",
-    "Workaholic",
-    "Laid-Back"
-  ][
-    Math.floor(
-      Math.random() * 13
-    )
-  ],
+    // Personality will be assigned by the database.
 
     overall,
+
+   potential,
 
     created_by:
       currentUser.id,
