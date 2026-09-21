@@ -530,9 +530,7 @@ async function loadPlayers() {
   loadTeams();
   
 function openPlayerProfile(playerId) {
-
   const players = window.iceversePlayers || [];
-
   const player = players.find(
     p => p.id === playerId
   );
@@ -542,10 +540,8 @@ function openPlayerProfile(playerId) {
   }
 
   document.querySelector(".hero").style.display = "none";
-
-document.getElementById("playersSection").style.display = "none";
-
-document.getElementById("playerProfileSection").style.display = "block";
+  document.getElementById("playersSection").style.display = "none";
+  document.getElementById("playerProfileSection").style.display = "block";
 
   const profileSection =
     document.getElementById("playerProfileSection");
@@ -556,75 +552,129 @@ document.getElementById("playerProfileSection").style.display = "block";
     document.getElementById("playerProfile");
 
   profile.innerHTML = `
-    <h2>
-      ${escapeHTML(player.first_name)}
-      ${escapeHTML(player.last_name)}
-    </h2>
+    <div style="
+      max-width: 900px;
+      margin: 0 auto;
+    ">
 
-    <h3>Player Bio</h3>
-    
-       <div style="
-  background: #0d2035;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-">
-  <div class="team-info">
-    <strong>Position:</strong> ${escapeHTML(player.primary_position)}
-  </div>
+      <div style="
+        background: linear-gradient(135deg, #102a43, #071525);
+        padding: 30px;
+        border-radius: 18px;
+        margin-bottom: 30px;
+        border: 1px solid #244a6b;
+      ">
 
-  <div class="team-info">
-    <strong>Age:</strong> ${player.age}
-  </div>
+        <h1 style="
+          margin: 0 0 10px 0;
+          font-size: 38px;
+        ">
+          ${escapeHTML(player.first_name)}
+          ${escapeHTML(player.last_name)}
+        </h1>
 
-  <div class="team-info">
-    <strong>Overall:</strong> ${player.overall}
-  </div>
+        <div style="
+          font-size: 20px;
+          color: #9fc5e8;
+          margin-bottom: 20px;
+        ">
+          ${escapeHTML(player.primary_position)}
+          • Age ${player.age}
+          • Overall ${player.overall}
+        </div>
 
-  <div class="team-info">
-    <strong>Archetype:</strong> ${escapeHTML(player.archetype)}
-  </div>
+        <div class="team-info">
+          <strong>Team:</strong> Not assigned yet
+        </div>
 
-  <div class="team-info">
-    <strong>Personality:</strong> ${escapeHTML(player.personality)}
-  </div>
-</div>
+        <div class="team-info">
+          <strong>Jersey Number:</strong> Not assigned yet
+        </div>
 
-<h3>Attributes</h3>
+      </div>
 
-<div style="
-  background: #0d2035;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-">
+      <h2>Player Bio</h2>
 
-  <div class="team-info">
-    <strong>Speed:</strong> ${player.player_attributes?.[0]?.speed ?? "N/A"}
-  </div>
+      <div style="
+        background: #0d2035;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      ">
 
-  <div class="team-info">
-    <strong>Acceleration:</strong> ${player.player_attributes?.[0]?.acceleration ?? "N/A"}
-  </div>
+        <div class="team-info">
+          <strong>Position:</strong>
+          ${escapeHTML(player.primary_position)}
+        </div>
 
-  <div class="team-info">
-   <strong>Agility:</strong> ${player.player_attributes?.[0]?.agility ?? "N/A"}
-  </div>
+        <div class="team-info">
+          <strong>Age:</strong>
+          ${player.age}
+        </div>
 
-  <div class="team-info">
-    <strong>Shooting:</strong> ${player.player_attributes?.[0]?.shooting ?? "N/A"}
-  </div>
+        <div class="team-info">
+          <strong>Overall:</strong>
+          ${player.overall}
+        </div>
 
-  <div class="team-info">
-   <strong>Passing:</strong> ${player.player_attributes?.[0]?.passing ?? "N/A"}
-  </div>
+        <div class="team-info">
+          <strong>Archetype:</strong>
+          ${escapeHTML(player.archetype)}
+        </div>
 
-  <div class="team-info">
-   <strong>Puck Control:</strong> ${player.player_attributes?.[0]?.puck_control ?? "N/A"}
-  </div>
+        <div class="team-info">
+          <strong>Personality:</strong>
+          ${escapeHTML(player.personality)}
+        </div>
 
-</div>
+      </div>
 
+      <h2>Attributes</h2>
+
+      <div style="
+        background: #0d2035;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      ">
+
+        <h3>Skating</h3>
+
+        <div class="team-info">
+          <strong>Speed:</strong>
+          ${player.player_attributes?.[0]?.speed ?? "N/A"}
+        </div>
+
+        <div class="team-info">
+          <strong>Acceleration:</strong>
+          ${player.player_attributes?.[0]?.acceleration ?? "N/A"}
+        </div>
+
+        <div class="team-info">
+          <strong>Agility:</strong>
+          ${player.player_attributes?.[0]?.agility ?? "N/A"}
+        </div>
+
+        <h3>Offense</h3>
+
+        <div class="team-info">
+          <strong>Shooting:</strong>
+          ${player.player_attributes?.[0]?.shooting ?? "N/A"}
+        </div>
+
+        <div class="team-info">
+          <strong>Passing:</strong>
+          ${player.player_attributes?.[0]?.passing ?? "N/A"}
+        </div>
+
+        <div class="team-info">
+          <strong>Puck Control:</strong>
+          ${player.player_attributes?.[0]?.puck_control ?? "N/A"}
+        </div>
+
+      </div>
+
+    </div>
   `;
 
   profileSection.scrollIntoView({
