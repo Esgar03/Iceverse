@@ -3000,13 +3000,10 @@ async function openTeamProfile(
 
 
   if (!teamProfileSection) {
-
     console.error(
       "Team profile section was not found."
     );
-
     return;
-
   }
 
 
@@ -3032,7 +3029,9 @@ async function openTeamProfile(
   try {
 
     /*
-      Load team.
+      --------------------------------------------------------
+      LOAD TEAM
+      --------------------------------------------------------
     */
 
     const {
@@ -3042,10 +3041,7 @@ async function openTeamProfile(
       await supabaseClient
         .from("teams")
         .select("*")
-        .eq(
-          "id",
-          teamId
-        )
+        .eq("id", teamId)
         .single();
 
 
@@ -3055,7 +3051,9 @@ async function openTeamProfile(
 
 
     /*
-      Load owner username.
+      --------------------------------------------------------
+      LOAD OWNER
+      --------------------------------------------------------
     */
 
     let ownerUsername =
@@ -3065,8 +3063,7 @@ async function openTeamProfile(
     if (team.owner_id) {
 
       const {
-        data: username,
-        error: usernameError
+        data: username
       } =
         await supabaseClient.rpc(
           "get_public_username",
@@ -3077,25 +3074,16 @@ async function openTeamProfile(
         );
 
 
-      if (usernameError) {
-
-        console.error(
-          "Team owner username error:",
-          usernameError
-        );
-
-      } else {
-
-        ownerUsername =
-          username;
-
-      }
+      ownerUsername =
+        username;
 
     }
 
 
     /*
-      Load roster.
+      --------------------------------------------------------
+      LOAD ROSTER
+      --------------------------------------------------------
     */
 
     const {
@@ -3128,7 +3116,7 @@ async function openTeamProfile(
     if (rosterError) {
 
       console.error(
-        "Team roster error:",
+        "Roster lookup error:",
         rosterError
       );
 
@@ -3139,10 +3127,6 @@ async function openTeamProfile(
       rosterRows || [];
 
 
-    /*
-      Determine ownership.
-    */
-
     const isMyTeam =
       currentUser &&
       team.owner_id ===
@@ -3150,54 +3134,12 @@ async function openTeamProfile(
 
 
     /*
-      Owner display.
+      --------------------------------------------------------
+      TEAM ACTIONS
+      --------------------------------------------------------
     */
 
-    const ownerHTML =
-      team.owner_id &&
-      ownerUsername
-        ? `
-
-          <p>
-
-            <strong>
-              Owner:
-            </strong>
-
-            <a
-              href="#"
-              class="team-owner-link"
-              data-user-id="${team.owner_id}"
-            >
-              ${escapeHTML(
-                ownerUsername
-              )}
-            </a>
-
-          </p>
-
-        `
-        : `
-
-          <p>
-
-            <strong>
-              Owner:
-            </strong>
-
-            Unclaimed
-
-          </p>
-
-        `;
-
-
-    /*
-      Team action.
-    */
-
-    let actionHTML =
-      "";
+    let actionHTML = "";
 
 
     if (isMyTeam) {
@@ -3206,12 +3148,21 @@ async function openTeamProfile(
 
         <button
           type="button"
-          class="
-            secondary-button
-            team-customize-profile-button
-          "
+          class="secondary-button"
+          id="manageTeamButton"
           style="
-            margin-right: 10px;
+            margin: 5px;
+          "
+        >
+          Manage Lines & Tactics
+        </button>
+
+        <button
+          type="button"
+          class="secondary-button"
+          id="customizeTeamProfileButton"
+          style="
+            margin: 5px;
           "
         >
           Customize Team
@@ -3219,17 +3170,16 @@ async function openTeamProfile(
 
       `;
 
-    } else if (
-      !team.owner_id
-    ) {
+    } else if (!team.owner_id) {
 
       actionHTML = `
 
         <button
           type="button"
-          class="
-            secondary-button
-            team-claim-profile-button
+          class="secondary-button"
+          id="claimTeamProfileButton"
+          style="
+            margin: 5px;
           "
         >
           Claim Team
@@ -3241,23 +3191,20 @@ async function openTeamProfile(
 
 
     /*
-      Roster HTML.
+      --------------------------------------------------------
+      ROSTER
+      --------------------------------------------------------
     */
 
-    let rosterHTML =
-      "";
+    let rosterHTML = "";
 
 
-    if (
-      roster.length === 0
-    ) {
+    if (roster.length === 0) {
 
       rosterHTML = `
 
         <div class="loading">
-
           This team currently has no players.
-
         </div>
 
       `;
@@ -3374,21 +3321,6 @@ async function openTeamProfile(
                   </div>
 
 
-                  ${
-                    player.jersey_number
-                      ? `
-                        <div
-                          class="team-info"
-                          style="
-                            margin-top: 5px;
-                          "
-                        >
-                          #${player.jersey_number}
-                        </div>
-                      `
-                      : ""
-                  }
-
                 </div>
 
               `;
@@ -3404,7 +3336,45 @@ async function openTeamProfile(
 
 
     /*
-      Build complete team page.
+      --------------------------------------------------------
+      OWNER
+      --------------------------------------------------------
+    */
+
+    const ownerHTML =
+      team.owner_id &&
+      ownerUsername
+        ? `
+
+          <p>
+            <strong>
+              Owner:
+            </strong>
+
+            ${escapeHTML(
+              ownerUsername
+            )}
+
+          </p>
+
+        `
+        : `
+
+          <p>
+            <strong>
+              Owner:
+            </strong>
+
+            Unclaimed
+          </p>
+
+        `;
+
+
+    /*
+      --------------------------------------------------------
+      PAGE
+      --------------------------------------------------------
     */
 
     teamProfile.innerHTML = `
@@ -3450,12 +3420,7 @@ async function openTeamProfile(
           </h2>
 
 
-          <p
-            style="
-              font-size: 18px;
-            "
-          >
-
+          <p>
             <strong>
               ${escapeHTML(
                 team.abbreviation ||
@@ -3477,11 +3442,7 @@ async function openTeamProfile(
         </div>
 
 
-        <div
-          style="
-            margin-bottom: 30px;
-          "
-        >
+        <div>
 
           ${ownerHTML}
 
@@ -3517,7 +3478,8 @@ async function openTeamProfile(
 
         <div
           style="
-            margin-bottom: 25px;
+            text-align: center;
+            margin: 25px 0;
           "
         >
 
@@ -3549,18 +3511,16 @@ async function openTeamProfile(
 
 
     /*
-      Back button.
+      --------------------------------------------------------
+      BUTTONS
+      --------------------------------------------------------
     */
 
-    const backButton =
-      document.getElementById(
+    document
+      .getElementById(
         "backToTeamsButton"
-      );
-
-
-    if (backButton) {
-
-      backButton.addEventListener(
+      )
+      ?.addEventListener(
         "click",
         function() {
 
@@ -3569,55 +3529,28 @@ async function openTeamProfile(
         }
       );
 
-    }
 
-
-    /*
-      Owner profile link.
-    */
-
-    const ownerLink =
-      teamProfile.querySelector(
-        ".team-owner-link"
-      );
-
-
-    if (ownerLink) {
-
-      ownerLink.addEventListener(
+    document
+      .getElementById(
+        "manageTeamButton"
+      )
+      ?.addEventListener(
         "click",
-        function(event) {
+        function() {
 
-          event.preventDefault();
-
-
-          const userId =
-            this.dataset.userId;
-
-
-          openUserProfile(
-            userId
+          openTeamManagement(
+            team.id
           );
 
         }
       );
 
-    }
 
-
-    /*
-      Customize button.
-    */
-
-    const customizeButton =
-      teamProfile.querySelector(
-        ".team-customize-profile-button"
-      );
-
-
-    if (customizeButton) {
-
-      customizeButton.addEventListener(
+    document
+      .getElementById(
+        "customizeTeamProfileButton"
+      )
+      ?.addEventListener(
         "click",
         function() {
 
@@ -3628,22 +3561,12 @@ async function openTeamProfile(
         }
       );
 
-    }
 
-
-    /*
-      Claim button.
-    */
-
-    const claimButton =
-      teamProfile.querySelector(
-        ".team-claim-profile-button"
-      );
-
-
-    if (claimButton) {
-
-      claimButton.addEventListener(
+    document
+      .getElementById(
+        "claimTeamProfileButton"
+      )
+      ?.addEventListener(
         "click",
         async function() {
 
@@ -3654,35 +3577,31 @@ async function openTeamProfile(
         }
       );
 
-    }
-
 
     /*
-      Player cards open player profiles.
+      Player cards.
     */
 
-    const playerCards =
-      teamProfile.querySelectorAll(
+    teamProfile
+      .querySelectorAll(
         "[data-player-id]"
+      )
+      .forEach(
+        card => {
+
+          card.addEventListener(
+            "click",
+            function() {
+
+              openPlayerProfile(
+                this.dataset.playerId
+              );
+
+            }
+          );
+
+        }
       );
-
-
-    playerCards.forEach(
-      card => {
-
-        card.addEventListener(
-          "click",
-          function() {
-
-            openPlayerProfile(
-              this.dataset.playerId
-            );
-
-          }
-        );
-
-      }
-    );
 
 
   } catch (error) {
@@ -3697,17 +3616,16 @@ async function openTeamProfile(
 
       <div class="error">
 
-        <p>
-          Unable to load team profile.
-        </p>
+        Unable to load team profile.
 
-        <p>
-          ${escapeHTML(
-            error.message ||
-            "Unknown error"
-          )}
-        </p>
+        <br><br>
 
+        ${escapeHTML(
+          error.message ||
+          "Unknown error"
+        )}
+
+        <br><br>
 
         <button
           type="button"
