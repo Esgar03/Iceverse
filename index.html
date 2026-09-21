@@ -389,6 +389,58 @@ async function loadCurrentUser() {
 
   currentUser = user;
 }
+  function updateAuthNavigation() {
+
+  const loginButton =
+    document.getElementById("loginButton");
+
+  const signupButton =
+    document.getElementById("signupButton");
+
+  const logoutButton =
+    document.getElementById("logoutButton");
+
+  if (!loginButton || !signupButton || !logoutButton) {
+    return;
+  }
+
+  if (currentUser) {
+
+    loginButton.style.display = "none";
+    signupButton.style.display = "none";
+    logoutButton.style.display = "inline-block";
+
+  } else {
+
+    loginButton.style.display = "inline-block";
+    signupButton.style.display = "inline-block";
+    logoutButton.style.display = "none";
+
+  }
+}
+
+
+async function logoutUser() {
+
+  const { error } =
+    await supabaseClient.auth.signOut();
+
+  if (error) {
+
+    console.error(
+      "Unable to log out:",
+      error
+    );
+
+    return;
+  }
+
+  currentUser = null;
+
+  updateAuthNavigation();
+
+  showHome();
+}
   
 
 /*
@@ -653,7 +705,10 @@ function displayPlayers(players) {
    * Start Iceverse
    */
 
-  loadCurrentUser();
+  loadCurrentUser().then(() => {
+  updateAuthNavigation();
+});
+
 loadTeams();
   
 function openPlayerProfile(playerId) {
