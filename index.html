@@ -9897,5 +9897,162 @@ const ivLogoObserver=new MutationObserver(()=>ivInstallOfficialLogo());
 window.addEventListener("load",()=>ivLogoObserver.observe(document.body,{childList:true,subtree:true}));
 </script>
 
+
+<style id="iceverse-v12-11-broadcast">
+:root{
+ --iv-bg:#07111b;--iv-panel:#0c1925;--iv-panel2:#102233;--iv-line:#20384d;
+ --iv-blue:#168cff;--iv-blue2:#62b7ff;--iv-text:#f4f8fc;--iv-muted:#8fa7bb;
+ --iv-red:#e33b45;--iv-green:#34c47c;--iv-gold:#e8b94f;
+}
+body{background:radial-gradient(circle at 70% 0,#112d45 0,#07111b 35%,#050c13 100%) fixed!important;color:var(--iv-text)!important}
+.panel,.player-profile-card,.metric-card{background:linear-gradient(180deg,rgba(16,34,51,.97),rgba(8,20,31,.98))!important;border:1px solid var(--iv-line)!important;border-radius:10px!important;box-shadow:0 12px 35px rgba(0,0,0,.2)}
+h1,h2,h3{letter-spacing:-.02em} h2,h3{color:#fff!important}
+.primary-button{background:linear-gradient(180deg,#249cff,#0878dd)!important;border-color:#3eabff!important;font-weight:800!important}
+.secondary-button{background:#101f2d!important;border:1px solid #2a465e!important;color:#eaf5ff!important;font-weight:700!important}
+.secondary-button:hover{border-color:#54aef6!important;background:#142b3f!important}
+.metric-card{border-top:3px solid var(--iv-blue)!important}
+.metric-value{font-weight:900!important}
+.data-row{border-bottom:1px solid #1b3042!important}
+table{border-collapse:separate!important;border-spacing:0!important}
+th{background:#0a1723!important;color:#8faec7!important;text-transform:uppercase;font-size:11px;letter-spacing:.055em}
+td{border-bottom:1px solid #1b3042!important}
+nav,header{backdrop-filter:blur(14px)}
+#ivWorldClock{top:13px!important;bottom:auto!important;right:80px!important;border-radius:5px!important;background:#0b1824!important;border-color:#2a465e!important;font-size:12px!important}
+
+/* Broadcast team management */
+#teamManagement .player-profile-card{max-width:1280px;margin:auto;padding:0!important;overflow:hidden}
+.iv-mgmt-hero{position:relative;padding:28px 30px;background:
+ linear-gradient(90deg,rgba(5,14,23,.96),rgba(8,26,42,.78)),
+ radial-gradient(circle at 80% 20%,rgba(22,140,255,.28),transparent 38%);
+ border-bottom:1px solid #2a465e}
+.iv-mgmt-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#72bfff;font-weight:900}
+.iv-mgmt-title{font-size:30px;margin:4px 0 4px!important}
+.iv-mgmt-tabs{position:sticky;top:0;z-index:30;display:flex;gap:2px;overflow:auto;background:#08131e;border-bottom:1px solid #253d51;padding:0 18px}
+.iv-mgmt-tab{appearance:none;border:0;background:transparent;color:#91a8ba;padding:15px 17px;font-weight:850;white-space:nowrap;border-bottom:3px solid transparent;cursor:pointer}
+.iv-mgmt-tab.active{color:white;border-bottom-color:#168cff;background:linear-gradient(180deg,rgba(22,140,255,.10),transparent)}
+.iv-mgmt-body{padding:24px 28px 90px}
+.iv-mgmt-page{display:none}.iv-mgmt-page.active{display:block}
+.iv-mgmt-section-title{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:18px}
+.iv-mgmt-section-title h3{font-size:22px;margin:0}
+.iv-mgmt-section-title p{margin:3px 0 0;color:#8fa7bb}
+.iv-line-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px}
+.iv-line-card{background:#0a1824;border:1px solid #223d53;border-radius:9px;padding:15px;position:relative;overflow:hidden}
+.iv-line-card:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:#168cff}
+.iv-line-card h4{margin:0 0 12px;font-size:14px;text-transform:uppercase;letter-spacing:.055em}
+.iv-line-card select{width:100%;background:#07131e!important;border:1px solid #29455d!important;margin-top:6px}
+.iv-rink-lines{background:
+ linear-gradient(rgba(7,18,28,.76),rgba(7,18,28,.76)),
+ repeating-linear-gradient(90deg,transparent 0 24.5%,rgba(62,151,219,.10) 25% 25.5%,transparent 26% 49%);
+ border:1px solid #27465e;border-radius:12px;padding:18px}
+#mgmtTactics label,#mgmtUsage label,#mgmtGoalies label{background:#0a1824;border:1px solid #223d53;border-radius:8px;padding:13px!important;display:flex!important;flex-direction:column;gap:7px;font-weight:800}
+#mgmtTactics select,#mgmtUsage input,#mgmtGoalies select{background:#07131e!important;border:1px solid #29455d!important}
+.iv-usage-bar{height:5px;border-radius:5px;background:#142c3f;overflow:hidden;margin-top:7px}.iv-usage-fill{height:100%;background:linear-gradient(90deg,#168cff,#65c1ff)}
+.iv-mgmt-savebar{position:sticky;bottom:0;z-index:25;display:flex;align-items:center;justify-content:space-between;gap:15px;background:rgba(5,14,23,.96);backdrop-filter:blur(12px);border-top:1px solid #29455d;padding:14px 22px;margin:24px -28px -90px}
+@media(max-width:700px){.iv-mgmt-body{padding:18px 14px 80px}.iv-mgmt-hero{padding:22px 18px}.iv-line-grid{grid-template-columns:1fr}.iv-mgmt-savebar{margin-left:-14px;margin-right:-14px}}
+</style>
+
+<script>
+/* V12.11 BROADCAST UI + REORGANIZED LINES & TACTICS */
+function ivBroadcastManagement(teamName){
+ const root=document.querySelector("#teamManagement .player-profile-card");
+ if(!root || root.dataset.broadcastReady==="1") return;
+ root.dataset.broadcastReady="1";
+
+ // Identify the existing sections generated by the working management code.
+ const tactics=document.getElementById("mgmtTactics");
+ const goalies=document.getElementById("mgmtGoalies");
+ const usage=document.getElementById("mgmtUsage");
+ const lineContainer=document.getElementById("lineCombinationContainer");
+ const rolesContainer=document.getElementById("playerRolesContainer");
+ const lines=lineContainer?.parentElement;
+ const roles=rolesContainer?.parentElement;
+ if(!tactics||!goalies||!usage||!lines||!roles)return;
+
+ tactics.id="mgmtTactics"; goalies.id="mgmtGoalies"; usage.id="mgmtUsage";
+ lines.id="mgmtLines"; roles.id="mgmtRoles";
+ [lines,tactics,goalies,usage,roles].forEach(x=>{x.classList.add("iv-mgmt-page");x.removeAttribute("style")});
+ lines.classList.add("active");
+
+ // Make generated line assignment blocks read like broadcast lineup cards.
+ if(lineContainer){
+   lineContainer.classList.add("iv-line-grid","iv-rink-lines");
+   [...lineContainer.children].forEach(x=>x.classList.add("iv-line-card"));
+ }
+ // Usage gets visual bars that react to its existing numeric inputs.
+ usage.querySelectorAll('input[data-usage]').forEach(inp=>{
+   const bar=document.createElement("div");bar.className="iv-usage-bar";
+   const fill=document.createElement("div");fill.className="iv-usage-fill";bar.appendChild(fill);
+   inp.insertAdjacentElement("afterend",bar);
+   const sync=()=>fill.style.width=Math.max(0,Math.min(100,Number(inp.value)||0))+"%";
+   inp.addEventListener("input",sync);sync();
+ });
+
+ const oldBack=document.getElementById("managementBackButton");
+ const save=document.getElementById("saveTeamManagement");
+ const msg=document.getElementById("managementMessage");
+
+ const hero=document.createElement("div");hero.className="iv-mgmt-hero";
+ hero.innerHTML=`<div class="iv-mgmt-kicker">Coaching Center</div><h2 class="iv-mgmt-title">${escapeHTML(teamName||"Team")} · Lines & Tactics</h2>
+ <div class="muted">Set your lineup, special situations, usage, leadership and game plan from one organized coaching dashboard.</div>`;
+ root.prepend(hero);
+ if(oldBack){oldBack.style.margin="16px 28px 0";hero.prepend(oldBack)}
+
+ const tabs=document.createElement("div");tabs.className="iv-mgmt-tabs";
+ const defs=[["mgmtLines","Lines"],["mgmtTactics","Tactics"],["mgmtGoalies","Goalies"],["mgmtUsage","Usage"],["mgmtRoles","Leadership"]];
+ tabs.innerHTML=defs.map((d,i)=>`<button type="button" class="iv-mgmt-tab ${i===0?"active":""}" data-mgmt-target="${d[0]}">${d[1]}</button>`).join("");
+ hero.insertAdjacentElement("afterend",tabs);
+
+ // Hide the older jump navigation and introductory headings; tabs replace them.
+ [...root.querySelectorAll(".world-nav")].forEach(x=>x.style.display="none");
+ [...root.children].forEach(x=>{
+   if(x===hero||x===tabs||[lines,tactics,goalies,usage,roles].includes(x)||x===save||x===msg||x===oldBack)return;
+   if(x.tagName==="H2"||x.tagName==="P")x.style.display="none";
+ });
+
+ const body=document.createElement("div");body.className="iv-mgmt-body";
+ tabs.insertAdjacentElement("afterend",body);
+ [lines,tactics,goalies,usage,roles].forEach(x=>body.appendChild(x));
+
+ // Add clean section headers.
+ const titles={
+   mgmtLines:["Even Strength & Special Teams","Build combinations for every game situation."],
+   mgmtTactics:["Team Game Plan","Choose the style your roster will try to execute."],
+   mgmtGoalies:["Goaltending","Set the starter, backup and rotation approach."],
+   mgmtUsage:["Deployment","Control how heavily each unit is used."],
+   mgmtRoles:["Leadership","Assign captaincy and alternate leadership roles."]
+ };
+ [lines,tactics,goalies,usage,roles].forEach(page=>{
+   const oldH=page.querySelector(":scope > h3");if(oldH)oldH.style.display="none";
+   const h=document.createElement("div");h.className="iv-mgmt-section-title";
+   h.innerHTML=`<div><h3>${titles[page.id][0]}</h3><p>${titles[page.id][1]}</p></div>`;
+   page.prepend(h);
+ });
+
+ tabs.addEventListener("click",e=>{
+   const b=e.target.closest("[data-mgmt-target]");if(!b)return;
+   tabs.querySelectorAll(".iv-mgmt-tab").forEach(x=>x.classList.toggle("active",x===b));
+   body.querySelectorAll(".iv-mgmt-page").forEach(x=>x.classList.toggle("active",x.id===b.dataset.mgmtTarget));
+ });
+
+ if(save){
+   const savebar=document.createElement("div");savebar.className="iv-mgmt-savebar";
+   const status=document.createElement("div");status.className="muted";status.textContent="Changes are not live until saved.";
+   savebar.append(status,save);
+   if(msg)savebar.prepend(msg);
+   body.appendChild(savebar);
+   save.classList.remove("secondary-button");save.classList.add("primary-button");
+   save.textContent="Save Coaching Setup";
+ }
+}
+
+// Enhance the existing working management function rather than replacing its database logic.
+const ivV11OpenTeamManagement=openTeamManagement;
+openTeamManagement=async function(teamId){
+ await ivV11OpenTeamManagement(teamId);
+ const teamTitle=document.querySelector("#teamManagement .player-profile-card h2")?.textContent?.replace("Management","").trim();
+ setTimeout(()=>ivBroadcastManagement(teamTitle),0);
+};
+</script>
+
 </body>
 </html>
