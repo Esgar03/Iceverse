@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Iceverse</title>
+
+  <link rel="stylesheet" href="css/iceverse.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+
+
+
+
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    ICEVERSE
+  </div>
+
+  <nav>
+    <button onclick="showDashboard()">Dashboard</button>
+    <button onclick="showFeed()">Feed</button>
+    <button onclick="showLeagueHub()">League</button>
+    <button onclick="showPlayersHub()">Players</button>
+    <button id="teamNavButton" onclick="showMyTeamOrTeams()">Team</button>
+    <button onclick="showWorldHub()">World</button>
+    <button id="notificationsNavButton" onclick="showNotifications()" style="display:none;">Notifications <span id="notificationBadge"></span></button>
+    <button id="adminNavButton" onclick="showAdmin()" style="display:none;">Admin</button>
+    <button id="loginButton" onclick="showLogin()">Log In</button>
+    <button id="signupButton" onclick="showSignup()">Create Account</button>
+    <button id="logoutButton" onclick="logoutUser()" style="display:none;">Log Out</button>
+  </nav>
+
+</header>
+
+
+<main>
+
+<!-- ========================================= -->
+<!-- AUTH -->
+<!-- ========================================= -->
+
+<section
+  id="authSection"
+  class="section"
+  style="display: none;"
+>
+
+  <div style="
+    max-width: 500px;
+    margin: 0 auto;
+    background: #0d2035;
+    border: 1px solid #203c59;
+    border-radius: 14px;
+    padding: 30px;
+  ">
+
+    <h2
+      id="authTitle"
+      style="margin-bottom: 20px;"
+    >
+      Create Account
+    </h2>
+
+    <div style="margin-bottom: 15px;">
+
+      <input
+        id="authUsername"
+        type="text"
+        placeholder="Username"
+        maxlength="20"
+        style="
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #294766;
+          background: #071525;
+          color: white;
+          font-size: 16px;
+        "
+      >
+
+    </div>
+
+    <div style="margin-bottom: 15px;">
+
+      <input
+        id="authEmail"
+        type="email"
+        placeholder="Email"
+        style="
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #294766;
+          background: #071525;
+          color: white;
+          font-size: 16px;
+        "
+      >
+
+    </div>
+
+    <div style="margin-bottom: 15px;">
+
+      <input
+        id="authPassword"
+        type="password"
+        placeholder="Password"
+        style="
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid #294766;
+          background: #071525;
+          color: white;
+          font-size: 16px;
+        "
+      >
+
+    </div>
+
+    <button
+      id="authButton"
+      type="button"
+      class="primary-button"
+      style="width: 100%;"
+    >
+      Create Account
+    </button>
+
+    <div
+      id="authMessage"
+      style="
+        margin-top: 15px;
+        color: #9fb3c8;
+      "
+    ></div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- HOME -->
+<!-- ========================================= -->
+
+<section
+  id="homeSection"
+>
+
+  <section class="hero">
+
+    <h1>
+      ICEVERSE
+    </h1>
+
+    <p>
+      A persistent multiplayer hockey universe where you create players,
+      manage teams, build lines, develop talent, and compete against other
+      hockey managers.
+    </p>
+
+  </section>
+
+
+  <section class="section">
+
+    <h2>
+      Iceverse Hockey League
+    </h2>
+
+    <div
+      id="teams"
+      class="teams"
+    >
+
+      <div class="loading">
+        Loading Iceverse teams...
+      </div>
+
+    </div>
+
+  </section>
+
+</section>
+
+
+<section
+  id="teamProfileSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <div id="teamProfile">
+
+    <div class="loading">
+      Loading team...
+    </div>
+
+  </div>
+
+</section>
+
+
+<section
+  id="teamCustomizeSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <div id="teamCustomize">
+
+    <div class="loading">
+      Loading team customization...
+    </div>
+
+  </div>
+
+</section>
+
+
+<section
+  id="teamManagementSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <div id="teamManagement">
+
+    <div class="loading">
+      Loading team management...
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- PLAYERS -->
+<!-- ========================================= -->
+
+<section
+  id="playersSection"
+  class="section"
+  style="display: none;"
+>
+
+  <div style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  ">
+
+    <h2>
+      Iceverse Players
+    </h2>
+
+    <button
+      id="createPlayerButton"
+      class="primary-button"
+      onclick="showCreatePlayer()"
+      style="display: none;"
+    >
+      + Create Player
+    </button>
+
+  </div>
+
+  <div style="margin-bottom: 20px;">
+
+    <input
+      id="playerSearch"
+      type="text"
+      placeholder="Search players..."
+      oninput="filterPlayers()"
+      style="
+        width: 100%;
+        max-width: 500px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #294766;
+        background: #0d2035;
+        color: white;
+        font-size: 16px;
+      "
+    >
+
+  </div>
+
+  <div
+    id="players"
+    class="teams"
+  >
+
+    <div class="loading">
+      Loading players...
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- CREATE PLAYER -->
+<!-- ========================================= -->
+
+<section
+  id="createPlayerSection"
+  class="section"
+  style="display: none;"
+>
+
+  <div class="form-card">
+
+    <div style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    ">
+
+      <div>
+
+        <h2 style="margin-bottom: 7px;">
+          Create Your Player
+        </h2>
+
+        <div class="team-info">
+          Every new player begins at age 18.
+          Your starting build determines where their career begins.
+        </div>
+
+      </div>
+
+      <button
+        class="secondary-button"
+        onclick="showPlayers()"
+      >
+        ← Back
+      </button>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-group">
+
+        <label for="createFirstName">
+          First Name
+        </label>
+
+        <input
+          id="createFirstName"
+          type="text"
+          maxlength="30"
+          placeholder="First name"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createLastName">
+          Last Name
+        </label>
+
+        <input
+          id="createLastName"
+          type="text"
+          maxlength="30"
+          placeholder="Last name"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createHeight">
+          Height
+        </label>
+
+        <select id="createHeight"></select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createWeight">
+          Weight
+        </label>
+
+        <select id="createWeight"></select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createPrimaryPosition">
+          Primary Position
+        </label>
+
+        <select
+          id="createPrimaryPosition"
+          onchange="updateSecondaryPositionOptions()"
+        >
+
+          <option value="">
+            Select position
+          </option>
+
+          <option value="C">
+            Center
+          </option>
+
+          <option value="LW">
+            Left Wing
+          </option>
+
+          <option value="RW">
+            Right Wing
+          </option>
+
+          <option value="LD">
+            Left Defense
+          </option>
+
+          <option value="RD">
+            Right Defense
+          </option>
+
+          <option value="G">
+            Goalie
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createSecondaryPosition">
+          Secondary Position
+        </label>
+
+        <select id="createSecondaryPosition">
+
+          <option value="">
+            None
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createHandedness">
+          Handedness
+        </label>
+
+        <select id="createHandedness">
+
+          <option value="">
+            Select handedness
+          </option>
+
+          <option value="Left">
+            Left
+          </option>
+
+          <option value="Right">
+            Right
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="createNationality">
+          Nationality
+        </label>
+
+        <select id="createNationality">
+
+          <option value="">
+            Select nationality
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group full">
+
+        <label for="createArchetype">
+          Archetype
+        </label>
+
+        <select
+          id="createArchetype"
+          onchange="updateCreationBuild()"
+        >
+
+          <option value="">
+            Select archetype
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="creationBuildArea"
+      style="display: none;"
+    >
+
+      <div class="build-layout">
+
+        <div class="build-panel">
+
+          <h3>
+            Starting Build
+          </h3>
+
+          <div class="build-summary">
+
+            <div class="build-stat">
+
+              <div class="build-stat-label">
+                Base Overall
+              </div>
+
+              <div
+                id="buildBaseOverall"
+                class="build-stat-value"
+              >
+                62
+              </div>
+
+            </div>
+
+
+            <div class="build-stat">
+
+              <div class="build-stat-label">
+                Skill Points
+              </div>
+
+              <div
+                id="buildPoints"
+                class="build-stat-value"
+              >
+                0
+              </div>
+
+            </div>
+
+
+            <div class="build-stat">
+
+              <div class="build-stat-label">
+                Projected Overall
+              </div>
+
+              <div
+                id="buildOverall"
+                class="build-stat-value"
+              >
+                62
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="buildDescription"
+            class="privacy-note"
+          ></div>
+
+
+          <div
+            id="buildMessage"
+            class="warning-message"
+          ></div>
+
+        </div>
+
+
+        <div class="build-panel">
+
+          <h3>
+            Build Guide
+          </h3>
+
+          <p class="privacy-note">
+            Your archetype gives you a natural starting shape, but it
+            will not create identical players. Height, weight, position,
+            handedness, archetype and build choices all influence the
+            result.
+          </p>
+
+          <p
+            class="privacy-note"
+            style="margin-top: 12px;"
+          >
+            Skill upgrades become increasingly expensive as an attribute
+            gets higher. Initial caps prevent players from creating
+            unrealistic elite attributes at age 18.
+          </p>
+
+          <p
+            class="privacy-note"
+            style="margin-top: 12px;"
+          >
+            A realistic build is more likely to receive additional
+            starting skill points. After creation, attributes develop
+            automatically through the player's career.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="attributeEditor"
+        class="build-panel"
+        style="margin-top: 20px;"
+      ></div>
+
+
+      <div style="
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+      ">
+
+        <button
+          id="finalCreatePlayerButton"
+          class="primary-button"
+          onclick="createPlayer()"
+        >
+          Create Player · 1,000 IP
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="createPlayerMessage"
+      style="margin-top: 15px;"
+    ></div>
+
+  </div>
+
+</section>
+
+
+<!-- ========================================= -->
+<!-- PLAYER PROFILE -->
+<!-- ========================================= -->
+
+ <section
+  id="playerProfileSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <div id="playerProfile">
+
+    <div class="loading">
+      Loading player...
+    </div>
+
+  </div>
+
+</section>
+
+
+<section
+  id="userProfileSection"
+  style="
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #071525;
+  "
+>
+
+  <button
+    onclick="showPlayers()"
+    class="secondary-button"
+    style="margin-bottom: 20px;"
+  >
+    ← Back to Players
+  </button>
+
+  <div id="userProfile">
+
+    <div class="loading">
+      Loading user...
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="dashboardSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Manager Dashboard</h2><span class="pill">Persistent Iceverse</span></div><div id="dashboardContent"><div class="loading">Loading dashboard...</div></div></section>
+<section id="feedSection" class="section" style="display:none;"><div id="feedContent"><div class="loading">Loading Iceverse feed...</div></div></section>
+<section id="standingsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>IHL Standings</h2><span class="pill">2 pts W · 1 pt OTL</span></div><div id="standingsContent"><div class="loading">Loading standings...</div></div></section>
+<section id="freeAgentsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Free Agents</h2><span class="pill">Unrostered players</span></div><div id="freeAgentsContent"><div class="loading">Loading free agents...</div></div></section>
+<section id="newsSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse News</h2><span class="pill">Iceverse Network</span></div><div id="newsContent"><div class="loading">Loading news...</div></div></section>
+<section id="myProfileSection" class="section" style="display:none;"><div class="section-toolbar"><h2>My Iceverse</h2><span class="pill">Manager & Player Careers</span></div><div id="myProfileContent"><div class="loading">Loading profile...</div></div></section>
+<section id="contractsSection" class="section" style="display:none;"><div id="contractsContent"></div></section>
+<section id="scheduleSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Schedule & Games</h2><span class="pill">Live Iceverse</span></div><div id="scheduleContent"></div></section>
+<section id="worldSection" class="section" style="display:none;"><div class="section-toolbar"><h2>Iceverse World</h2><span class="pill">Career · Competition · Legacy</span></div><div id="worldContent"></div></section>
+
+
+
+<section id="leagueHubSection" class="section" style="display:none;"><div id="leagueHubContent"></div></section>
+<section id="playersHubSection" class="section" style="display:none;"><div id="playersHubContent"></div></section>
+<section id="marketplaceSection" class="section" style="display:none;"><div id="marketplaceContent"></div></section>
+
+<section id="notificationsSection" class="section" style="display:none;"><div id="notificationsContent"></div></section>
+<section id="usernameLookupSection" class="section" style="display:none;"><div id="usernameLookupContent"></div></section>
+<section id="leadersSection" class="section" style="display:none;"><div id="leadersContent"></div></section>
+
+<section id="gameDetailSection" class="section" style="display:none;"><div id="gameDetailContent"></div></section>
+<section id="testSimSection" class="section" style="display:none;"><div id="testSimContent"></div></section>
+
+<section id="adminSection" class="section" style="display:none;">
+  <div class="section-toolbar"><h2>Iceverse Admin</h2><span class="pill">Owner Only</span></div>
+  <div id="adminContent"></div>
+</section>
+
+</main>
+
+
+<footer>
+  Iceverse Hockey League · Building the future of online hockey
+</footer>
+
+
+<script src="js/00-config.js"></script>
+<script src="js/01-auth-navigation.js"></script>
+<script src="js/02-teams-management.js"></script>
+<script src="js/03-players.js"></script>
+<script src="js/04-app-world-admin.js"></script>
+<script src="js/05-world-systems.js"></script>
+<script src="js/06-schedule-feed.js"></script>
+<script src="js/07-economy-creation-patches.js"></script>
+<script src="js/08-simulation-patches.js"></script>
+<script src="js/09-directory-profile-patches.js"></script>
+<script src="js/10-game-schedule-patches.js"></script>
+<script src="js/11-awards-operations-heartbeat.js"></script>
+<script src="js/12-branding.js"></script>
+<script src="js/13-broadcast-team-management.js"></script>
+<script src="js/14-schedule-32-team.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
