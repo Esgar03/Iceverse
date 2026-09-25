@@ -1,0 +1,152 @@
+-- ============================================================
+-- ICEVERSE V13.21 — TEST SIM + STANDINGS STABILITY HOTFIX
+-- COPY/PASTE THIS ENTIRE BLOCK INTO SUPABASE SQL EDITOR
+-- ============================================================
+
+-- Simulate only a tiny number of games per request.
+-- This replaces the timeout-prone "whole day / whole season in one RPC" approach.
+create or replace function public.admin_test_sim_batch(
+  p_game_limit integer default 2
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path='public'
+set row_security='off'
+as $$
+declare
+  v_season uuid;
+  v_limit integer;
+  g record;
+  n integer := 0;
+  v_remaining integer := 0;
+begin
+  if not public.is_iceverse_admin() then
+    raise exception 'Admin only';
+  end if;
+
+  select season_id
+  into v_season
+  from public.iv_test_season_backup
+  where id=1 and active=true;
+
+  if v_season is null then
+    raise exception 'Start Test Season first';
+  end if;
+
+  v_limit := greatest(1,least(coalesce(p_game_limit,2),4));
+
+  for g in
+    select id,home_team_id,away_team_id
+    from public.games
+    where season_id=v_season
+      and status='scheduled'
+    order by scheduled_at,id
+    limit v_limit
+  loop
+    perform public.iv_simulate_shift_game(
+      g.home_team_id,
+      g.away_team_id,
+      null,
+      'official',
+      g.id
+    );
+    n := n+1;
+  end loop;
+
+  select count(*)
+  into v_remaining
+  from public.games
+  where season_id=v_season
+    and status='scheduled';
+
+  return jsonb_build_object(
+    'games_simulated',n,
+    'remaining_games',v_remaining,
+    'complete',(v_remaining=0)
+  );
+end;
+$$;
+
+grant execute
+on function public.admin_test_sim_batch(integer)
+to authenticated;
+
+
+-- Re-sync the legacy team W/L/OTL columns from completed official games.
+-- The frontend hotfix also calculates standings directly from games.
+create or replace function public.iv_rebuild_team_records_from_games()
+returns integer
+language plpgsql
+security definer
+set search_path='public'
+set row_security='off'
+as $$
+declare
+  v_season uuid;
+  v_count integer := 0;
+begin
+  select id into v_season
+  from public.seasons
+  where active=true
+  order by season_number desc
+  limit 1;
+
+  if v_season is null then
+    raise exception 'No active season found';
+  end if;
+
+  update public.teams
+  set wins=0,losses=0,overtime_losses=0;
+
+  with completed as (
+    select
+      g.*,
+      coalesce(
+        g.winner_team_id,
+        case
+          when g.home_score>g.away_score then g.home_team_id
+          when g.away_score>g.home_score then g.away_team_id
+          else null
+        end
+      ) as resolved_winner
+    from public.games g
+    where g.season_id=v_season
+      and g.status in ('completed','final')
+  ),
+  calc as (
+    select
+      t.id team_id,
+      count(*) filter(where c.resolved_winner=t.id)::int wins,
+      count(*) filter(
+        where c.resolved_winner is not null
+          and c.resolved_winner<>t.id
+          and coalesce(c.overtime,false)=false
+      )::int losses,
+      count(*) filter(
+        where c.resolved_winner is not null
+          and c.resolved_winner<>t.id
+          and coalesce(c.overtime,false)=true
+      )::int otl
+    from public.teams t
+    left join completed c
+      on t.id in (c.home_team_id,c.away_team_id)
+    group by t.id
+  )
+  update public.teams t
+  set wins=c.wins,
+      losses=c.losses,
+      overtime_losses=c.otl
+  from calc c
+  where t.id=c.team_id;
+
+  get diagnostics v_count=row_count;
+  return v_count;
+end;
+$$;
+
+select public.iv_rebuild_team_records_from_games();
+
+select
+  to_regprocedure('public.admin_test_sim_batch(integer)') is not null as safe_test_batch_installed,
+  to_regprocedure('public.iv_rebuild_team_records_from_games()') is not null as standings_rebuild_installed;
